@@ -17,7 +17,7 @@ abstract class AppColors {
 
   // Text colors
   static const Color textPrimary = Color(0xFF000000);
-  static const Color textSecondary = Color(0xFF000000);
+  static const Color textSecondary = Color(0xFF737373);
 
   // Success colors
   static const Color green = Color(0xff0D8536);
@@ -31,6 +31,9 @@ abstract class AppColors {
   static const Color grey300 = Color(0xffDADADA);
   static const Color grey400 = Color(0xff999999);
   static const Color grey500 = Color(0xff858585);
+
+  //while blue tone
+  static const Color whiteBlue = Color(0xffDBE2E8);
 }
 
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
+import 'core/widgets/session_popup/session_popup_widget.dart';
 import 'routes/app_router.dart';
 
 class App extends StatelessWidget {
@@ -13,6 +14,15 @@ class App extends StatelessWidget {
       title: 'Focus Fitness',
       theme: AppTheme.light,
       routerConfig: AppRouter.router,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            // Global session popup overlay
+            SessionPopupWidget(),
+          ],
+        );
+      },
     );
   }
 }

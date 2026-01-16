@@ -7,6 +7,7 @@ abstract class AppSpacing {
   static double md = 16.w;
   static double lg = 24.w;
   static double xl = 32.w;
+  static double xxl = 40.w;
 
   static EdgeInsets screenPadding =
       EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h);

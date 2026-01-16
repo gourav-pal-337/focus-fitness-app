@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -113,7 +113,7 @@ class AuthOtpVerificationScreen extends StatelessWidget {
         onPressed: canProceed
             ? () {
                 if (isLogin) {
-                  // TODO: Handle login action with OTP
+                  context.go(HomeRoute.path);
                 } else {
                   context.push(LinkTrainerRoute.path);
                 }
@@ -124,96 +124,59 @@ class AuthOtpVerificationScreen extends StatelessWidget {
   }
 }
 
-class _OtpInputFields extends StatefulWidget {
+class _OtpInputFields extends StatelessWidget {
   const _OtpInputFields();
-
-  @override
-  State<_OtpInputFields> createState() => _OtpInputFieldsState();
-}
-
-class _OtpInputFieldsState extends State<_OtpInputFields> {
-  late final List<FocusNode> _focusNodes;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNodes = List.generate(4, (_) => FocusNode());
-    // Auto-focus first field
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNodes[0].requestFocus();
-    });
-  }
-
-  @override
-  void dispose() {
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AuthProvider>();
-    final controllers = provider.otpControllers;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(4, (index) {
-        return SizedBox(
-          width: 60.w,
-          child: TextFormField(
-            controller: controllers[index],
-            focusNode: _focusNodes[index],
-            textAlign: TextAlign.center,
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(1),
-            ],
-            style: AppTextStyle.text24Bold.copyWith(
-              color: AppColors.textPrimary,
-            ),
-            cursorColor: AppColors.primary,
-            onChanged: (value) {
-              provider.updateOtp(index, value);
-              if (value.isNotEmpty && index < 3) {
-                _focusNodes[index + 1].requestFocus();
-              } else if (value.isEmpty && index > 0) {
-                _focusNodes[index - 1].requestFocus();
-              }
-            },
-            onTap: () {
-              controllers[index].selection = TextSelection.fromPosition(
-                TextPosition(offset: controllers[index].text.length),
-              );
-            },
-            decoration: InputDecoration(
-              border: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: AppColors.grey300,
-                  width: 1,
-                ),
-              ),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: AppColors.grey300,
-                  width: 1,
-                ),
-              ),
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: AppColors.primary,
-                  width: 1.5,
-                ),
-              ),
-              contentPadding: EdgeInsets.only(
-                bottom: 8.h,
-              ),
-            ),
+    final defaultPinTheme = PinTheme(
+      width: 40.w,
+      height: 60.h,
+      textStyle: AppTextStyle.text24Bold.copyWith(
+        color: AppColors.textPrimary,
+      ),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.grey300,
+            width: 1,
           ),
-        );
-      }),
+        ),
+      ),
+    );
+
+    final focusedPinTheme = defaultPinTheme.copyWith(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.primary,
+            width: 1.5,
+          ),
+        ),
+      ),
+    );
+
+    return Pinput(
+      length: 6,
+      defaultPinTheme: defaultPinTheme,
+      focusedPinTheme: focusedPinTheme,
+      onCompleted: (pin) {
+        provider.updateOtp(pin);
+      },
+      onChanged: (value) {
+        provider.updateOtp(value);
+      },
+      keyboardType: TextInputType.number,
+      pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
+      showCursor: true,
+      cursor: Container(
+        width: 2,
+        height: 24.h,
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+        ),
+      ),
     );
   }
 }

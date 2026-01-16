@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/provider/user_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/buttons/custom_bottom.dart';
+import '../../../../routes/app_router.dart';
+import '../../../trainer/provider/linked_trainer_provider.dart';
 import '../../provider/auth_provider.dart';
 
 class LinkTrainerScreen extends StatelessWidget {
   const LinkTrainerScreen({
     super.key,
     required this.trainerId,
-    this.trainerName = 'Alex Morgan',
-    this.trainerImageUrl,
   });
 
   final String trainerId;
-  final String trainerName;
-  final String? trainerImageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -79,51 +79,65 @@ class LinkTrainerScreen extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.screenPadding.left,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 48.r,
-              backgroundColor: AppColors.grey200,
-              backgroundImage: trainerImageUrl != null
-                  ? NetworkImage(trainerImageUrl!)
-                  : null,
-              child: trainerImageUrl == null
-                  ? Icon(
-                      Icons.person,
-                      size: 40.sp,
-                      color: AppColors.grey400,
-                    )
-                  : null,
+    return Consumer<AuthProvider>(
+      builder: (context, provider, _) {
+        final trainer = provider.foundTrainer;
+        final trainerName = trainer?.fullName ?? 'Trainer';
+        final trainerImageUrl = trainer?.profilePhoto;
+
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenPadding.left,
             ),
-            SizedBox(height: AppSpacing.sm),
-            Text(
-              trainerName,
-              style: AppTextStyle.text24SemiBold.copyWith(
-                color: AppColors.textPrimary,
-              ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 48.r,
+                  backgroundColor: AppColors.grey200,
+                  backgroundImage: trainerImageUrl != null
+                      ? NetworkImage(trainerImageUrl)
+                      : null,
+                  child: trainerImageUrl == null
+                      ? Icon(
+                          Icons.person,
+                          size: 40.sp,
+                          color: AppColors.grey400,
+                        )
+                      : null,
+                ),
+                SizedBox(height: AppSpacing.sm),
+                Text(
+                  trainerName,
+                  style: AppTextStyle.text24SemiBold.copyWith(
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.md),
+                Text(
+                  'Trainer ID: $trainerId',
+                  style: AppTextStyle.text16Regular.copyWith(
+                    color: AppColors.grey400,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: AppSpacing.md),
-            Text(
-              'Trainer ID: $trainerId',
-              style: AppTextStyle.text16Regular.copyWith(
-                color: AppColors.grey400,
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildVerifyButton(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, provider, _) {
+    return Consumer2<AuthProvider, UserProvider>(
+      builder: (context, authProvider, userProvider, _) {
+        final isLoading = authProvider.isLinkingTrainer;
+        final error = authProvider.linkTrainerError;
+        final trainer = authProvider.foundTrainer;
+        final trainerName = trainer?.fullName ?? 'Trainer';
+        final trainerImageUrl = trainer?.profilePhoto;
+
         return Padding(
           padding: EdgeInsets.only(
             left: AppSpacing.screenPadding.left,
@@ -131,21 +145,84 @@ class LinkTrainerScreen extends StatelessWidget {
             top: AppSpacing.lg,
             bottom: AppSpacing.lg,
           ),
-          child: CustomButton(
-            text: 'Verify',
-            size: ButtonSize.large,
-            width: double.infinity,
-            height: 52.h,
-            backgroundColor: AppColors.primary,
-            textColor: AppColors.background,
-            textStyle: AppTextStyle.text16SemiBold.copyWith(
-              color: AppColors.background,
-            ),
-            borderRadius: 12.r,
-            onPressed: () {
-              provider.linkTrainer();
-              _showSuccessModal(context);
-            },
+          child: Column(
+            mainAxisSize: .min,
+            children: [
+              // Show error message if linking failed
+              if (error != null)
+                Container(
+                  margin: EdgeInsets.only(bottom: AppSpacing.md),
+                  padding: EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(
+                      color: Colors.red.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.error,
+                        color: Colors.red,
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          error,
+                          style: AppTextStyle.text14Regular.copyWith(
+                            color: Colors.red,
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              CustomButton(
+                text: isLoading ? 'Linking...' : 'Verify',
+                size: ButtonSize.large,
+                width: double.infinity,
+                height: 52.h,
+                backgroundColor:
+                    isLoading ? AppColors.grey300 : AppColors.primary,
+                textColor: AppColors.background,
+                textStyle: AppTextStyle.text16SemiBold.copyWith(
+                  color: AppColors.background,
+                ),
+                borderRadius: 12.r,
+                isEnabled: !isLoading,
+                onPressed: isLoading
+                    ? null
+                    : () async {
+                        // Get user info from UserProvider or AuthProvider
+                        final fullName = userProvider.user?.fullName ??
+                            authProvider.name;
+                        final email = userProvider.user?.email;
+                        final phone = userProvider.user?.phone ??
+                            (authProvider.phoneNumber.isNotEmpty
+                                ? '${authProvider.countryCode}${authProvider.phoneNumber}'
+                                : null);
+
+                        // Link trainer
+                        final success = await authProvider.linkTrainer(
+                          fullName: trainerName,
+                          preferredName: trainerName,
+                          // email: email,
+                          phone: userProvider.user?.phone ?? '',
+                        );
+
+                        if (success && context.mounted) {
+                          // Refresh linked trainer data
+                          _showSuccessModal(context);
+                          final linkedTrainerProvider = context.read<LinkedTrainerProvider>();
+                          await linkedTrainerProvider.refresh();
+                        }
+                        // Error is already shown in the error container above
+                      },
+              ),
+            ],
           ),
         );
       },
@@ -160,7 +237,7 @@ class LinkTrainerScreen extends StatelessWidget {
       builder: (context) => _SuccessModal(
         onContinue: () {
           Navigator.of(context).pop();
-          // TODO: Navigate to next screen after linking
+          context.go(HomeRoute.path);
         },
       ),
     );

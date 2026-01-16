@@ -6,8 +6,23 @@ import '../provider/onboarding_provider.dart';
 import '../widgets/onboarding_controls.dart';
 import '../widgets/onboarding_page.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize onboarding provider after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<OnboardingProvider>(context, listen: false);
+      provider.initialize();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

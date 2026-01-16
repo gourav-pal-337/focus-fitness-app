@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/provider/user_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -17,7 +18,8 @@ class SetNewPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canProceed = context.watch<ForgotPasswordProvider>().canProceedWithPassword;
+    final provider = context.watch<ForgotPasswordProvider>();
+    final canProceed = provider.canProceedWithPassword && !provider.isConfirmingReset;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -58,6 +60,8 @@ class SetNewPasswordScreen extends StatelessWidget {
               const _PasswordField(),
               SizedBox(height: AppSpacing.md),
               const _ConfirmPasswordField(),
+              SizedBox(height: AppSpacing.md),
+              const _ErrorDisplay(),
               SizedBox(height: AppSpacing.lg * 2),
             ],
           ),
@@ -71,7 +75,7 @@ class SetNewPasswordScreen extends StatelessWidget {
           right: AppSpacing.screenPadding.right,
           bottom: AppSpacing.lg,
         ),
-        text: 'Update Password',
+        text: provider.isConfirmingReset ? 'Updating...' : 'Update Password',
         size: ButtonSize.large,
         width: double.infinity,
         height: 52.h,
@@ -83,8 +87,19 @@ class SetNewPasswordScreen extends StatelessWidget {
         borderRadius: 12.r,
         isEnabled: canProceed,
         onPressed: canProceed
-            ? () {
-                _showSuccessModal(context);
+            ? () async {
+                final provider = context.read<ForgotPasswordProvider>();
+                final success = await provider.confirmPasswordReset();
+                
+                if (success && context.mounted) {
+                  // Update UserProvider with user data from response
+                  final userProvider = Provider.of<UserProvider>(context, listen: false);
+                  if (provider.resetConfirmResponse != null) {
+                    userProvider.setUser(provider.resetConfirmResponse!.user);
+                  }
+                  _showSuccessModal(context);
+                }
+                // Error is shown in _ErrorDisplay widget
               }
             : null,
       ),
@@ -226,14 +241,56 @@ class _PasswordResetSuccessModal extends StatelessWidget {
               borderRadius: 12.r,
               onPressed: () {
                 Navigator.of(context).pop();
-                // Navigate to login screen
-                context.go(LoginWithEmailRoute.path);
+                // User is automatically logged in after password reset, navigate to home
+                context.go(HomeRoute.path);
               },
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class _ErrorDisplay extends StatelessWidget {
+  const _ErrorDisplay();
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<ForgotPasswordProvider>();
+    
+    if (provider.resetConfirmError != null) {
+      return Container(
+        padding: EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(
+            color: Colors.red.withOpacity(0.3),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.error,
+              color: Colors.red,
+              size: 20.sp,
+            ),
+            SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                provider.resetConfirmError!,
+                style: AppTextStyle.text14Regular.copyWith(
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    return const SizedBox.shrink();
   }
 }
 

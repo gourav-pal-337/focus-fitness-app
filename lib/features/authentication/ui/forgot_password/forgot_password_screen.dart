@@ -15,7 +15,8 @@ class ForgotPasswordScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canProceed = context.watch<ForgotPasswordProvider>().canProceedWithEmail;
+    final provider = context.watch<ForgotPasswordProvider>();
+    final canProceed = provider.canProceedWithEmail && !provider.isRequestingReset;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -54,6 +55,8 @@ class ForgotPasswordScreen extends StatelessWidget {
               ),
               SizedBox(height: AppSpacing.lg * 1.5),
               const _EmailField(),
+              SizedBox(height: AppSpacing.md),
+              const _ErrorDisplay(),
               SizedBox(height: AppSpacing.lg * 2),
             ],
           ),
@@ -67,7 +70,7 @@ class ForgotPasswordScreen extends StatelessWidget {
           right: AppSpacing.screenPadding.right,
           bottom: AppSpacing.lg,
         ),
-        text: 'Reset Password',
+        text: provider.isRequestingReset ? 'Sending...' : 'Reset Password',
         size: ButtonSize.large,
         width: double.infinity,
         height: 52.h,
@@ -79,9 +82,15 @@ class ForgotPasswordScreen extends StatelessWidget {
         borderRadius: 12.r,
         isEnabled: canProceed,
         onPressed: canProceed
-            ? () {
-                final email = context.read<ForgotPasswordProvider>().resetEmail;
-                context.push('/check-email/$email');
+            ? () async {
+                final provider = context.read<ForgotPasswordProvider>();
+                final success = await provider.requestPasswordReset();
+                
+                if (success && context.mounted) {
+                  final email = provider.resetEmail;
+                  context.push('/check-email/$email');
+                }
+                // Error is shown in _ErrorDisplay widget
               }
             : null,
       ),
@@ -114,6 +123,48 @@ class _EmailField extends StatelessWidget {
       ),
       onChanged: provider.updateResetEmail,
     );
+  }
+}
+
+class _ErrorDisplay extends StatelessWidget {
+  const _ErrorDisplay();
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<ForgotPasswordProvider>();
+    
+    if (provider.resetRequestError != null) {
+      return Container(
+        padding: EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: Colors.red.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(
+            color: Colors.red.withOpacity(0.3),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.error,
+              color: Colors.red,
+              size: 20.sp,
+            ),
+            SizedBox(width: AppSpacing.sm),
+            Expanded(
+              child: Text(
+                provider.resetRequestError!,
+                style: AppTextStyle.text14Regular.copyWith(
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    
+    return const SizedBox.shrink();
   }
 }
 

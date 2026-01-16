@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -52,7 +52,7 @@ class CheckEmailScreen extends StatelessWidget {
               ),
               SizedBox(height: AppSpacing.sm + 5),
               Text(
-                'We sent a resent link to $email. Enter 4 digit code that mentioned in the email',
+                'We sent a reset code to $email. Enter 6 digit code that mentioned in the email',
                 style: AppTextStyle.text16Regular.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -70,8 +70,9 @@ class CheckEmailScreen extends StatelessWidget {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      // TODO: Handle resend email
+                    onTap: () async {
+                      final provider = context.read<ForgotPasswordProvider>();
+                      await provider.requestPasswordReset();
                     },
                     child: Text(
                       'Resend email',
@@ -115,96 +116,59 @@ class CheckEmailScreen extends StatelessWidget {
   }
 }
 
-class _EmailCodeInputFields extends StatefulWidget {
+class _EmailCodeInputFields extends StatelessWidget {
   const _EmailCodeInputFields();
-
-  @override
-  State<_EmailCodeInputFields> createState() => _EmailCodeInputFieldsState();
-}
-
-class _EmailCodeInputFieldsState extends State<_EmailCodeInputFields> {
-  late final List<FocusNode> _focusNodes;
-
-  @override
-  void initState() {
-    super.initState();
-    _focusNodes = List.generate(4, (_) => FocusNode());
-    // Auto-focus first field
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _focusNodes[0].requestFocus();
-    });
-  }
-
-  @override
-  void dispose() {
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ForgotPasswordProvider>();
-    final controllers = provider.emailCodeControllers;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(4, (index) {
-        return SizedBox(
-          width: 60.w,
-          child: TextFormField(
-            controller: controllers[index],
-            focusNode: _focusNodes[index],
-            textAlign: TextAlign.center,
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(1),
-            ],
-            style: AppTextStyle.text24Bold.copyWith(
-              color: AppColors.textPrimary,
-            ),
-            cursorColor: AppColors.primary,
-            onChanged: (value) {
-              provider.updateEmailCode(index, value);
-              if (value.isNotEmpty && index < 3) {
-                _focusNodes[index + 1].requestFocus();
-              } else if (value.isEmpty && index > 0) {
-                _focusNodes[index - 1].requestFocus();
-              }
-            },
-            onTap: () {
-              controllers[index].selection = TextSelection.fromPosition(
-                TextPosition(offset: controllers[index].text.length),
-              );
-            },
-            decoration: InputDecoration(
-              border: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: AppColors.grey300,
-                  width: 1,
-                ),
-              ),
-              enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: AppColors.grey300,
-                  width: 1,
-                ),
-              ),
-              focusedBorder: UnderlineInputBorder(
-                borderSide: BorderSide(
-                  color: AppColors.primary,
-                  width: 1.5,
-                ),
-              ),
-              contentPadding: EdgeInsets.only(
-                bottom: 8.h,
-              ),
-            ),
+    final defaultPinTheme = PinTheme(
+      width: 40.w,
+      height: 50.h,
+      textStyle: AppTextStyle.text24Bold.copyWith(
+        color: AppColors.textPrimary,
+      ),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.grey300,
+            width: 1,
           ),
-        );
-      }),
+        ),
+      ),
+    );
+
+    final focusedPinTheme = defaultPinTheme.copyWith(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.primary,
+            width: 1.5,
+          ),
+        ),
+      ),
+    );
+
+    return Pinput(
+      length: 6,
+      defaultPinTheme: defaultPinTheme,
+      focusedPinTheme: focusedPinTheme,
+      onCompleted: (pin) {
+        provider.updateEmailCode(pin);
+      },
+      onChanged: (value) {
+        provider.updateEmailCode(value);
+      },
+      keyboardType: TextInputType.number,
+      pinputAutovalidateMode: PinputAutovalidateMode.onSubmit,
+      showCursor: true,
+      cursor: Container(
+        width: 2,
+        height: 24.h,
+        decoration: BoxDecoration(
+          color: AppColors.primary,
+        ),
+      ),
     );
   }
 }

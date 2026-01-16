@@ -50,7 +50,7 @@ class AppTextFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final baseTextStyle =
-        textStyle ?? AppTextStyle.text16Regular.copyWith(color: AppColors.grey100);
+        textStyle ?? AppTextStyle.text16Regular.copyWith(color: AppColors.textPrimary);
 
     return TextFormField(
       controller: controller,
