@@ -68,7 +68,6 @@ class UserModel {
     this.termsAcceptedAt,
     required this.createdAt,
     required this.updatedAt,
-
   });
 
   final String id;
@@ -102,18 +101,39 @@ class UserModel {
       status: json['status'] as String? ?? '',
       onboardingStage: json['onboardingStage'] as String? ?? '',
       termsAcceptedAt: json['termsAcceptedAt'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String? ?? DateTime.now().toIso8601String()),
-      updatedAt: DateTime.parse(json['updatedAt'] as String? ?? DateTime.now().toIso8601String()),
+      createdAt: DateTime.parse(
+        json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
+      ),
+      updatedAt: DateTime.parse(
+        json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
+      ),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'role': role,
+      'fullName': fullName,
+      'profilePhoto': profilePhoto,
+      'email': email,
+      'phone': phone,
+      'linkedTrainerId': linkedTrainerId,
+      'isLinked': isTrainerLinked,
+      'emailVerified': emailVerified,
+      'phoneVerified': phoneVerified,
+      'status': status,
+      'onboardingStage': onboardingStage,
+      'termsAcceptedAt': termsAcceptedAt,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
   }
 }
 
 /// Tokens model
 class TokensModel {
-  TokensModel({
-    required this.accessToken,
-    required this.refreshToken,
-  });
+  TokensModel({required this.accessToken, required this.refreshToken});
 
   final String accessToken;
   final String refreshToken;
@@ -128,11 +148,7 @@ class TokensModel {
 
 /// Email verification model
 class EmailVerificationModel {
-  EmailVerificationModel({
-    required this.status,
-    this.expiresAt,
-    this.error,
-  });
+  EmailVerificationModel({required this.status, this.expiresAt, this.error});
 
   final String status;
   final String? expiresAt;
@@ -149,11 +165,7 @@ class EmailVerificationModel {
 
 /// Trainer link model
 class TrainerLinkModel {
-  TrainerLinkModel({
-    required this.status,
-    this.profile,
-    this.error,
-  });
+  TrainerLinkModel({required this.status, this.profile, this.error});
 
   final String status;
   final TrainerProfileModel? profile;
@@ -198,4 +210,3 @@ class TrainerProfileModel {
     );
   }
 }
-

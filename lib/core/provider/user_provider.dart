@@ -4,6 +4,7 @@ import '../../features/authentication/data/models/register_response_model.dart';
 import '../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
 import '../../features/user/data/repository/user_repository.dart';
+import '../service/local_storage_service.dart';
 
 /// Global user provider to access user information throughout the app
 class UserProvider extends ChangeNotifier {
@@ -30,6 +31,9 @@ class UserProvider extends ChangeNotifier {
       return await result.when(
         success: (response) async {
           _user = response.user;
+          if (_user != null) {
+            await LocalStorageService.saveUser(_user!);
+          }
           _isLoading = false;
           _error = null;
           notifyListeners();
@@ -48,6 +52,21 @@ class UserProvider extends ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  /// Load user details from cache
+  Future<bool> loadUserFromCache() async {
+    try {
+      final cachedUser = await LocalStorageService.getUser();
+      if (cachedUser != null) {
+        _user = cachedUser;
+        notifyListeners();
+        return true;
+      }
+    } catch (e) {
+      // ignore error
+    }
+    return false;
   }
 
   /// Set user data
@@ -86,4 +105,3 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_fitness/core/provider/session_popup_provider.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
 import 'package:focus_fitness/core/service/local_storage_service.dart';
+import 'package:focus_fitness/core/service/internet_connectivity_service.dart';
 import 'package:focus_fitness/features/authentication/provider/auth_provider.dart';
 import 'package:focus_fitness/features/authentication/provider/forgot_password_provider.dart';
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
@@ -13,8 +14,9 @@ import 'app.dart';
 import 'features/sample/provider/sample_provider.dart';
 
 void main() async {
-WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
   await LocalStorageService.init();
+  InternetConnectivityService.init();
   runApp(const AppBootstrap());
 }
 
@@ -29,12 +31,8 @@ class AppBootstrap extends StatelessWidget {
       builder: (context, child) {
         return MultiProvider(
           providers: [
-            ChangeNotifierProvider<UserProvider>(
-              create: (_) => UserProvider(),
-            ),
-            ChangeNotifierProvider<AuthProvider>(
-              create: (_) => AuthProvider(),
-            ),
+            ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
+            ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
             ChangeNotifierProvider<ForgotPasswordProvider>(
               create: (_) => ForgotPasswordProvider(),
             ),
@@ -57,5 +55,3 @@ class AppBootstrap extends StatelessWidget {
     );
   }
 }
-
-

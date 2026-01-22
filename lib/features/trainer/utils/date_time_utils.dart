@@ -274,6 +274,7 @@ class DateTimeUtils {
     required List<DateInfo> availableDates,
     required int durationMinutes,
   }) {
+    print("Converting to ISO Timestamps for dateId: $dateId, timeSlot: $timeSlot");
     // Find the date info
     final dateInfo = availableDates.firstWhere(
       (d) => d.dateId == dateId,
@@ -306,8 +307,8 @@ class DateTimeUtils {
       hour = 0;
     }
 
-    // Create DateTime for start time
-    final startDateTime = DateTime(
+    // Create DateTime for start time in UTC
+    final startDateTime = DateTime.utc(
       dateInfo.dateTime.year,
       dateInfo.dateTime.month,
       dateInfo.dateTime.day,
@@ -318,9 +319,9 @@ class DateTimeUtils {
     // Create DateTime for end time (start + duration)
     final endDateTime = startDateTime.add(Duration(minutes: durationMinutes));
 
-    // Convert to ISO 8601 format
-    final startTime = startDateTime.toUtc().toIso8601String();
-    final endTime = endDateTime.toUtc().toIso8601String();
+    // Convert to ISO 8601 format (already in UTC)
+    final startTime = startDateTime.toIso8601String();
+    final endTime = endDateTime.toIso8601String();
 
     return {
       'startTime': startTime,

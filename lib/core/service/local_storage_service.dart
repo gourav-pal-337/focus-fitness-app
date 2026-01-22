@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:encrypt_shared_preferences/provider.dart';
+
+import '../../features/authentication/data/models/register_response_model.dart';
 
 class LocalStorageService {
   static LocalStorageService? _instance;
@@ -20,6 +23,7 @@ class LocalStorageService {
   static const String _recentLocationsKey = 'recentLocations';
   static const String _recentHotelSearchesKey = 'recentHotelSearches';
   static const String _twoFactorAuthEnabled = 'twoFactorAuthEnabled';
+  static const String _userKey = 'user_data';
 
   final EncryptedSharedPreferences _prefs;
 
@@ -193,10 +197,7 @@ class LocalStorageService {
       }
 
       // Store as comma-separated string
-      await _prefsInstance.setString(
-        _recentLocationsKey,
-        locations.join(','),
-      );
+      await _prefsInstance.setString(_recentLocationsKey, locations.join(','));
     } catch (e) {
       log(e.toString());
     }
@@ -205,8 +206,9 @@ class LocalStorageService {
   /// Get recent hotel searches (max 4)
   static Future<List<String>> getRecentHotelSearches() async {
     try {
-      final searchesStr =
-          await _prefsInstance.getString(_recentHotelSearchesKey);
+      final searchesStr = await _prefsInstance.getString(
+        _recentHotelSearchesKey,
+      );
       if (searchesStr == null || searchesStr.isEmpty) return [];
       // EncryptedSharedPreferences doesn't have getStringList, so we store as comma-separated string
       return searchesStr.split(',');
@@ -257,10 +259,7 @@ class LocalStorageService {
   /// Set two-factor authentication status
   static Future<bool> setTwoFactorAuthEnabled(bool enabled) async {
     try {
-      await _prefsInstance.setString(
-        _twoFactorAuthEnabled,
-        enabled.toString(),
-      );
+      await _prefsInstance.setString(_twoFactorAuthEnabled, enabled.toString());
       return true;
     } catch (e) {
       log(e.toString());
@@ -270,13 +269,32 @@ class LocalStorageService {
 
   static Future<bool> clearAll({bool shouldPop = true}) async {
     try {
-
       await _prefsInstance.clear();
       setOnboarding(true);
       return true;
     } catch (e) {
       log(e.toString());
       return false;
+    }
+  }
+
+  static Future<void> saveUser(UserModel user) async {
+    try {
+      final userJson = jsonEncode(user.toJson());
+      await _prefsInstance.setString(_userKey, userJson);
+    } catch (e) {
+      log(e.toString());
+    }
+  }
+
+  static Future<UserModel?> getUser() async {
+    try {
+      final userJson = await _prefsInstance.getString(_userKey);
+      if (userJson == null || userJson.isEmpty) return null;
+      return UserModel.fromJson(jsonDecode(userJson));
+    } catch (e) {
+      log(e.toString());
+      return null;
     }
   }
 }

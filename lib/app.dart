@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/widgets/session_popup/session_popup_widget.dart';
+import 'core/constants/global_keys.dart';
 import 'routes/app_router.dart';
 
 class App extends StatelessWidget {
@@ -13,6 +14,7 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Focus Fitness',
       theme: AppTheme.light,
+      scaffoldMessengerKey: rootScaffoldMessengerKey,
       routerConfig: AppRouter.router,
       builder: (context, child) {
         return Stack(
@@ -26,5 +28,3 @@ class App extends StatelessWidget {
     );
   }
 }
-
-

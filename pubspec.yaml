@@ -49,6 +49,7 @@ dependencies:
   local_auth: ^3.0.0 
   hide_scroll_navbar: ^1.0.2
   url_launcher: ^6.2.5
+  connectivity_plus: ^7.0.0
 
 dev_dependencies:
   flutter_test:

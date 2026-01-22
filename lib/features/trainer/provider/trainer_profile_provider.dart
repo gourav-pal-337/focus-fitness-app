@@ -6,25 +6,22 @@ import '../utils/date_time_utils.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
 
-enum SessionType {
-  online,
-  physical,
-}
+enum SessionType { online, physical }
 
 class TrainerProfileProvider extends ChangeNotifier {
   final TrainerRepository _repository = TrainerRepository();
-  
+
   TrainerProfileInfo? _trainer;
   List<SessionPlanModel> _sessionPlans = [];
   SessionPlanModel? _selectedSessionPlan;
   List<DateInfo> _availableDates = [];
   List<String> _availableTimeSlots = [];
-  
+
   String? _selectedDate;
   String? _selectedTimeSlot;
   bool _showBookingConfirmation = false;
   SessionType _sessionType = SessionType.online;
-  
+
   bool _isLoading = false;
   String? _error;
   bool _isBooking = false;
@@ -35,12 +32,12 @@ class TrainerProfileProvider extends ChangeNotifier {
   SessionPlanModel? get selectedSessionPlan => _selectedSessionPlan;
   List<DateInfo> get availableDates => _availableDates;
   List<String> get availableTimeSlots => _availableTimeSlots;
-  
+
   String? get selectedDate => _selectedDate;
   String? get selectedTimeSlot => _selectedTimeSlot;
   bool get showBookingConfirmation => _showBookingConfirmation;
   SessionType get sessionType => _sessionType;
-  
+
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isBooking => _isBooking;
@@ -56,21 +53,23 @@ class TrainerProfileProvider extends ChangeNotifier {
 
     try {
       final result = await _repository.getTrainerProfile(trainerId);
-      
+
       await result.when(
         success: (response) async {
           _trainer = response.trainer;
           _sessionPlans = response.sessionPlans;
-          
+
           // Combine dates from all session plans
           _availableDates = DateTimeUtils.parseAllAvailableDates(_sessionPlans);
-          
+
           // Select first session plan by default if available
           if (_sessionPlans.isNotEmpty) {
             _selectedSessionPlan = _sessionPlans.first;
-            _availableTimeSlots = DateTimeUtils.parseAvailableTimeSlots(_sessionPlans.first);
+            _availableTimeSlots = DateTimeUtils.parseAvailableTimeSlots(
+              _sessionPlans.first,
+            );
           }
-          
+
           _isLoading = false;
           _error = null;
           notifyListeners();
@@ -92,40 +91,43 @@ class TrainerProfileProvider extends ChangeNotifier {
   void selectSessionPlan(SessionPlanModel plan) {
     _selectedSessionPlan = plan;
     _availableTimeSlots = DateTimeUtils.parseAvailableTimeSlots(plan);
-    
+
     // Reset selections when plan changes
     _selectedDate = null;
     _selectedTimeSlot = null;
-    
+
     notifyListeners();
   }
 
   void selectDate(String dateId) {
     _selectedDate = dateId;
-    
+
     // Find which session plan this date belongs to and update time slots
     final dateInfo = _availableDates.firstWhere(
       (d) => d.dateId == dateId,
-      orElse: () => _availableDates.isNotEmpty ? _availableDates.first : throw StateError('No dates available'),
+      orElse: () => _availableDates.isNotEmpty
+          ? _availableDates.first
+          : throw StateError('No dates available'),
     );
-    
+
     // Find the session plan for this date
     final plan = _sessionPlans.firstWhere(
       (p) => p.id == dateInfo.sessionPlanId,
       orElse: () => _sessionPlans.first,
     );
-    
+
     // Update selected session plan and time slots
     _selectedSessionPlan = plan;
     _availableTimeSlots = DateTimeUtils.parseAvailableTimeSlots(plan);
-    
+
     // Reset time slot selection when date changes
     _selectedTimeSlot = null;
-    
+
     notifyListeners();
   }
 
   void selectTimeSlot(String timeSlot) {
+    print("seleted time : $timeSlot");
     _selectedTimeSlot = timeSlot;
     notifyListeners();
   }
@@ -147,7 +149,10 @@ class TrainerProfileProvider extends ChangeNotifier {
 
   /// Book a session
   Future<bool> bookSession({String? notes}) async {
-    if (_trainer == null || _selectedSessionPlan == null || _selectedDate == null || _selectedTimeSlot == null) {
+    if (_trainer == null ||
+        _selectedSessionPlan == null ||
+        _selectedDate == null ||
+        _selectedTimeSlot == null) {
       _bookingError = 'Please select date and time slot';
       notifyListeners();
       return false;
@@ -158,6 +163,8 @@ class TrainerProfileProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      debugPrint("selected time : ${_selectedTimeSlot}");
+
       // Convert date and time slot to ISO timestamps
       final timestamps = DateTimeUtils.convertToIsoTimestamps(
         dateId: _selectedDate!,
@@ -165,6 +172,8 @@ class TrainerProfileProvider extends ChangeNotifier {
         availableDates: _availableDates,
         durationMinutes: _selectedSessionPlan!.durationMinutes,
       );
+
+      debugPrint("timestamps : ${timestamps}");
 
       // Create request model
       final request = BookSessionRequestModel(
@@ -215,4 +224,3 @@ class TrainerProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-

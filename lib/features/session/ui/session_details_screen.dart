@@ -18,24 +18,38 @@ import '../widgets/cancel_session_dialog.dart';
 import '../widgets/session_cancelled_dialog.dart';
 import '../data/models/session_summary_response_model.dart';
 
-class SessionDetailsScreen extends StatelessWidget {
-  const SessionDetailsScreen({
-    super.key,
-    required this.session,
-  });
+class SessionDetailsScreen extends StatefulWidget {
+  const SessionDetailsScreen({super.key, required this.session});
 
   final SessionData session;
+
+  @override
+  State<SessionDetailsScreen> createState() => _SessionDetailsScreenState();
+}
+
+class _SessionDetailsScreenState extends State<SessionDetailsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    final provider = SessionDetailsProvider();
+    debugPrint("Booking ID: ${widget.session.bookingId}");
+    if (widget.session.bookingId != null &&
+        widget.session.bookingId!.isNotEmpty) {
+      provider.fetchSessionSummary(widget.session.bookingId);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) {
         final provider = SessionDetailsProvider();
+
         // Call fetch asynchronously only for completed sessions
-        if (session.status == SessionStatus.completed && 
-            session.bookingId != null && 
-            session.bookingId!.isNotEmpty) {
-          provider.fetchSessionSummary(session.bookingId);
+        if (widget.session.status == SessionStatus.completed &&
+            widget.session.bookingId != null &&
+            widget.session.bookingId!.isNotEmpty) {
+          provider.fetchSessionSummary(widget.session.bookingId);
         }
         return provider;
       },
@@ -44,19 +58,17 @@ class SessionDetailsScreen extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              const CustomAppBar(
-                title: 'Session Details',
-              ),
+              const CustomAppBar(title: 'Session Details'),
               Expanded(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.all(AppSpacing.screenPadding.left),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _TrainerInfoCard(session: session),
+                      _TrainerInfoCard(session: widget.session),
                       SizedBox(height: AppSpacing.lg),
-                      _DateTimeBar(session: session),
-                      if (session.status == SessionStatus.completed) ...[
+                      _DateTimeBar(session: widget.session),
+                      if (widget.session.status == SessionStatus.completed) ...[
                         SizedBox(height: AppSpacing.xl),
                         _SessionSummarySection(),
                         SizedBox(height: AppSpacing.xl),
@@ -67,7 +79,7 @@ class SessionDetailsScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              _ActionButton(session: session),
+              _ActionButton(session: widget.session),
             ],
           ),
         ),
@@ -161,9 +173,7 @@ class _SessionSummarySection extends StatelessWidget {
       return Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.xl),
-          child: CircularProgressIndicator(
-            color: AppColors.primary,
-          ),
+          child: CircularProgressIndicator(color: AppColors.primary),
         ),
       );
     }
@@ -177,9 +187,7 @@ class _SessionSummarySection extends StatelessWidget {
         ),
         child: Text(
           error,
-          style: AppTextStyle.text14Regular.copyWith(
-            color: AppColors.grey400,
-          ),
+          style: AppTextStyle.text14Regular.copyWith(color: AppColors.grey400),
         ),
       );
     }
@@ -193,9 +201,7 @@ class _SessionSummarySection extends StatelessWidget {
         ),
         child: Text(
           'Session summary not available yet',
-          style: AppTextStyle.text14Regular.copyWith(
-            color: AppColors.grey400,
-          ),
+          style: AppTextStyle.text14Regular.copyWith(color: AppColors.grey400),
         ),
       );
     }
@@ -224,11 +230,14 @@ class _SessionSummarySection extends StatelessWidget {
             ),
           ),
           SizedBox(height: AppSpacing.sm),
-          ...summary.exercises!.map((exercise) => _ExerciseCard(exercise: exercise)),
+          ...summary.exercises!.map(
+            (exercise) => _ExerciseCard(exercise: exercise),
+          ),
           SizedBox(height: AppSpacing.md),
         ],
         // Trainer Notes
-        if (summary.trainerNotes != null && summary.trainerNotes!.isNotEmpty) ...[
+        if (summary.trainerNotes != null &&
+            summary.trainerNotes!.isNotEmpty) ...[
           _NotesCard(
             title: 'Trainer Notes',
             notes: summary.trainerNotes!,
@@ -261,10 +270,7 @@ class _PerformanceMetricsCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: AppRadius.medium,
-        border: Border.all(
-          color: AppColors.grey200,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.grey200, width: 1),
       ),
       child: Row(
         children: [
@@ -278,11 +284,7 @@ class _PerformanceMetricsCard extends StatelessWidget {
             ),
             if (summary.performance != null) ...[
               SizedBox(width: AppSpacing.md),
-              Container(
-                width: 1,
-                height: 40.h,
-                color: AppColors.grey200,
-              ),
+              Container(width: 1, height: 40.h, color: AppColors.grey200),
               SizedBox(width: AppSpacing.md),
             ],
           ],
@@ -297,11 +299,7 @@ class _PerformanceMetricsCard extends StatelessWidget {
               ),
             if (summary.performance!.reps != null) ...[
               SizedBox(width: AppSpacing.md),
-              Container(
-                width: 1,
-                height: 40.h,
-                color: AppColors.grey200,
-              ),
+              Container(width: 1, height: 40.h, color: AppColors.grey200),
               SizedBox(width: AppSpacing.md),
               Expanded(
                 child: _MetricItem(
@@ -333,11 +331,7 @@ class _MetricItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(
-          icon,
-          size: 24.sp,
-          color: AppColors.primary,
-        ),
+        Icon(icon, size: 24.sp, color: AppColors.primary),
         SizedBox(height: AppSpacing.xs),
         Text(
           value,
@@ -348,9 +342,7 @@ class _MetricItem extends StatelessWidget {
         SizedBox(height: 2.h),
         Text(
           label,
-          style: AppTextStyle.text12Regular.copyWith(
-            color: AppColors.grey400,
-          ),
+          style: AppTextStyle.text12Regular.copyWith(color: AppColors.grey400),
         ),
       ],
     );
@@ -370,10 +362,7 @@ class _ExerciseCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: AppRadius.medium,
-        border: Border.all(
-          color: AppColors.grey200,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.grey200, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,15 +383,9 @@ class _ExerciseCard extends StatelessWidget {
               runSpacing: AppSpacing.xs,
               children: [
                 if (exercise.sets != null)
-                  _ExerciseDetailChip(
-                    label: 'Sets',
-                    value: '${exercise.sets}',
-                  ),
+                  _ExerciseDetailChip(label: 'Sets', value: '${exercise.sets}'),
                 if (exercise.reps != null)
-                  _ExerciseDetailChip(
-                    label: 'Reps',
-                    value: '${exercise.reps}',
-                  ),
+                  _ExerciseDetailChip(label: 'Reps', value: '${exercise.reps}'),
                 if (exercise.weight != null)
                   _ExerciseDetailChip(
                     label: 'Weight',
@@ -411,7 +394,8 @@ class _ExerciseCard extends StatelessWidget {
                 if (exercise.duration != null)
                   _ExerciseDetailChip(
                     label: 'Duration',
-                    value: '${(exercise.duration! / 60).toStringAsFixed(0)} min',
+                    value:
+                        '${(exercise.duration! / 60).toStringAsFixed(0)} min',
                   ),
               ],
             ),
@@ -432,10 +416,7 @@ class _ExerciseCard extends StatelessWidget {
 }
 
 class _ExerciseDetailChip extends StatelessWidget {
-  const _ExerciseDetailChip({
-    required this.label,
-    required this.value,
-  });
+  const _ExerciseDetailChip({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -479,21 +460,14 @@ class _NotesCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: AppRadius.medium,
-        border: Border.all(
-          color: AppColors.grey200,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.grey200, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                icon,
-                size: 18.sp,
-                color: AppColors.primary,
-              ),
+              Icon(icon, size: 18.sp, color: AppColors.primary),
               SizedBox(width: AppSpacing.xs),
               Text(
                 title,
@@ -569,13 +543,12 @@ class _FeedbackTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
         SizedBox(height: 4.h),
         TextField(
           onChanged: (value) {
             context.read<SessionDetailsProvider>().setFeedback(value);
           },
-          
+
           maxLines: 6,
           decoration: InputDecoration(
             labelText: 'Feedback',
@@ -589,24 +562,15 @@ class _FeedbackTextField extends StatelessWidget {
             fillColor: AppColors.background,
             border: OutlineInputBorder(
               borderRadius: AppRadius.medium,
-              borderSide: BorderSide(
-                color: AppColors.grey200,
-                width: 1,
-              ),
+              borderSide: BorderSide(color: AppColors.grey200, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: AppRadius.medium,
-              borderSide: BorderSide(
-                color: AppColors.grey200,
-                width: 1,
-              ),
+              borderSide: BorderSide(color: AppColors.grey200, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: AppRadius.medium,
-              borderSide: BorderSide(
-                color: AppColors.primary,
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
             ),
             contentPadding: EdgeInsets.all(AppSpacing.md),
           ),
@@ -708,4 +672,3 @@ class _ActionButton extends StatelessWidget {
     }
   }
 }
-
