@@ -17,7 +17,5 @@ abstract class AppAssets {
   static const String support = 'assets/icons/Support.svg';
   static const String securePayment = 'assets/icons/shield-checkmark.svg';
   static const String supportIcon = 'assets/icons/ticket.svg';
-  
+  static const String whatsapp = 'assets/icons/whatsapp.svg';
 }
-
-

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "340118958004",
+    "project_id": "focus-fitness-90f35",
+    "storage_bucket": "focus-fitness-90f35.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:340118958004:android:209b6b6deaba20e9c68ce1",
+        "android_client_info": {
+          "package_name": "com.example.focus_fitness"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtoyAjO6Ym_EtjbKYZPrXFhvVnQFydYKA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

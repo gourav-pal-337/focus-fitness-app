@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:focus_fitness/core/constants/app_assets.dart';
+import 'package:focus_fitness/features/trainer/provider/trainer_profile_provider.dart';
 import 'package:provider/provider.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 import '../../provider/session_popup_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/app_radius.dart';
@@ -26,7 +29,10 @@ class _SessionPopupWidgetState extends State<SessionPopupWidget> {
     super.initState();
     // Listen to provider changes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = Provider.of<SessionPopupProvider>(context, listen: false);
+      final provider = Provider.of<SessionPopupProvider>(
+        context,
+        listen: false,
+      );
       provider.addListener(_onProviderChanged);
       // Check if popup should be shown immediately
       _checkAndShowPopup(provider);
@@ -47,16 +53,16 @@ class _SessionPopupWidgetState extends State<SessionPopupWidget> {
   }
 
   void _checkAndShowPopup(SessionPopupProvider provider) {
-    if (provider.shouldShowPopup && 
-        provider.popupData != null && 
+    if (provider.shouldShowPopup &&
+        provider.popupData != null &&
         !provider.isBottomSheetShowing &&
         mounted &&
         _overlayEntry == null) {
       // Use a small delay to ensure overlay is ready
       Future.delayed(const Duration(milliseconds: 100), () {
-        if (mounted && 
-            provider.shouldShowPopup && 
-            !provider.isBottomSheetShowing && 
+        if (mounted &&
+            provider.shouldShowPopup &&
+            !provider.isBottomSheetShowing &&
             _overlayEntry == null) {
           _showSessionBottomSheet(provider.popupData!, provider);
         }
@@ -76,33 +82,37 @@ class _SessionPopupWidgetState extends State<SessionPopupWidget> {
     SessionPopupProvider provider,
   ) {
     if (!mounted) return;
-    
+
     // Use router's navigator key to get navigator state
     final navigatorState = AppRouter.rootNavigatorKey.currentState;
     if (navigatorState == null) {
       // Retry after a short delay if navigator is not ready
       Future.delayed(const Duration(milliseconds: 200), () {
-        if (mounted && provider.shouldShowPopup && !provider.isBottomSheetShowing) {
+        if (mounted &&
+            provider.shouldShowPopup &&
+            !provider.isBottomSheetShowing) {
           _showSessionBottomSheet(data, provider);
         }
       });
       return;
     }
-    
+
     // Get overlay from navigator state
     final overlay = navigatorState.overlay;
     if (overlay == null) {
       // Retry after a short delay if overlay is not ready
       Future.delayed(const Duration(milliseconds: 200), () {
-        if (mounted && provider.shouldShowPopup && !provider.isBottomSheetShowing) {
+        if (mounted &&
+            provider.shouldShowPopup &&
+            !provider.isBottomSheetShowing) {
           _showSessionBottomSheet(data, provider);
         }
       });
       return;
     }
-    
+
     provider.setBottomSheetShowing(true);
-    
+
     _overlayEntry = OverlayEntry(
       builder: (context) => _SessionBottomSheetOverlay(
         data: data,
@@ -113,7 +123,7 @@ class _SessionPopupWidgetState extends State<SessionPopupWidget> {
         },
       ),
     );
-    
+
     overlay.insert(_overlayEntry!);
   }
 
@@ -133,7 +143,8 @@ class _SessionBottomSheetOverlay extends StatefulWidget {
   final VoidCallback onDismiss;
 
   @override
-  State<_SessionBottomSheetOverlay> createState() => _SessionBottomSheetOverlayState();
+  State<_SessionBottomSheetOverlay> createState() =>
+      _SessionBottomSheetOverlayState();
 }
 
 class _SessionBottomSheetOverlayState extends State<_SessionBottomSheetOverlay>
@@ -150,21 +161,14 @@ class _SessionBottomSheetOverlayState extends State<_SessionBottomSheetOverlay>
       vsync: this,
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-    ));
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+        );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
 
     _animationController.forward();
   }
@@ -183,7 +187,7 @@ class _SessionBottomSheetOverlayState extends State<_SessionBottomSheetOverlay>
 
   @override
   Widget build(BuildContext context) {
-    return 
+    return
     // Container(
     //  height: 400,
     //  width: double.infinity,
@@ -193,38 +197,36 @@ class _SessionBottomSheetOverlayState extends State<_SessionBottomSheetOverlay>
       height: 400,
       width: double.infinity,
       // color: ,
-      child: 
-      //  SessionBottomSheetContent(
-      //           data: widget.data,
-      //           onDismiss: _handleDismiss,
-      //         ),
-      Stack(
-        children: [
-          // Backdrop
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: _handleDismiss,
-              child: FadeTransition(
-                opacity: _fadeAnimation,
-                child: Container(
-                  color: AppColors.overlayDark80,
+      child:
+          //  SessionBottomSheetContent(
+          //           data: widget.data,
+          //           onDismiss: _handleDismiss,
+          //         ),
+          Stack(
+            children: [
+              // Backdrop
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: _handleDismiss,
+                  child: FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Container(color: AppColors.overlayDark80),
+                  ),
                 ),
               ),
-            ),
-          ),
-          // Bottom sheet content
-          SlideTransition(
-            position: _slideAnimation,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: SessionBottomSheetContent(
-                data: widget.data,
-                onDismiss: _handleDismiss,
+              // Bottom sheet content
+              SlideTransition(
+                position: _slideAnimation,
+                child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: SessionBottomSheetContent(
+                    data: widget.data,
+                    onDismiss: _handleDismiss,
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }
@@ -240,9 +242,7 @@ class SessionBottomSheetContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  
-    
-    ClipRRect(
+    return ClipRRect(
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular(24.r),
         topRight: Radius.circular(24.r),
@@ -281,10 +281,10 @@ class SessionBottomSheetContent extends StatelessWidget {
                     _buildTitle(),
                     SizedBox(height: AppSpacing.sm),
                     // // Session details bar
-                    _buildSessionDetails(),
+                    // _buildSessionDetails(),
                     SizedBox(height: AppSpacing.lg * 1.5),
                     // // Join session button
-                    _buildJoinButton(context),
+                    _buildJoinButton(context, data.trainerContact),
                     SizedBox(height: AppSpacing.md),
                   ],
                 ),
@@ -297,27 +297,20 @@ class SessionBottomSheetContent extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    return 
+    return
     // Container(
     //   height: 40,
     //   width: double.infinity,
     //   color: AppColors.primary,
     // );
     Padding(
-      padding: EdgeInsets.only(
-        top: AppSpacing.md,
-        right: AppSpacing.md,
-      ),
+      padding: EdgeInsets.only(top: AppSpacing.md, right: AppSpacing.md),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           GestureDetector(
             onTap: onDismiss,
-            child: Icon(
-              Icons.close,
-              size: 24.sp,
-              color: AppColors.textPrimary,
-            ),
+            child: Icon(Icons.close, size: 24.sp, color: AppColors.textPrimary),
           ),
         ],
       ),
@@ -349,11 +342,7 @@ class SessionBottomSheetContent extends StatelessWidget {
                     : null,
               ),
               child: data.trainerImageUrl == null
-                  ? Icon(
-                      Icons.person,
-                      size: 30.sp,
-                      color: AppColors.background,
-                    )
+                  ? Icon(Icons.person, size: 30.sp, color: AppColors.background)
                   : null,
             ),
           ),
@@ -373,10 +362,7 @@ class SessionBottomSheetContent extends StatelessWidget {
                 color: AppColors.background,
               ),
               child: Center(
-                child: Text(
-                  '😊',
-                  style: TextStyle(fontSize: 32.sp),
-                ),
+                child: Text('😊', style: TextStyle(fontSize: 32.sp)),
               ),
             ),
           ),
@@ -389,7 +375,8 @@ class SessionBottomSheetContent extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Text(
-        'Your session with ${data.trainerName} is about to get started!',
+        "Join your trainer and their avatar asistant on whatsapp",
+        // 'Your session with ${data.trainerName} is about to get started! ${data.trainerContact} ',
         textAlign: TextAlign.center,
         style: AppTextStyle.text16SemiBold.copyWith(
           color: AppColors.textPrimary,
@@ -400,10 +387,7 @@ class SessionBottomSheetContent extends StatelessWidget {
 
   Widget _buildSessionDetails() {
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: 10.w,
-        vertical: 5.w,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.w),
       decoration: BoxDecoration(
         color: AppColors.grey100,
         borderRadius: AppRadius.small,
@@ -454,9 +438,9 @@ class SessionBottomSheetContent extends StatelessWidget {
     );
   }
 
-  Widget _buildJoinButton(BuildContext context) {
+  Widget _buildJoinButton(BuildContext context, String trainerConntact) {
     return CustomButton(
-      text: 'Join Session',
+      text: 'Link Account to WhatsApp',
       size: ButtonSize.large,
       width: double.infinity,
       height: 52.h,
@@ -464,17 +448,27 @@ class SessionBottomSheetContent extends StatelessWidget {
       textColor: AppColors.background,
       icon: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Image.network(
-          "https://cdn-icons-png.flaticon.com/512/3670/3670051.png",
-        ),
+        child: SvgPicture.asset(AppAssets.whatsapp),
+        // Image.network(
+        //   "https://cdn-icons-png.flaticon.com/512/3670/3670051.png",
+        // ),
       ),
       iconPosition: IconPosition.left,
       textStyle: AppTextStyle.text16SemiBold.copyWith(
         color: AppColors.background,
       ),
       borderRadius: 12.r,
-      onPressed: () {
-        onDismiss();
+      onPressed: () async {
+        final Uri whatsappUrl = Uri.parse(
+          'https://wa.me/$trainerConntact?text=Hello',
+        );
+
+        if (await canLaunchUrl(whatsappUrl)) {
+          await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
+        } else {
+          debugPrint('Could not launch $whatsappUrl');
+        }
+
         data.onJoinSession?.call();
       },
     );

@@ -158,9 +158,8 @@ abstract class LoginWithEmailRoute {
   static final GoRoute route = GoRoute(
     path: path,
     name: name,
-    builder: (context, state) => const AuthWithEmailScreen(
-      mode: AuthMode.login,
-    ),
+    builder: (context, state) =>
+        const AuthWithEmailScreen(mode: AuthMode.login),
   );
 }
 
@@ -171,9 +170,8 @@ abstract class SignupWithEmailRoute {
   static final GoRoute route = GoRoute(
     path: path,
     name: name,
-    builder: (context, state) => const AuthWithEmailScreen(
-      mode: AuthMode.signup,
-    ),
+    builder: (context, state) =>
+        const AuthWithEmailScreen(mode: AuthMode.signup),
   );
 }
 
@@ -193,15 +191,13 @@ abstract class CheckEmailRoute {
   static const String name = 'checkEmail';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final email = state.pathParameters['email'] ?? '';
-          return CheckEmailScreen(
-            email: email,
-          );
-        },
-      );
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final email = state.pathParameters['email'] ?? '';
+      return CheckEmailScreen(email: email);
+    },
+  );
 }
 
 abstract class SetNewPasswordRoute {
@@ -222,9 +218,8 @@ abstract class LoginWithPhoneRoute {
   static final GoRoute route = GoRoute(
     path: path,
     name: name,
-    builder: (context, state) => const AuthWithPhoneScreen(
-      mode: AuthMode.login,
-    ),
+    builder: (context, state) =>
+        const AuthWithPhoneScreen(mode: AuthMode.login),
   );
 }
 
@@ -235,9 +230,8 @@ abstract class SignupWithPhoneRoute {
   static final GoRoute route = GoRoute(
     path: path,
     name: name,
-    builder: (context, state) => const AuthWithPhoneScreen(
-      mode: AuthMode.signup,
-    ),
+    builder: (context, state) =>
+        const AuthWithPhoneScreen(mode: AuthMode.signup),
   );
 }
 
@@ -246,18 +240,15 @@ abstract class OtpVerificationRoute {
   static const String name = 'otpVerification';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final mobileNumber = state.pathParameters['mobileNumber'] ?? '';
-          final modeParam = state.uri.queryParameters['mode'] ?? 'signup';
-          final mode = modeParam == 'login' ? AuthMode.login : AuthMode.signup;
-          return AuthOtpVerificationScreen(
-            mobileNumber: mobileNumber,
-            mode: mode,
-          );
-        },
-      );
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final mobileNumber = state.pathParameters['mobileNumber'] ?? '';
+      final modeParam = state.uri.queryParameters['mode'] ?? 'signup';
+      final mode = modeParam == 'login' ? AuthMode.login : AuthMode.signup;
+      return AuthOtpVerificationScreen(mobileNumber: mobileNumber, mode: mode);
+    },
+  );
 }
 
 abstract class EnterTrainerIdRoute {
@@ -276,15 +267,13 @@ abstract class LinkTrainerRoute {
   static const String name = 'linkTrainer';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final trainerId = state.pathParameters['trainerId'] ?? '';
-          return LinkTrainerScreen(
-            trainerId: trainerId,
-          );
-        },
-      );
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final trainerId = state.pathParameters['trainerId'] ?? '';
+      return LinkTrainerScreen(trainerId: trainerId);
+    },
+  );
 }
 
 abstract class DashboardRoute {
@@ -298,21 +287,11 @@ abstract class DashboardRoute {
       );
     },
     branches: [
-      StatefulShellBranch(
-        routes: [HomeRoute.route],
-      ),
-      StatefulShellBranch(
-        routes: [WorkoutsRoute.route],
-      ),
-      StatefulShellBranch(
-        routes: [SubscriptionsRoute.route],
-      ),
-      StatefulShellBranch(
-        routes: [SupportRoute.route],
-      ),
-      StatefulShellBranch(
-        routes: [ProfileRoute.route],
-      ),
+      StatefulShellBranch(routes: [HomeRoute.route]),
+      StatefulShellBranch(routes: [WorkoutsRoute.route]),
+      StatefulShellBranch(routes: [SubscriptionsRoute.route]),
+      StatefulShellBranch(routes: [SupportRoute.route]),
+      StatefulShellBranch(routes: [ProfileRoute.route]),
     ],
   );
 }
@@ -324,7 +303,8 @@ abstract class HomeRoute {
   static final GoRoute route = GoRoute(
     path: '/dashboard/home',
     name: name,
-    pageBuilder: (context, state) => NoTransitionPage(child: const HomeScreen()),
+    pageBuilder: (context, state) =>
+        NoTransitionPage(child: const HomeScreen()),
   );
 }
 
@@ -335,7 +315,8 @@ abstract class WorkoutsRoute {
   static final GoRoute route = GoRoute(
     path: '/dashboard/workouts',
     name: name,
-    pageBuilder: (context, state) => NoTransitionPage(child: const WorkoutsScreen()),
+    pageBuilder: (context, state) =>
+        NoTransitionPage(child: const WorkoutsScreen()),
   );
 }
 
@@ -346,7 +327,8 @@ abstract class SubscriptionsRoute {
   static final GoRoute route = GoRoute(
     path: '/dashboard/subscriptions',
     name: name,
-    pageBuilder: (context, state) => NoTransitionPage(child: const SubscriptionsScreen()),
+    pageBuilder: (context, state) =>
+        NoTransitionPage(child: const SubscriptionsScreen()),
   );
 }
 
@@ -357,7 +339,8 @@ abstract class SupportRoute {
   static final GoRoute route = GoRoute(
     path: '/dashboard/support',
     name: name,
-    pageBuilder: (context, state) => NoTransitionPage(child: const SupportScreen()),
+    pageBuilder: (context, state) =>
+        NoTransitionPage(child: const SupportScreen()),
   );
 }
 
@@ -368,9 +351,8 @@ abstract class ContactSupportRoute {
   static final GoRoute route = GoRoute(
     path: '/dashboard/contact-support',
     name: name,
-    builder: (context, state) => const ContactSupportScreen()
-   );
-  
+    builder: (context, state) => const ContactSupportScreen(),
+  );
 }
 
 abstract class TicketDetailsRoute {
@@ -416,7 +398,8 @@ abstract class ProfileRoute {
   static final GoRoute route = GoRoute(
     path: '/dashboard/profile',
     name: name,
-    pageBuilder: (context, state) => NoTransitionPage(child: const ProfileScreen()),
+    pageBuilder: (context, state) =>
+        NoTransitionPage(child: const ProfileScreen()),
   );
 }
 
@@ -425,74 +408,77 @@ abstract class EditProfileDetailsRoute {
   static const String name = 'editProfileDetails';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final title = state.uri.queryParameters['title'] ?? 'Edit Details';
-          
-          // Get profile data from provider
-          final profileProvider = Provider.of<ClientProfileProvider>(context, listen: false);
-          final profile = profileProvider.profile;
-          
-          // Default fields based on title
-          List<EditField> fields;
-          EditProfileSection section;
-          if (title == 'Personal Details') {
-            section = EditProfileSection.personalDetails;
-            fields = [
-              EditField(
-                label: 'DOB',
-                value: profile?.dateOfBirth ?? '',
-                hintText: 'Select date of birth',
-                isDateField: true,
-              ),
-              EditField(
-                label: 'Height',
-                value:  (profile?.height ?? '').toString(),
-                hintText: 'Enter height in cm',
-              ),
-              EditField(
-                label: 'Weight',
-                value:  (profile?.weight ?? '').toString(),
-                hintText: 'Enter weight in kg',
-              ),
-              EditField(
-                label: 'Fitness Level',
-                value:  (profile?.fitnessLevel ?? '').toString(),
-                hintText: 'e.g., Beginner, Intermediate, Advanced',
-              ),
-            ];
-          } else if (title == 'Fitness Goals') {
-            section = EditProfileSection.fitnessGoals;
-            fields = [
-              EditField(
-                label: 'Weight Goal',
-                value: profile?.weightGoal ?? '',
-                hintText: 'e.g., 72-74kg',
-              ),
-              EditField(
-                label: 'Body Type',
-                value: profile?.bodyType ?? '',
-                hintText: 'e.g., Muscular, Lean',
-              ),
-              EditField(
-                label: 'Performance Goal',
-                value: profile?.performanceGoal ?? '',
-                hintText: 'e.g., Improve Stamina',
-              ),
-            ];
-          } else {
-            section = EditProfileSection.personalDetails;
-            fields = const [];
-          }
-          
-          return EditProfileDetailsScreen(
-            title: title,
-            fields: fields,
-            section: section,
-          );
-        },
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final title = state.uri.queryParameters['title'] ?? 'Edit Details';
+
+      // Get profile data from provider
+      final profileProvider = Provider.of<ClientProfileProvider>(
+        context,
+        listen: false,
       );
+      final profile = profileProvider.profile;
+
+      // Default fields based on title
+      List<EditField> fields;
+      EditProfileSection section;
+      if (title == 'Personal Details') {
+        section = EditProfileSection.personalDetails;
+        fields = [
+          EditField(
+            label: 'DOB',
+            value: profile?.dateOfBirth ?? '',
+            hintText: 'Select date of birth',
+            isDateField: true,
+          ),
+          EditField(
+            label: 'Height',
+            value: (profile?.height ?? '').toString(),
+            hintText: 'Enter height in cm',
+          ),
+          EditField(
+            label: 'Weight',
+            value: (profile?.weight ?? '').toString(),
+            hintText: 'Enter weight in kg',
+          ),
+          EditField(
+            label: 'Fitness Level',
+            value: (profile?.fitnessLevel ?? '').toString(),
+            hintText: 'e.g., Beginner, Intermediate, Advanced',
+          ),
+        ];
+      } else if (title == 'Fitness Goals') {
+        section = EditProfileSection.fitnessGoals;
+        fields = [
+          EditField(
+            label: 'Weight Goal',
+            value: profile?.weightGoal ?? '',
+            hintText: 'e.g., 72-74kg',
+          ),
+          EditField(
+            label: 'Body Type',
+            value: profile?.bodyType ?? '',
+            hintText: 'e.g., Muscular, Lean',
+          ),
+          EditField(
+            label: 'Performance Goal',
+            value: profile?.performanceGoal ?? '',
+            hintText: 'e.g., Improve Stamina',
+          ),
+        ];
+      } else {
+        section = EditProfileSection.personalDetails;
+        fields = const [];
+      }
+
+      return EditProfileDetailsScreen(
+        title: title,
+        fields: fields,
+        section: section,
+      );
+    },
+  );
 }
 
 abstract class AccountDetailsRoute {
@@ -566,15 +552,13 @@ abstract class TrainerProfileRoute {
   static const String name = 'trainerProfile';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final trainerId = state.pathParameters['trainerId'] ?? '';
-          return TrainerProfileScreen(
-            trainerId: trainerId,
-          );
-        },
-      );
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final trainerId = state.pathParameters['trainerId'] ?? '';
+      return TrainerProfileScreen(trainerId: trainerId);
+    },
+  );
 }
 
 abstract class PaymentMethodRoute {
@@ -582,52 +566,54 @@ abstract class PaymentMethodRoute {
   static const String name = 'paymentMethod';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final amountParam = state.uri.queryParameters['amount'];
-          final amount = amountParam != null
-              ? double.tryParse(amountParam) ?? 100.00
-              : 100.00;
-          
-          // Booking data
-          final trainerId = state.uri.queryParameters['trainerId'] ?? '';
-          final sessionPlanId = state.uri.queryParameters['sessionPlanId'] ?? '';
-          final dateId = state.uri.queryParameters['dateId'] ?? '';
-          final timeSlot = state.uri.queryParameters['timeSlot'] ?? '';
-          final durationMinutesParam = state.uri.queryParameters['durationMinutes'];
-          final durationMinutes = durationMinutesParam != null
-              ? int.tryParse(durationMinutesParam) ?? 60
-              : 60;
-          
-          // Reconstruct available dates from dateId (we only need the selected date)
-          List<Map<String, dynamic>> availableDates = [];
-          if (dateId.isNotEmpty) {
-            try {
-              final dateTime = DateTime.parse(dateId);
-              final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-              availableDates = [{
-                'dateId': dateId,
-                'day': days[dateTime.weekday - 1],
-                'sessionPlanId': sessionPlanId,
-              }];
-            } catch (e) {
-              // If parsing fails, use empty list
-              availableDates = [];
-            }
-          }
-          
-          return PaymentMethodScreen(
-            amount: amount,
-            trainerId: trainerId,
-            sessionPlanId: sessionPlanId,
-            dateId: dateId,
-            timeSlot: timeSlot,
-            durationMinutes: durationMinutes,
-            availableDates: availableDates,
-          );
-        },
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final amountParam = state.uri.queryParameters['amount'];
+      final amount = amountParam != null
+          ? double.tryParse(amountParam) ?? 100.00
+          : 100.00;
+
+      // Booking data
+      final trainerId = state.uri.queryParameters['trainerId'] ?? '';
+      final sessionPlanId = state.uri.queryParameters['sessionPlanId'] ?? '';
+      final dateId = state.uri.queryParameters['dateId'] ?? '';
+      final timeSlot = state.uri.queryParameters['timeSlot'] ?? '';
+      final durationMinutesParam = state.uri.queryParameters['durationMinutes'];
+      final durationMinutes = durationMinutesParam != null
+          ? int.tryParse(durationMinutesParam) ?? 60
+          : 60;
+
+      // Reconstruct available dates from dateId (we only need the selected date)
+      List<Map<String, dynamic>> availableDates = [];
+      if (dateId.isNotEmpty) {
+        try {
+          final dateTime = DateTime.parse(dateId);
+          final days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          availableDates = [
+            {
+              'dateId': dateId,
+              'day': days[dateTime.weekday - 1],
+              'sessionPlanId': sessionPlanId,
+            },
+          ];
+        } catch (e) {
+          // If parsing fails, use empty list
+          availableDates = [];
+        }
+      }
+
+      return PaymentMethodScreen(
+        amount: amount,
+        trainerId: trainerId,
+        sessionPlanId: sessionPlanId,
+        dateId: dateId,
+        timeSlot: timeSlot,
+        durationMinutes: durationMinutes,
+        availableDates: availableDates,
       );
+    },
+  );
 }
 
 abstract class DelinkTrainerRoute {
@@ -657,24 +643,38 @@ abstract class TransactionSuccessfulRoute {
   static const String name = 'transactionSuccessful';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final amountParam = state.uri.queryParameters['amount'];
-          final amount = amountParam != null
-              ? double.tryParse(amountParam) ?? 100.00
-              : 100.00;
-          final paymentMethod =
-              state.uri.queryParameters['paymentMethod'] ?? 'Standard Charted Card';
-          final cardNumber =
-              state.uri.queryParameters['cardNumber'] ?? '1234 5678 2345';
-          return TransactionSuccessfulScreen(
-            amount: amount,
-            paymentMethod: paymentMethod,
-            cardNumber: cardNumber,
-          );
-        },
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final amountParam = state.uri.queryParameters['amount'];
+      final amount = amountParam != null
+          ? double.tryParse(amountParam) ?? 100.00
+          : 100.00;
+      final paymentMethod =
+          state.uri.queryParameters['paymentMethod'] ?? 'Standard Charted Card';
+      final cardNumber =
+          state.uri.queryParameters['cardNumber'] ?? '1234 5678 2345';
+      final bookingId = state.uri.queryParameters['bookingId'];
+      final trainerName = state.uri.queryParameters['trainerName'];
+      final sessionDate = state.uri.queryParameters['sessionDate'];
+      final sessionTime = state.uri.queryParameters['sessionTime'];
+      final startTimeIso = state.uri.queryParameters['sessionStartTime'];
+      final sessionStartTime = startTimeIso != null
+          ? DateTime.tryParse(startTimeIso)
+          : null;
+
+      return TransactionSuccessfulScreen(
+        amount: amount,
+        paymentMethod: paymentMethod,
+        cardNumber: cardNumber,
+        trainerName: trainerName,
+        bookingId: bookingId,
+        sessionDate: sessionDate,
+        sessionTime: sessionTime,
+        sessionStartTime: sessionStartTime,
       );
+    },
+  );
 }
 
 abstract class SessionHistoryRoute {
@@ -704,38 +704,38 @@ abstract class SessionDetailsRoute {
   static const String name = 'sessionDetails';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final trainerName = state.uri.queryParameters['trainerName'] ?? '';
-          final trainerImageUrl =
-              state.uri.queryParameters['trainerImageUrl'] ?? '';
-          final sessionType = state.uri.queryParameters['sessionType'] ?? '';
-          final duration = state.uri.queryParameters['duration'] ?? '';
-          final statusParam = state.uri.queryParameters['status'] ?? 'completed';
-          final date = state.uri.queryParameters['date'] ?? '';
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final trainerName = state.uri.queryParameters['trainerName'] ?? '';
+      final trainerImageUrl =
+          state.uri.queryParameters['trainerImageUrl'] ?? '';
+      final sessionType = state.uri.queryParameters['sessionType'] ?? '';
+      final duration = state.uri.queryParameters['duration'] ?? '';
+      final statusParam = state.uri.queryParameters['status'] ?? 'completed';
+      final date = state.uri.queryParameters['date'] ?? '';
 
-          final status = statusParam == 'completed'
-              ? SessionStatus.completed
-              : statusParam == 'cancelled'
-                  ? SessionStatus.cancelled
-                  : SessionStatus.upcoming;
+      final status = statusParam == 'completed'
+          ? SessionStatus.completed
+          : statusParam == 'cancelled'
+          ? SessionStatus.cancelled
+          : SessionStatus.upcoming;
 
-          final bookingId = state.uri.queryParameters['bookingId'];
+      final bookingId = state.uri.queryParameters['bookingId'];
 
-          final session = SessionData(
-            trainerName: trainerName,
-            trainerImageUrl: trainerImageUrl,
-            sessionType: sessionType,
-            duration: duration,
-            status: status,
-            date: date,
-            bookingId: bookingId,
-          );
-
-          return SessionDetailsScreen(session: session);
-        },
+      final session = SessionData(
+        trainerName: trainerName,
+        trainerImageUrl: trainerImageUrl,
+        sessionType: sessionType,
+        duration: duration,
+        status: status,
+        date: date,
+        bookingId: bookingId,
       );
+
+      return SessionDetailsScreen(session: session);
+    },
+  );
 }
 
 abstract class PastSubscriptionsRoute {
@@ -754,22 +754,22 @@ abstract class SubscriptionDetailsRoute {
   static const String name = 'subscriptionDetails';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final planName = state.uri.queryParameters['planName'] ?? '';
-          final startDate = state.uri.queryParameters['startDate'] ?? '';
-          final endDate = state.uri.queryParameters['endDate'] ?? '';
-          final paymentMethod = state.uri.queryParameters['paymentMethod'] ?? '';
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final planName = state.uri.queryParameters['planName'] ?? '';
+      final startDate = state.uri.queryParameters['startDate'] ?? '';
+      final endDate = state.uri.queryParameters['endDate'] ?? '';
+      final paymentMethod = state.uri.queryParameters['paymentMethod'] ?? '';
 
-          return SubscriptionDetailsScreen(
-            planName: planName,
-            startDate: startDate,
-            endDate: endDate,
-            paymentMethod: paymentMethod,
-          );
-        },
+      return SubscriptionDetailsScreen(
+        planName: planName,
+        startDate: startDate,
+        endDate: endDate,
+        paymentMethod: paymentMethod,
       );
+    },
+  );
 }
 
 abstract class ExercisesRoute {
@@ -777,20 +777,21 @@ abstract class ExercisesRoute {
   static const String name = 'exercises';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final fromWorkoutProgress = state.uri.queryParameters['fromWorkoutProgress'] == 'true';
-          final dateMillis = state.uri.queryParameters['date'];
-          final date = dateMillis != null
-              ? DateTime.fromMillisecondsSinceEpoch(int.parse(dateMillis))
-              : null;
-          return ExercisesScreen(
-            fromWorkoutProgress: fromWorkoutProgress,
-            workoutDate: date,
-          );
-        },
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final fromWorkoutProgress =
+          state.uri.queryParameters['fromWorkoutProgress'] == 'true';
+      final dateMillis = state.uri.queryParameters['date'];
+      final date = dateMillis != null
+          ? DateTime.fromMillisecondsSinceEpoch(int.parse(dateMillis))
+          : null;
+      return ExercisesScreen(
+        fromWorkoutProgress: fromWorkoutProgress,
+        workoutDate: date,
       );
+    },
+  );
 }
 
 abstract class ExerciseDetailsRoute {
@@ -798,13 +799,13 @@ abstract class ExerciseDetailsRoute {
   static const String name = 'exerciseDetails';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final exerciseId = state.uri.queryParameters['exerciseId'] ?? '1';
-          return ExerciseDetailsScreen(exerciseId: exerciseId);
-        },
-      );
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final exerciseId = state.uri.queryParameters['exerciseId'] ?? '1';
+      return ExerciseDetailsScreen(exerciseId: exerciseId);
+    },
+  );
 }
 
 abstract class WorkoutProgressRoute {
@@ -812,17 +813,17 @@ abstract class WorkoutProgressRoute {
   static const String name = 'workoutProgress';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final exerciseId = state.uri.queryParameters['exerciseId'];
-          final exerciseName = state.uri.queryParameters['exerciseName'];
-          return WorkoutProgressScreen(
-            exerciseIdToAdd: exerciseId,
-            exerciseNameToAdd: exerciseName,
-          );
-        },
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final exerciseId = state.uri.queryParameters['exerciseId'];
+      final exerciseName = state.uri.queryParameters['exerciseName'];
+      return WorkoutProgressScreen(
+        exerciseIdToAdd: exerciseId,
+        exerciseNameToAdd: exerciseName,
       );
+    },
+  );
 }
 
 abstract class SessionLogRoute {
@@ -841,16 +842,16 @@ abstract class SessionLogDetailsRoute {
   static const String name = 'sessionLogDetails';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final dateMillis = state.uri.queryParameters['date'];
-          final date = dateMillis != null
-              ? DateTime.fromMillisecondsSinceEpoch(int.parse(dateMillis))
-              : DateTime.now();
-          return SessionLogDetailsScreen(date: date);
-        },
-      );
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final dateMillis = state.uri.queryParameters['date'];
+      final date = dateMillis != null
+          ? DateTime.fromMillisecondsSinceEpoch(int.parse(dateMillis))
+          : DateTime.now();
+      return SessionLogDetailsScreen(date: date);
+    },
+  );
 }
 
 abstract class EditExerciseSetRoute {
@@ -858,29 +859,29 @@ abstract class EditExerciseSetRoute {
   static const String name = 'editExerciseSet';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final exerciseId = state.uri.queryParameters['exerciseId'] ?? '';
-          final exerciseName = state.uri.queryParameters['exerciseName'] ?? '';
-          final dateMillis = state.uri.queryParameters['date'];
-          final setIndex = state.uri.queryParameters['setIndex'];
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final exerciseId = state.uri.queryParameters['exerciseId'] ?? '';
+      final exerciseName = state.uri.queryParameters['exerciseName'] ?? '';
+      final dateMillis = state.uri.queryParameters['date'];
+      final setIndex = state.uri.queryParameters['setIndex'];
 
-          final date = dateMillis != null
-              ? DateTime.fromMillisecondsSinceEpoch(int.parse(dateMillis))
-              : DateTime.now();
+      final date = dateMillis != null
+          ? DateTime.fromMillisecondsSinceEpoch(int.parse(dateMillis))
+          : DateTime.now();
 
-          return ChangeNotifierProvider.value(
-            value: WorkoutProgressProvider(),
-            child: _EditExerciseSetScreenWrapper(
-              exerciseId: exerciseId,
-              exerciseName: exerciseName,
-              date: date,
-              setIndex: setIndex != null ? int.parse(setIndex) : null,
-            ),
-          );
-        },
+      return ChangeNotifierProvider.value(
+        value: WorkoutProgressProvider(),
+        child: _EditExerciseSetScreenWrapper(
+          exerciseId: exerciseId,
+          exerciseName: exerciseName,
+          date: date,
+          setIndex: setIndex != null ? int.parse(setIndex) : null,
+        ),
       );
+    },
+  );
 }
 
 class _EditExerciseSetScreenWrapper extends StatelessWidget {
@@ -926,17 +927,14 @@ abstract class VideoPlayerRoute {
   static const String name = 'videoPlayer';
 
   static GoRoute get route => GoRoute(
-        path: path,
-        name: name,
-        builder: (context, state) {
-          final videoUrl = state.uri.queryParameters['videoUrl'] ?? '';
-          final title = state.uri.queryParameters['title'];
-          return VideoPlayerScreen(
-            videoUrl: videoUrl,
-            title: title,
-          );
-        },
-      );
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final videoUrl = state.uri.queryParameters['videoUrl'] ?? '';
+      final title = state.uri.queryParameters['title'];
+      return VideoPlayerScreen(videoUrl: videoUrl, title: title);
+    },
+  );
 }
 
 abstract class SampleRoute {
@@ -948,4 +946,3 @@ abstract class SampleRoute {
     builder: (context, state) => const SampleScreen(),
   );
 }
-

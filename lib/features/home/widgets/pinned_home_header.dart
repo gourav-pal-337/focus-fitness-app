@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
+import 'package:focus_fitness/features/authentication/provider/auth_provider.dart';
 import 'package:focus_fitness/features/profile/widgets/profile_header_section.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +16,9 @@ class PinnedHomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authProv = context.read<AuthProvider>();
     final userProvider = context.read<UserProvider>();
+
     final user = userProvider.user;
     return Container(
       color: AppColors.background,
@@ -39,7 +42,7 @@ class PinnedHomeHeader extends StatelessWidget {
               ),
               SizedBox(height: 4.h),
               Text(
-                user?.fullName ?? '',
+                user?.fullName ?? authProv.name ?? '',
                 style: AppTextStyle.text24SemiBold.copyWith(
                   color: AppColors.textPrimary,
                 ),
@@ -58,23 +61,23 @@ class PinnedHomeHeader extends StatelessWidget {
                       size: 24.sp,
                       color: AppColors.textPrimary,
                     ),
-                  Positioned(
-                    top: -2.h,
-                    right: -2.w,
-                    child: Container(
-                      width: 8.w,
-                      height: 8.w,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: AppColors.background,
-                          width: 1.5,
+                    Positioned(
+                      top: -2.h,
+                      right: -2.w,
+                      child: Container(
+                        width: 8.w,
+                        height: 8.w,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.background,
+                            width: 1.5,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
                 ),
               ),
               SizedBox(width: 16.w),
@@ -90,30 +93,25 @@ class PinnedHomeHeader extends StatelessWidget {
                   context.go(ProfileRoute.path);
                 },
                 child: Container(
-                          width: 35.w,
-                          height: 35.w,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: AppColors.grey75,
+                  width: 35.w,
+                  height: 35.w,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.grey75,
+                  ),
+                  child: user?.profilePhoto != null
+                      ? ClipOval(
+                          child: Image.network(
+                            user!.profilePhoto!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return DefaultAvatar(size: 15.w);
+                            },
                           ),
-                          child: user?.profilePhoto != null
-                ? ClipOval(
-                    child: Image.network(
-                      user!.profilePhoto!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return DefaultAvatar(
-                          size: 15.w,
-                        );
-                      },
-                    ),
-                  )
-                : DefaultAvatar(
-                  size: 15.w,
+                        )
+                      : DefaultAvatar(size: 15.w),
                 ),
-                        ),
               ),
-              
             ],
           ),
         ],
@@ -121,4 +119,3 @@ class PinnedHomeHeader extends StatelessWidget {
     );
   }
 }
-

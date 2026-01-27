@@ -40,7 +40,8 @@ class BookingApiService {
       } else {
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {
-          final errorMessage = responseData['error'] as String? ??
+          final errorMessage =
+              responseData['error'] as String? ??
               responseData['message'] as String? ??
               response.msg;
 
@@ -66,10 +67,14 @@ class BookingApiService {
   }
 
   /// Get session summary for a specific booking
-  Future<SessionSummaryResponseModel> getSessionSummary(String bookingId) async {
+  Future<SessionSummaryResponseModel> getSessionSummary(
+    String bookingId,
+  ) async {
     try {
       final endpoint = Endpoints.getSessionSummary(bookingId);
-      debugPrint('BookingApiService: Calling getSessionSummary with endpoint: $endpoint');
+      debugPrint(
+        'BookingApiService: Calling getSessionSummary with endpoint: $endpoint',
+      );
       final response = await _apiHitter.getApiResponse(endpoint);
       debugPrint('BookingApiService: Response status: ${response.status}');
 
@@ -79,7 +84,114 @@ class BookingApiService {
       } else {
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {
-          final errorMessage = responseData['error'] as String? ??
+          final errorMessage =
+              responseData['error'] as String? ??
+              responseData['message'] as String? ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage,
+            statusCode: response.response?.statusCode,
+          );
+        }
+
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Rate a completed session
+  Future<bool> rateSession({
+    required String bookingId,
+    required int rating,
+    String? feedback,
+  }) async {
+    try {
+      final endpoint = Endpoints.rateSession(bookingId);
+      final data = {
+        'rating': rating,
+        if (feedback != null && feedback.isNotEmpty) 'feedback': feedback,
+      };
+
+      debugPrint(
+        'BookingApiService: Calling rateSession with endpoint: $endpoint',
+      );
+      final response = await _apiHitter.getPostApiResponse(
+        endpoint,
+        data: data,
+      );
+
+      debugPrint('BookingApiService: Response status: ${response.status}');
+
+      if (response.status) {
+        return true;
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              responseData['error'] as String? ??
+              responseData['message'] as String? ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage,
+            statusCode: response.response?.statusCode,
+          );
+        }
+
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Cancel a booking
+  Future<bool> cancelBooking({
+    required String bookingId,
+    String? reason,
+  }) async {
+    try {
+      final endpoint = Endpoints.cancelBooking(bookingId);
+      final data = {
+        if (reason != null && reason.isNotEmpty) 'cancellationReason': reason,
+      };
+
+      debugPrint(
+        'BookingApiService: Calling cancelBooking with endpoint: $endpoint',
+      );
+      final response = await _apiHitter.getPatchApiResponse(
+        endpoint,
+        data: data,
+      );
+
+      debugPrint('BookingApiService: Response status: ${response.status}');
+
+      if (response.status) {
+        return true;
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              responseData['error'] as String? ??
               responseData['message'] as String? ??
               response.msg;
 
@@ -104,4 +216,3 @@ class BookingApiService {
     }
   }
 }
-

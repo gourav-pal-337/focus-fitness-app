@@ -23,34 +23,61 @@ class BookingRepository {
       );
       return Success(response);
     } on ApiException catch (e) {
-      return Failure(
-        e.message,
-        code: e.statusCode ?? 500,
-      );
+      return Failure(e.message, code: e.statusCode ?? 500);
     } catch (e) {
-      return Failure(
-        e.toString().replaceAll('Exception: ', ''),
-        code: 500,
-      );
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
 
   /// Get session summary for a specific booking
-  Future<Result<SessionSummaryResponseModel>> getSessionSummary(String bookingId) async {
+  Future<Result<SessionSummaryResponseModel>> getSessionSummary(
+    String bookingId,
+  ) async {
     try {
       final response = await _apiService.getSessionSummary(bookingId);
       return Success(response);
     } on ApiException catch (e) {
-      return Failure(
-        e.message,
-        code: e.statusCode ?? 500,
-      );
+      return Failure(e.message, code: e.statusCode ?? 500);
     } catch (e) {
-      return Failure(
-        e.toString().replaceAll('Exception: ', ''),
-        code: 500,
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  /// Rate a completed session
+  Future<Result<bool>> rateSession({
+    required String bookingId,
+    required int rating,
+    String? feedback,
+  }) async {
+    try {
+      final response = await _apiService.rateSession(
+        bookingId: bookingId,
+        rating: rating,
+        feedback: feedback,
       );
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  /// Cancel a completed session
+  Future<Result<bool>> cancelBooking({
+    required String bookingId,
+    String? reason,
+  }) async {
+    try {
+      final response = await _apiService.cancelBooking(
+        bookingId: bookingId,
+        reason: reason,
+      );
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
 }
-

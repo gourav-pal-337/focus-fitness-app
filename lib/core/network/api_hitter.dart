@@ -24,7 +24,7 @@ class ApiHitter {
   factory ApiHitter() => singleton;
 
   ApiHitter._internal() {
-     if (dio == null) {
+    if (dio == null) {
       BaseOptions options = BaseOptions(
         baseUrl: Endpoints.baseUrl,
         headers: {
@@ -34,36 +34,27 @@ class ApiHitter {
         connectTimeout: const Duration(milliseconds: 60000),
         receiveTimeout: const Duration(milliseconds: 60000),
       );
-      dio =  Dio(options)
-        ..interceptors.addAll(
-          [
-            LogInterceptor(
-              request: false,
-              requestBody: true,
-              responseBody: true,
-            ),
-            _AccessTokenInterceptor(),
-          ],
-        );
-    } 
+      dio = Dio(options)
+        ..interceptors.addAll([
+          LogInterceptor(request: false, requestBody: true, responseBody: true),
+          _AccessTokenInterceptor(),
+        ]);
+    }
     if (!kIsWeb) {
-      (dio!.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate = (
-        HttpClient client,
-      ) {
-        client.badCertificateCallback =
-            (X509Certificate cert, String host, int port) => true;
-        return client;
-      };
+      (dio!.httpClientAdapter as IOHttpClientAdapter).onHttpClientCreate =
+          (HttpClient client) {
+            client.badCertificateCallback =
+                (X509Certificate cert, String host, int port) => true;
+            return client;
+          };
     }
   }
 
-  
   Future<ApiResponse> getPostApiResponse(
     String endPoint, {
-   
+
     dynamic data,
     Map<String, dynamic>? queryParameters,
-
   }) async {
     bool value = await checkInternetConnection();
     if (value == false) {
@@ -74,7 +65,7 @@ class ApiHitter {
       try {
         var response = await dio!.post(
           endPoint,
-       
+
           queryParameters: queryParameters,
           data: data,
         );
@@ -93,10 +84,9 @@ class ApiHitter {
 
   Future<ApiResponse> getPutApiResponse(
     String endPoint, {
-   
+
     Map<String, dynamic>? queryParameters,
     dynamic data,
-   
   }) async {
     bool value = await checkInternetConnection();
     if (value == false) {
@@ -108,7 +98,36 @@ class ApiHitter {
         var response = await dio!.put(
           endPoint,
           queryParameters: queryParameters,
-         
+
+          data: data,
+        );
+        return apiData(response);
+      } on DioException catch (error) {
+        return exception(error);
+      }
+    } else {
+      return ApiResponse(
+        false,
+        msg: 'Check your internet connection and Please try again later.',
+      );
+    }
+  }
+
+  Future<ApiResponse> getPatchApiResponse(
+    String endPoint, {
+    Map<String, dynamic>? queryParameters,
+    dynamic data,
+  }) async {
+    bool value = await checkInternetConnection();
+    if (value == false) {
+      debugPrint('No internet connection');
+    }
+
+    if (value) {
+      try {
+        var response = await dio!.patch(
+          endPoint,
+          queryParameters: queryParameters,
           data: data,
         );
         return apiData(response);
@@ -165,10 +184,7 @@ class ApiHitter {
 
     if (value) {
       try {
-        var response = await dio!.delete(
-          endPoint,
-          data: data,
-        );
+        var response = await dio!.delete(endPoint, data: data);
         return apiData(response);
       } on DioException catch (error) {
         return exception(error);
@@ -214,10 +230,11 @@ class ApiHitter {
   ApiResponse exception(DioException e) {
     if (e.response != null) {
       if (e.response?.statusCode == 401) {
-        final errorMessage = (e.response?.data['error'] ??
-                e.response?.data['msg'] ??
-                'Something went wrong')
-            .toString();
+        final errorMessage =
+            (e.response?.data['error'] ??
+                    e.response?.data['msg'] ??
+                    'Something went wrong')
+                .toString();
         debugPrint(errorMessage);
 
         LocalStorageService.clearAll();
@@ -226,19 +243,16 @@ class ApiHitter {
 
       final responseData = e.response?.data;
       String errorMessage = e.message ?? 'An error occurred';
-      
+
       if (responseData is Map<String, dynamic>) {
-        errorMessage = responseData['error'] as String? ??
+        errorMessage =
+            responseData['error'] as String? ??
             responseData['message'] as String? ??
             responseData['msg'] as String? ??
             errorMessage;
       }
-      
-      return ApiResponse(
-        false,
-        msg: errorMessage,
-        response: e.response,
-      );
+
+      return ApiResponse(false, msg: errorMessage, response: e.response);
     } else {
       return ApiResponse(
         false,
@@ -309,8 +323,7 @@ class ApiHitter {
       });
       log("the upload function  ${formData}");
 
-      final response =
-          await dio!.post(Endpoints.uploadFile, data: formData);
+      final response = await dio!.post(Endpoints.uploadFile, data: formData);
       return apiData(response);
     } on DioException catch (e) {
       if (e.response?.statusCode == 502) {
@@ -367,8 +380,7 @@ class ApiHitter {
         'file': multipartFile,
       });
 
-      final response =
-          await dio!.post(Endpoints.uploadFile, data: formData);
+      final response = await dio!.post(Endpoints.uploadFile, data: formData);
       return apiData(response);
     } on DioException catch (e) {
       return exception(e);
@@ -386,7 +398,6 @@ class ApiHitter {
       );
     }
   }
-
 }
 
 class _AccessTokenInterceptor extends Interceptor {
@@ -402,10 +413,7 @@ class _AccessTokenInterceptor extends Interceptor {
   }
 
   @override
-  void onResponse(
-    Response response,
-    ResponseInterceptorHandler handler,
-  ) {
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
     if (response.data is Map<String, dynamic> &&
         (response.data as Map<String, dynamic>).containsKey('message')) {
       // Success message handling can be added here if needed
@@ -414,10 +422,7 @@ class _AccessTokenInterceptor extends Interceptor {
   }
 
   @override
-  void onError(
-    DioException exception,
-    ErrorInterceptorHandler handler,
-  ) {
+  void onError(DioException exception, ErrorInterceptorHandler handler) {
     final response = exception.response;
     if (response != null) {
       if (response.data is Map<String, dynamic> &&

@@ -21,11 +21,21 @@ class TransactionSuccessfulScreen extends StatefulWidget {
     required this.amount,
     this.paymentMethod = 'Standard Charted Card',
     this.cardNumber = '1234 5678 2345',
+    this.trainerName,
+    this.bookingId,
+    this.sessionDate,
+    this.sessionTime,
+    this.sessionStartTime,
   });
 
   final double amount;
   final String paymentMethod;
   final String cardNumber;
+  final String? trainerName;
+  final String? bookingId;
+  final String? sessionDate;
+  final String? sessionTime;
+  final DateTime? sessionStartTime;
 
   @override
   State<TransactionSuccessfulScreen> createState() =>
@@ -99,10 +109,17 @@ class _TransactionSuccessfulScreenState
                     ),
                   ),
                 ),
-                _GoToHomeButton(),
+                _GoToHomeButton(
+                  bookingId: widget.bookingId,
+                  trainerName: widget.trainerName,
+                  sessionDate: widget.sessionDate,
+                  sessionTime: widget.sessionTime,
+                  sessionStartTime: widget.sessionStartTime,
+                ),
               ],
             ),
-            // Confetti overlay - multiple emitters for scattered effect
+            // Confetti overlay - multiple emitters...
+            // (omitted for brevity, assume original layout is fine)
             Align(
               alignment: Alignment.topCenter,
               child: ConfettiWidget(
@@ -130,7 +147,7 @@ class _TransactionSuccessfulScreenState
                 numberOfParticles: 50,
                 gravity: 0.2,
                 shouldLoop: false,
-              //  maximumSize: Size(10.w, 10.h),
+                //  maximumSize: Size(10.w, 10.h),
               ),
             ),
             // Additional confetti from right
@@ -145,10 +162,6 @@ class _TransactionSuccessfulScreenState
                 numberOfParticles: 50,
                 gravity: 0.2,
                 shouldLoop: false,
-                // maximumSize: Size(10.w, 10.h),
-                // colors: const [
-                  
-                // ],
               ),
             ),
           ],
@@ -195,16 +208,12 @@ class _SessionBookedSection extends StatelessWidget {
       children: [
         Text(
           'Session Booked',
-          style: AppTextStyle.text16SemiBold.copyWith(
-            color: AppColors.grey400,
-          ),
+          style: AppTextStyle.text16SemiBold.copyWith(color: AppColors.grey400),
         ),
         SizedBox(height: AppSpacing.sm),
         Text(
           '\$${amount.toStringAsFixed(2)}',
-          style: AppTextStyle.text24Bold.copyWith(
-            color: AppColors.textPrimary,
-          ),
+          style: AppTextStyle.text24Bold.copyWith(color: AppColors.textPrimary),
         ),
         SizedBox(height: AppSpacing.lg),
         CustomPaint(
@@ -228,11 +237,7 @@ class _DashedLinePainter extends CustomPainter {
     double startX = 0;
 
     while (startX < size.width) {
-      canvas.drawLine(
-        Offset(startX, 0),
-        Offset(startX + dashWidth, 0),
-        paint,
-      );
+      canvas.drawLine(Offset(startX, 0), Offset(startX + dashWidth, 0), paint);
       startX += dashWidth + dashSpace;
     }
   }
@@ -257,9 +262,7 @@ class _TransactionMethodSection extends StatelessWidget {
       children: [
         Text(
           'Transaction Method',
-          style: AppTextStyle.text16Regular.copyWith(
-            color: AppColors.grey400,
-          ),
+          style: AppTextStyle.text16Regular.copyWith(color: AppColors.grey400),
         ),
         SizedBox(height: AppSpacing.md),
         Container(
@@ -313,6 +316,19 @@ class _TransactionMethodSection extends StatelessWidget {
 }
 
 class _GoToHomeButton extends StatelessWidget {
+  const _GoToHomeButton({
+    this.trainerName,
+    this.sessionDate,
+    this.sessionTime,
+    this.sessionStartTime,
+    this.bookingId,
+  });
+  final String? bookingId;
+  final String? trainerName;
+  final String? sessionDate;
+  final String? sessionTime;
+  final DateTime? sessionStartTime;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -347,29 +363,42 @@ class _GoToHomeButton extends StatelessWidget {
         onPressed: () {
           // Navigate to home/dashboard
           context.go('/dashboard/home');
-          
-          // Schedule session popup to show after 2 seconds
-          final sessionPopupProvider = Provider.of<SessionPopupProvider>(
-            context,
-            listen: false,
-          );
-          
-          sessionPopupProvider.schedulePopup(
-            SessionPopupData(
-              trainerName: 'James Gustavsson',
-              trainerImageUrl: null, // You can add actual image URL here
-              sessionDate: 'Monday Jun 9, 2025',
-              sessionTime: '7:00 - 7:30 am',
-              onJoinSession: () {
-                // TODO: Handle join session action
-                // You can navigate to session screen or start video call
-              },
-            ),
-            delay: const Duration(seconds: 5),
-          );
+
+          // if (trainerName != null &&
+          //     sessionDate != null &&
+          //     sessionTime != null) {
+          //   // Schedule session popup
+          //   final sessionPopupProvider = Provider.of<SessionPopupProvider>(
+          //     context,
+          //     listen: false,
+          //   );
+
+          //   final data = SessionPopupData(
+          //     bookingId: bookingId!,
+          //     trainerName: trainerName!,
+          //     trainerImageUrl: null,
+          //     sessionDate: sessionDate!,
+          //     sessionTime: sessionTime!,
+          //     onJoinSession: () {
+          //       // TODO: Handle join session action
+          //     },
+          //   );
+          //   sessionPopupProvider.schedulePopupAt(
+          //     data,
+          //     DateTime.now().add(const Duration(seconds: 5)),
+          //   );
+
+          //   // sessionPopupProvider.schedulePopupAt(data, sessionStartTime!);
+          //   // if (sessionStartTime != null) {
+          //   // } else {
+          //   //   sessionPopupProvider.schedulePopup(
+          //   //     data,
+          //   //     delay: const Duration(seconds: 5),
+          //   //   );
+          //   // }
+          // }
         },
       ),
     );
   }
 }
-

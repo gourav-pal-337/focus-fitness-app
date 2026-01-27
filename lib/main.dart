@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_fitness/core/provider/session_popup_provider.dart';
@@ -8,6 +9,8 @@ import 'package:focus_fitness/features/authentication/provider/auth_provider.dar
 import 'package:focus_fitness/features/authentication/provider/forgot_password_provider.dart';
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
 import 'package:focus_fitness/features/trainer/provider/linked_trainer_provider.dart';
+import 'package:focus_fitness/features/trainer/provider/trainer_profile_provider.dart';
+import 'package:focus_fitness/firebase_options.dart';
 import 'package:provider/provider.dart';
 
 import 'app.dart';
@@ -17,6 +20,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await LocalStorageService.init();
   InternetConnectivityService.init();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const AppBootstrap());
 }
 
@@ -47,6 +51,9 @@ class AppBootstrap extends StatelessWidget {
             ),
             ChangeNotifierProvider<ClientProfileProvider>(
               create: (_) => ClientProfileProvider(),
+            ),
+            ChangeNotifierProvider<TrainerProfileProvider>(
+              create: (_) => TrainerProfileProvider(),
             ),
           ],
           child: const App(),

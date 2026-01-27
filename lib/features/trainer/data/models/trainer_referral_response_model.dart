@@ -43,8 +43,10 @@ class TrainerSearchResponseModel {
       message: json['message'] as String? ?? '',
       trainers: json['trainers'] != null
           ? (json['trainers'] as List)
-              .map((item) => TrainerInfo.fromJson(item as Map<String, dynamic>))
-              .toList()
+                .map(
+                  (item) => TrainerInfo.fromJson(item as Map<String, dynamic>),
+                )
+                .toList()
           : [],
       count: json['count'] as int? ?? 0,
     );
@@ -65,6 +67,7 @@ class TrainerInfo {
     this.sessionTypes,
     this.trainingPhilosophy,
     this.documents,
+    this.whatsappNumber,
   });
 
   final String id;
@@ -78,6 +81,7 @@ class TrainerInfo {
   final List<String>? sessionTypes;
   final String? trainingPhilosophy;
   final List<TrainerDocument>? documents;
+  final String? whatsappNumber;
 
   factory TrainerInfo.fromJson(Map<String, dynamic> json) {
     return TrainerInfo(
@@ -97,13 +101,16 @@ class TrainerInfo {
       trainingPhilosophy: json['trainingPhilosophy'] as String?,
       documents: json['documents'] != null
           ? (json['documents'] as List)
-              .map((item) => TrainerDocument.fromJson(item as Map<String, dynamic>))
-              .toList()
+                .map(
+                  (item) =>
+                      TrainerDocument.fromJson(item as Map<String, dynamic>),
+                )
+                .toList()
           : null,
+      whatsappNumber: json['waNumber'] as String?,
     );
   }
 
   /// Get display name (preferred name or full name)
   String get displayName => preferredName ?? fullName ?? 'Trainer';
 }
-

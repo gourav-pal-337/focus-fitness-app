@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/features/home/widgets/trainer_summary_section.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -38,84 +39,97 @@ class TrainerProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => TrainerProfileProvider()..fetchTrainerProfile(trainerId),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: CustomScrollView(
-          slivers: [
-            SliverList(
-              delegate: SliverChildListDelegate([
-                TrainerProfileHeader(
-                  trainerImageUrl: trainerImageUrl,
-                ),
-                SizedBox(height: 50.h),
-                Consumer<TrainerProfileProvider>(
-                  builder: (context, provider, _) {
-                    if (provider.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    
-                    if (provider.error != null) {
-                      return Center(
-                        child: Text(
-                          provider.error!,
-                          style: AppTextStyle.text14Regular.copyWith(
-                            color: AppColors.grey400,
-                          ),
-                        ),
-                      );
-                    }
-                    
-                    final trainer = provider.trainer;
-                    if (trainer == null) {
-                      return TrainerInfoSection(
-                        name: trainerName,
-                        specialty: trainerSpecialty,
-                        rating: trainerRating,
-                        imageUrl: trainerImageUrl,
-                      );
-                    }
-                    
-                    return TrainerInfoSection(
-                      name: trainer.fullName ?? trainerName,
-                      specialty: trainerSpecialty,
-                      rating: trainer.avgRating ?? trainerRating,
-                      imageUrl: trainer.profilePhoto ?? trainerImageUrl,
-                    );
-                  },
-                ),
-                SizedBox(height: AppSpacing.xl),
-                Consumer<TrainerProfileProvider>(
-                  builder: (context, provider, _) {
-                    return AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder: (Widget child, Animation<double> animation) {
-                        return SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(1.0, 0.0),
-                            end: Offset.zero,
-                          ).animate(CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeInOut,
-                          )),
-                          child: child,
-                        );
-                      },
-                      child: provider.showBookingConfirmation
-                          ? _BookingContent(
-                              key: const ValueKey('booking'),
-                            )
-                          : _ProfileContent(
-                              key: const ValueKey('profile'),
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          // print('didPop: $didPop, result: $result');
+          // final trainerProv = Provider.of<TrainerProfileProvider>(
+          //   context,
+          //   listen: false,
+          // );
+          // if (trainerProv.showBookingConfirmation) {
+          //   trainerProv.hideBookingView();
+          //   return;
+          // }
+          // context.pop(result);
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          body: CustomScrollView(
+            slivers: [
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  TrainerProfileHeader(trainerImageUrl: trainerImageUrl),
+                  SizedBox(height: 50.h),
+                  Consumer<TrainerProfileProvider>(
+                    builder: (context, provider, _) {
+                      if (provider.isLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (provider.error != null) {
+                        return Center(
+                          child: Text(
+                            provider.error!,
+                            style: AppTextStyle.text14Regular.copyWith(
+                              color: AppColors.grey400,
                             ),
-                    );
-                  },
-                ),
-                SizedBox(height: AppSpacing.xl),
-              ]),
-            ),
-          ],
+                          ),
+                        );
+                      }
+
+                      final trainer = provider.trainer;
+                      if (trainer == null) {
+                        return TrainerInfoSection(
+                          name: trainerName,
+                          specialty: trainerSpecialty,
+                          rating: trainerRating,
+                          imageUrl: trainerImageUrl,
+                        );
+                      }
+
+                      return TrainerInfoSection(
+                        name: trainer.fullName ?? trainerName,
+                        specialty: trainerSpecialty,
+                        rating: trainer.avgRating ?? trainerRating,
+                        imageUrl: trainer.profilePhoto ?? trainerImageUrl,
+                      );
+                    },
+                  ),
+                  SizedBox(height: AppSpacing.xl),
+                  Consumer<TrainerProfileProvider>(
+                    builder: (context, provider, _) {
+                      return AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        transitionBuilder:
+                            (Widget child, Animation<double> animation) {
+                              return SlideTransition(
+                                position:
+                                    Tween<Offset>(
+                                      begin: const Offset(1.0, 0.0),
+                                      end: Offset.zero,
+                                    ).animate(
+                                      CurvedAnimation(
+                                        parent: animation,
+                                        curve: Curves.easeInOut,
+                                      ),
+                                    ),
+                                child: child,
+                              );
+                            },
+                        child: provider.showBookingConfirmation
+                            ? _BookingContent(key: const ValueKey('booking'))
+                            : _ProfileContent(key: const ValueKey('profile')),
+                      );
+                    },
+                  ),
+                  SizedBox(height: AppSpacing.xl),
+                ]),
+              ),
+            ],
+          ),
+          bottomNavigationBar: _BookSessionButton(),
         ),
-        bottomNavigationBar: _BookSessionButton(),
       ),
     );
   }
@@ -131,8 +145,11 @@ class _ProfileContent extends StatelessWidget {
         const TrainerStatsRow(),
         SizedBox(height: AppSpacing.xl),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding.left).copyWith(right: 10),
-          child: const KnowMoreSection(),
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenPadding.left,
+          ).copyWith(right: 10),
+          child: const TrainerSummarySection(),
+          // const KnowMoreSection(),
         ),
         SizedBox(height: AppSpacing.xl),
         const DateSelector(),
@@ -167,12 +184,11 @@ class _SessionDateTimeDisplay extends StatelessWidget {
     final selectedDate = provider.selectedDate;
     final selectedTimeSlot = provider.selectedTimeSlot;
 
-    final formattedDate = selectedDate != null ? _formatDate(context, selectedDate) : null;
-    
-    return DateTimeBar(
-      date: formattedDate,
-      time: selectedTimeSlot,
-    );
+    final formattedDate = selectedDate != null
+        ? _formatDate(context, selectedDate)
+        : null;
+
+    return DateTimeBar(date: formattedDate, time: selectedTimeSlot);
   }
 
   String _formatDate(BuildContext context, String dateId) {
@@ -212,8 +228,8 @@ class _SessionTypeSelector extends StatelessWidget {
                     isSelected: sessionType == SessionType.online,
                     onTap: () {
                       context.read<TrainerProfileProvider>().setSessionType(
-                            SessionType.online,
-                          );
+                        SessionType.online,
+                      );
                     },
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(12.r),
@@ -227,8 +243,8 @@ class _SessionTypeSelector extends StatelessWidget {
                     isSelected: sessionType == SessionType.physical,
                     onTap: () {
                       context.read<TrainerProfileProvider>().setSessionType(
-                            SessionType.physical,
-                          );
+                        SessionType.physical,
+                      );
                     },
                     borderRadius: BorderRadius.only(
                       topRight: Radius.circular(12.r),
@@ -286,7 +302,7 @@ class _PaymentInfoSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<TrainerProfileProvider>();
     final sessionPlan = provider.selectedSessionPlan;
-    
+
     final price = sessionPlan?.feeAmount ?? 100.00;
     const tax = 0.00;
     final total = price + tax;
@@ -303,15 +319,9 @@ class _PaymentInfoSection extends StatelessWidget {
             ),
           ),
           SizedBox(height: AppSpacing.xs),
-          _PaymentRow(
-            label: 'Price',
-            value: '\$${price.toStringAsFixed(2)}',
-          ),
+          _PaymentRow(label: 'Price', value: '\$${price.toStringAsFixed(2)}'),
           SizedBox(height: AppSpacing.xs),
-          _PaymentRow(
-            label: 'Tax',
-            value: '\$${tax.toStringAsFixed(2)}',
-          ),
+          _PaymentRow(label: 'Tax', value: '\$${tax.toStringAsFixed(2)}'),
           SizedBox(height: AppSpacing.xs),
           Text(
             'Total',
@@ -331,10 +341,7 @@ class _PaymentInfoSection extends StatelessWidget {
 }
 
 class _PaymentRow extends StatelessWidget {
-  const _PaymentRow({
-    required this.label,
-    required this.value,
-  });
+  const _PaymentRow({required this.label, required this.value});
 
   final String label;
   final String value;
@@ -346,9 +353,7 @@ class _PaymentRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: AppTextStyle.text16Regular.copyWith(
-            color: AppColors.grey400,
-          ),
+          style: AppTextStyle.text16Regular.copyWith(color: AppColors.grey400),
         ),
         Text(
           value,
@@ -402,50 +407,63 @@ class _BookSessionButton extends StatelessWidget {
         borderRadius: 12.r,
         isEnabled: (showBookingConfirmation || canBook) && !provider.isBooking,
         onPressed: showBookingConfirmation
-            ? () {
-                // Navigate to payment method screen with booking data
+            ? () async {
                 final provider = context.read<TrainerProfileProvider>();
-                final sessionPlan = provider.selectedSessionPlan;
-                final totalAmount = sessionPlan?.feeAmount ?? 100.00;
-                final trainer = provider.trainer;
-                final selectedDate = provider.selectedDate;
-                final selectedTimeSlot = provider.selectedTimeSlot;
-                final sessionType = provider.sessionType;
-                
-                if (trainer != null && sessionPlan != null && selectedDate != null && selectedTimeSlot != null) {
-                  // Convert available dates to JSON string for passing
-                  final availableDatesJson = provider.availableDates.map((d) => {
-                    'dateId': d.dateId,
-                    'day': d.day,
-                    'sessionPlanId': d.sessionPlanId,
-                  }).toList();
-                  
-                  // Encode the data as query parameters
-                  final bookingData = {
-                    'amount': totalAmount.toStringAsFixed(2),
-                    'trainerId': trainer.id,
-                    'sessionPlanId': sessionPlan.id,
-                    'dateId': selectedDate,
-                    'timeSlot': selectedTimeSlot,
-                    'sessionType': sessionType == SessionType.online ? 'online' : 'physical',
-                    'durationMinutes': sessionPlan.durationMinutes.toString(),
-                    'availableDates': Uri.encodeComponent(availableDatesJson.toString()),
-                  };
-                  
-                  final queryString = bookingData.entries
-                      .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
-                      .join('&');
-                  
-                  context.push('/payment-method?$queryString');
+                final success = await provider.bookSession();
+
+                if (success && context.mounted) {
+                  final sessionPlan = provider.selectedSessionPlan;
+                  final totalAmount = sessionPlan?.feeAmount ?? 100.00;
+                  final trainerId = provider.trainer?.id;
+                  const paymentMethod = 'Apple Pay';
+                  const cardNumber = 'email@website.com';
+
+                  // Calculate session details
+                  final trainerName =
+                      provider.trainer?.fullName ??
+                      provider.trainer?.fullName ??
+                      'Trainer';
+                  final selectedDateId = provider.selectedDate!;
+                  final selectedTimeSlot = provider.selectedTimeSlot!;
+
+                  final sessionDate = DateTimeUtils.formatDateId(
+                    selectedDateId,
+                    provider.availableDates,
+                  );
+
+                  // Calculate ISO start time
+                  final timestamps = DateTimeUtils.convertToIsoTimestamps(
+                    dateId: selectedDateId,
+                    timeSlot: selectedTimeSlot,
+                    availableDates: provider.availableDates,
+                    durationMinutes: sessionPlan?.durationMinutes ?? 60,
+                  );
+
+                  final sessionStartTime = timestamps['startTime']!;
+
+                  context.push(
+                    '/transaction-successful?amount=${totalAmount.toStringAsFixed(2)}&paymentMethod=${Uri.encodeComponent(paymentMethod)}&cardNumber=${Uri.encodeComponent(cardNumber)}&trainerName=${Uri.encodeComponent(trainerName)}&sessionDate=${Uri.encodeComponent(sessionDate)}&sessionTime=${Uri.encodeComponent(selectedTimeSlot)}&sessionStartTime=${Uri.encodeComponent(sessionStartTime)}&bookingId=$trainerId}',
+                  );
+                } else if (context.mounted && provider.bookingError != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        provider.bookingError!,
+                        style: AppTextStyle.text14Regular.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
                 }
               }
             : canBook
-                ? () {
-                    context.read<TrainerProfileProvider>().showBookingView();
-                  }
-                : null,
+            ? () {
+                context.read<TrainerProfileProvider>().showBookingView();
+              }
+            : null,
       ),
     );
   }
 }
-

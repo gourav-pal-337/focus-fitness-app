@@ -6,12 +6,7 @@ import '../widgets/session_card.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
 
-enum SessionTab {
-  all,
-  upcoming,
-  past,
-  cancelled,
-}
+enum SessionTab { all, upcoming, past, cancelled }
 
 class SessionHistoryProvider extends ChangeNotifier {
   final BookingRepository _repository = BookingRepository();
@@ -28,38 +23,21 @@ class SessionHistoryProvider extends ChangeNotifier {
 
   /// Get filtered bookings based on selected tab
   List<BookingModel> get filteredBookings {
-    final now = DateTime.now();
-    switch (_selectedTab) {
-      case SessionTab.all:
-        return _allBookings;
-      case SessionTab.upcoming:
-        return _allBookings.where((booking) {
-          final startTime = DateTime.parse(booking.startTime);
-          return startTime.isAfter(now) &&
-              booking.status != 'cancelled';
-        }).toList();
-      case SessionTab.past:
-        return _allBookings.where((booking) {
-          final startTime = DateTime.parse(booking.startTime);
-          return startTime.isBefore(now) &&
-              booking.status != 'cancelled';
-        }).toList();
-      case SessionTab.cancelled:
-        return _allBookings.where((booking) {
-          return booking.status == 'cancelled';
-        }).toList();
-    }
+    return _allBookings;
   }
 
   /// Get SessionData list for UI
   List<SessionData> get sessions {
-    return filteredBookings.map((booking) => _mapBookingToSessionData(booking)).toList();
+    return filteredBookings
+        .map((booking) => _mapBookingToSessionData(booking))
+        .toList();
   }
 
   void selectTab(SessionTab tab) {
+    if (_selectedTab == tab) return;
     _selectedTab = tab;
     notifyListeners();
-    // No need to fetch again - we filter client-side
+    fetchBookings();
   }
 
   /// Fetch bookings from API
@@ -71,19 +49,22 @@ class SessionHistoryProvider extends ChangeNotifier {
     try {
       // Map tab to API status filter
       String? statusFilter;
-      if (_selectedTab == SessionTab.cancelled) {
-        statusFilter = 'cancelled';
-      } else if (_selectedTab == SessionTab.upcoming) {
-        // For upcoming, we'll fetch all and filter client-side
-        statusFilter = null;
-      } else if (_selectedTab == SessionTab.past) {
-        // For past, we'll fetch all and filter client-side
-        statusFilter = null;
+      switch (_selectedTab) {
+        case SessionTab.upcoming:
+          statusFilter = 'confirmed';
+          break;
+        case SessionTab.past:
+          statusFilter = 'completed';
+          break;
+        case SessionTab.cancelled:
+          statusFilter = 'cancelled';
+          break;
+        case SessionTab.all:
+          statusFilter = null;
+          break;
       }
 
-      final result = await _repository.getClientBookings(
-        status: statusFilter,
-      );
+      final result = await _repository.getClientBookings(status: statusFilter);
 
       await result.when(
         success: (response) async {
@@ -109,30 +90,44 @@ class SessionHistoryProvider extends ChangeNotifier {
   SessionData _mapBookingToSessionData(BookingModel booking) {
     // Parse start time
     final startTime = DateTime.parse(booking.startTime);
-    
+
     // Format date
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
-    final dateStr = '${months[startTime.month - 1]} ${startTime.day}, ${startTime.year}';
+    final dateStr =
+        '${months[startTime.month - 1]} ${startTime.day}, ${startTime.year}';
 
     // Determine status
     SessionStatus status;
-    if (booking.status == 'cancelled') {
-      status = SessionStatus.cancelled;
-    } else {
-      final now = DateTime.now();
-      if (startTime.isAfter(now)) {
-        status = SessionStatus.upcoming;
-      } else {
+    switch (booking.status.toLowerCase()) {
+      case 'cancelled':
+        status = SessionStatus.cancelled;
+        break;
+      case 'completed':
         status = SessionStatus.completed;
-      }
+        break;
+      case 'confirmed':
+      case 'pending':
+      default:
+        status = SessionStatus.upcoming;
+        break;
     }
 
     // Get trainer name and image
     final trainerName = booking.trainer?.displayName ?? 'Trainer';
-    
+
     // Handle profile photo URL
     String trainerImageUrl = booking.trainer?.profilePhoto ?? '';
     if (trainerImageUrl.isNotEmpty && trainerImageUrl.startsWith('/')) {
@@ -163,4 +158,3 @@ class SessionHistoryProvider extends ChangeNotifier {
     await fetchBookings();
   }
 }
-

@@ -609,41 +609,64 @@ class _ActionButton extends StatelessWidget {
   Widget _buildButton(BuildContext context) {
     switch (session.status) {
       case SessionStatus.upcoming:
-        return CustomButton(
-          text: 'Cancel Session',
-          type: ButtonType.filled,
-          onPressed: () {
-            CancelSessionDialog.show(
-              context: context,
-              trainerName: session.trainerName,
-              onConfirm: () {
-                // Show success dialog after cancellation
-                SessionCancelledDialog.show(
+        return Consumer<SessionDetailsProvider>(
+          builder: (context, provider, _) {
+            final isCancelling = provider.isCancelling;
+            return CustomButton(
+              text: isCancelling ? 'Canceling...' : 'Cancel Session',
+              type: ButtonType.filled,
+              isLoading: isCancelling,
+              onPressed: () {
+                CancelSessionDialog.show(
                   context: context,
-                  onOk: () {
-                    // TODO: Handle session cancellation completion
-                    context.pop();
+                  trainerName: session.trainerName,
+                  onConfirm: () async {
+                    if (session.bookingId != null) {
+                      if (context.mounted) {
+                        SessionCancelledDialog.show(
+                          context: context,
+                          onOk: () async {
+                            await provider.cancelSession(session.bookingId!);
+                            context
+                              ..pop() // Close dialog
+                              ..pop(); // Close screen
+                          },
+                        );
+                      }
+                    } else {
+                      context
+                          .pop(); // Close dialog if no booking ID (shouldn't happen)
+                    }
                   },
                 );
               },
+              width: double.infinity,
+              backgroundColor: AppColors.primary,
+              textColor: AppColors.background,
+              borderRadius: 12.r,
             );
           },
-          width: double.infinity,
-          backgroundColor: AppColors.primary,
-          textColor: AppColors.background,
-          borderRadius: 12.r,
         );
       case SessionStatus.completed:
         return Consumer<SessionDetailsProvider>(
           builder: (context, provider, _) {
             final hasFeedback = provider.hasFeedback;
+            final isSubmitting = provider.isSubmittingFeedback;
+
             return CustomButton(
               text: hasFeedback ? 'Submit Feedback' : 'Book Again',
               type: ButtonType.filled,
-              onPressed: () {
+              isLoading: isSubmitting,
+              onPressed: () async {
                 if (hasFeedback) {
-                  // Navigate to feedback success screen
-                  context.push(FeedbackSuccessRoute.path);
+                  if (session.bookingId != null) {
+                    final success = await provider.submitFeedback(
+                      session.bookingId!,
+                    );
+                    if (success && context.mounted) {
+                      context.push(FeedbackSuccessRoute.path);
+                    }
+                  }
                 } else {
                   // TODO: Handle book again
                   context.pop();

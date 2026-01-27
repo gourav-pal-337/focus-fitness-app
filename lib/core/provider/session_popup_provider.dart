@@ -33,24 +33,45 @@ class SessionPopupProvider extends ChangeNotifier {
   }
 
   /// Schedule popup to show after delay
-  void schedulePopup(SessionPopupData data, {Duration delay = const Duration(seconds: 2)}) {
+  void schedulePopup(
+    SessionPopupData data, {
+    Duration delay = const Duration(seconds: 2),
+  }) {
     Future.delayed(delay, () {
       showPopup(data);
     });
+  }
+
+  /// Schedule popup to show at a specific time
+  void schedulePopupAt(SessionPopupData data, DateTime scheduledTime) {
+    final now = DateTime.now();
+    final delay = scheduledTime.difference(now);
+
+    if (delay.isNegative) {
+      // If time has passed, show immediately (or maybe don't show? user didn't specify)
+      // letting it show immediately for now as it seems safer for "just missed" cases
+      showPopup(data);
+    } else {
+      schedulePopup(data, delay: delay);
+    }
   }
 }
 
 /// Data model for session popup
 class SessionPopupData {
   const SessionPopupData({
+    required this.trainerId,
+    required this.trainerContact,
     required this.trainerName,
     required this.trainerImageUrl,
     required this.sessionDate,
     required this.sessionTime,
+
     this.onJoinSession,
     this.onDismiss,
   });
-
+  final String trainerId;
+  final String trainerContact;
   final String trainerName;
   final String? trainerImageUrl;
   final String sessionDate;
@@ -58,4 +79,3 @@ class SessionPopupData {
   final VoidCallback? onJoinSession;
   final VoidCallback? onDismiss;
 }
-

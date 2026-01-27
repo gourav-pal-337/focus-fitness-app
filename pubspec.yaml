@@ -50,6 +50,7 @@ dependencies:
   hide_scroll_navbar: ^1.0.2
   url_launcher: ^6.2.5
   connectivity_plus: ^7.0.0
+  firebase_core: ^4.4.0
 
 dev_dependencies:
   flutter_test:
