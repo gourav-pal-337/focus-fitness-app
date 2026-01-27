@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.focusFitness</string>
+	<string>com.focusFitness.app</string>
 	<key>PROJECT_ID</key>
 	<string>focus-fitness-90f35</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:340118958004:ios:4acc07bec990dbe6c68ce1</string>
+	<string>1:340118958004:ios:463a822d5f8651b1c68ce1</string>
 </dict>
 </plist>

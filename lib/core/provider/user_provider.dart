@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../features/authentication/data/models/register_response_model.dart';
@@ -51,6 +52,37 @@ class UserProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       return false;
+    }
+  }
+
+  Future<String?> getFcmToken() async {
+    try {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        if (apnsToken == null) {
+          debugPrint("APNS Token NOT available, waiting...");
+          // Retry checking for APNs token
+          for (var i = 0; i < 10; i++) {
+            await Future.delayed(const Duration(seconds: 1));
+            apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+            if (apnsToken != null) break;
+          }
+        }
+
+        if (apnsToken == null) {
+          debugPrint(
+            "Unable to retrieve APNS token. FCM token retrieval aborted.",
+          );
+          return null;
+        }
+      }
+
+      final token = await FirebaseMessaging.instance.getToken();
+      debugPrint("FCM Token: $token");
+      return token;
+    } catch (e) {
+      debugPrint("Error getting FCM token: $e");
+      return null;
     }
   }
 

@@ -8,6 +8,7 @@ import 'package:focus_fitness/core/service/internet_connectivity_service.dart';
 import 'package:focus_fitness/features/authentication/provider/auth_provider.dart';
 import 'package:focus_fitness/features/authentication/provider/forgot_password_provider.dart';
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
+
 import 'package:focus_fitness/features/trainer/provider/linked_trainer_provider.dart';
 import 'package:focus_fitness/features/trainer/provider/trainer_profile_provider.dart';
 import 'package:focus_fitness/firebase_options.dart';
@@ -15,12 +16,51 @@ import 'package:provider/provider.dart';
 
 import 'app.dart';
 import 'features/sample/provider/sample_provider.dart';
+import 'core/service/notification_service.dart';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  debugPrint("Handling a background message: ${message.messageId}");
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await LocalStorageService.init();
   InternetConnectivityService.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Request permission
+  final messaging = FirebaseMessaging.instance;
+  await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
+  // Initialize Local Notifications
+  await NotificationService().init();
+
+  // Listen for foreground messages
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    debugPrint("Got a message whilst in the foreground!");
+    debugPrint("Message data: ${message.data}");
+
+    if (message.notification != null) {
+      debugPrint(
+        "Message also contained a notification: ${message.notification?.body} | title : ${message.notification?.title}",
+      );
+      NotificationService().showNotification(message);
+    }
+  });
+
   runApp(const AppBootstrap());
 }
 

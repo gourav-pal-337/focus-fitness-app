@@ -5,17 +5,14 @@ import '../data/services/profile_api_service.dart';
 import '../ui/edit_profile_details_screen.dart';
 
 /// Section types for edit profile screen
-enum EditProfileSection {
-  personalDetails,
-  fitnessGoals,
-}
+enum EditProfileSection { personalDetails, fitnessGoals }
 
 class EditProfileDetailsProvider extends ChangeNotifier {
   EditProfileDetailsProvider({
     required List<EditField> fields,
     required this.section,
-  })  : _fields = fields,
-        _apiService = ProfileApiService() {
+  }) : _fields = fields,
+       _apiService = ProfileApiService() {
     _values = fields.map((field) => field.value).toList();
   }
 
@@ -95,13 +92,24 @@ class EditProfileDetailsProvider extends ChangeNotifier {
       try {
         // Try parsing as ISO format first (YYYY-MM-DD)
         birthDate = DateTime.parse(dobStr);
-        dateOfBirth = '${birthDate.year.toString().padLeft(4, '0')}-${birthDate.month.toString().padLeft(2, '0')}-${birthDate.day.toString().padLeft(2, '0')}';
+        dateOfBirth =
+            '${birthDate.year.toString().padLeft(4, '0')}-${birthDate.month.toString().padLeft(2, '0')}-${birthDate.day.toString().padLeft(2, '0')}';
       } catch (e) {
         // If not ISO format, try parsing display format (e.g., "Jan 15, 1990")
         try {
           final months = {
-            'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-            'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+            'Jan': 1,
+            'Feb': 2,
+            'Mar': 3,
+            'Apr': 4,
+            'May': 5,
+            'Jun': 6,
+            'Jul': 7,
+            'Aug': 8,
+            'Sep': 9,
+            'Oct': 10,
+            'Nov': 11,
+            'Dec': 12,
           };
           final parts = dobStr.split(' ');
           if (parts.length == 3 && months.containsKey(parts[0])) {
@@ -109,7 +117,8 @@ class EditProfileDetailsProvider extends ChangeNotifier {
             final day = int.parse(parts[1].replaceAll(',', ''));
             final year = int.parse(parts[2]);
             birthDate = DateTime(year, month, day);
-            dateOfBirth = '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+            dateOfBirth =
+                '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
           } else {
             dateOfBirth = dobStr; // Use as-is if can't parse
           }
@@ -159,5 +168,3 @@ class EditProfileDetailsProvider extends ChangeNotifier {
     );
   }
 }
-
-

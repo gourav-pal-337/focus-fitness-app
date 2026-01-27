@@ -70,6 +70,6 @@ class DefaultFirebaseOptions {
     messagingSenderId: '340118958004',
     projectId: 'focus-fitness-90f35',
     storageBucket: 'focus-fitness-90f35.firebasestorage.app',
-    iosBundleId: 'com.example.focusFitness',
+    iosBundleId: 'com.focusFitness.app',
   );
 }

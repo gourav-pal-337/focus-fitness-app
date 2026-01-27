@@ -48,5 +48,10 @@
      <!-- Why is my app authenticating using face id? -->
 	<key>NSFaceIDUsageDescription</key>
     <string>We use Face ID to secure your account and provide a seamless login experience.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>remote-notification</string>
+	</array>
 </dict>
 </plist>
