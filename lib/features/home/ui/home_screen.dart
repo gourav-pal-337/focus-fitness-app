@@ -6,6 +6,7 @@ import 'package:focus_fitness/core/provider/session_popup_provider.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
 import 'package:focus_fitness/core/widgets/session_popup/session_popup_widget.dart';
 import 'package:focus_fitness/features/home/widgets/complete_profile_dialog.dart';
+import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
 import 'package:focus_fitness/features/profile/provider/edit_profile_details_provider.dart';
 import 'package:focus_fitness/features/trainer/provider/linked_trainer_provider.dart';
 import 'package:provider/provider.dart';
@@ -27,13 +28,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   void checkuserDetails() {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final user = userProvider.user;
-
+    // final userProvider = Provider.of<UserProvider>(context, listen: false);
+    // final user = userProvider.user;
+    final profileProvider = Provider.of<ClientProfileProvider>(
+      context,
+      listen: false,
+    );
+    profileProvider.fetchProfile();
+    final user = profileProvider.profile;
     if (user != null) {
       final isProfileIncomplete =
           (user.gender == null || user.gender!.isEmpty) ||
-          (user.dob == null || user.dob!.isEmpty);
+          (user.dateOfBirth == null || user.dateOfBirth!.isEmpty);
 
       if (isProfileIncomplete) {
         showDialog(

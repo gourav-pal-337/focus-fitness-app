@@ -16,6 +16,7 @@ class BookingModel {
     this.clientPhone,
     this.notes,
     this.trainerNotes,
+    this.remindersSent,
     this.rescheduleHistory,
     this.cancellationReason,
     this.paymentReference,
@@ -40,6 +41,7 @@ class BookingModel {
   final String status; // 'pending', 'confirmed', 'completed', 'cancelled'
   final String? notes;
   final String? trainerNotes;
+  final List<dynamic>? remindersSent;
   final List<dynamic>? rescheduleHistory;
   final String? cancellationReason;
   final String? paymentReference;
@@ -67,10 +69,13 @@ class BookingModel {
       status: json['status'] as String? ?? 'pending',
       notes: json['notes'] as String?,
       trainerNotes: json['trainerNotes'] as String?,
+      remindersSent: json['remindersSent'] as List<dynamic>?,
       rescheduleHistory: json['rescheduleHistory'] as List<dynamic>?,
       cancellationReason: json['cancellationReason'] as String?,
       paymentReference: json['paymentReference'] as String?,
-      rating: json['rating'] != null ? (json['rating'] as num).toDouble() : null,
+      rating: json['rating'] != null
+          ? (json['rating'] as num).toDouble()
+          : null,
       feedback: json['feedback'] as String?,
       ratedAt: json['ratedAt'] as String?,
       invoiceUrl: json['invoiceUrl'] as String?,
@@ -80,7 +85,9 @@ class BookingModel {
           ? TrainerInfo.fromJson(json['trainer'] as Map<String, dynamic>)
           : null,
       sessionPlan: json['sessionPlan'] != null
-          ? SessionPlanInfo.fromJson(json['sessionPlan'] as Map<String, dynamic>)
+          ? SessionPlanInfo.fromJson(
+              json['sessionPlan'] as Map<String, dynamic>,
+            )
           : null,
     );
   }
@@ -144,4 +151,3 @@ class SessionPlanInfo {
     );
   }
 }
-

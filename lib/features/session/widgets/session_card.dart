@@ -11,6 +11,8 @@ import 'session_status_badge.dart';
 import 'session_action_buttons.dart';
 import 'invoice_button.dart';
 
+import '../data/models/booking_model.dart';
+
 enum SessionStatus { cancelled, completed, upcoming }
 
 class SessionData {
@@ -22,6 +24,7 @@ class SessionData {
   final String date;
   final String? invoiceUrl;
   final String? bookingId;
+  final BookingModel? booking;
 
   SessionData({
     required this.trainerName,
@@ -32,6 +35,7 @@ class SessionData {
     required this.date,
     this.invoiceUrl,
     this.bookingId,
+    this.booking,
   });
 }
 
@@ -73,7 +77,8 @@ class SessionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        context.push(_getSessionDetailsPath());
+        context.push(SessionDetailsRoute.path, extra: session);
+        // context.push(_getSessionDetailsPath());
       },
       child: Container(
         padding: EdgeInsets.all(AppSpacing.md),
@@ -149,7 +154,8 @@ class SessionCard extends StatelessWidget {
               SizedBox(height: AppSpacing.lg),
               InvoiceButton(invoiceUrl: session.invoiceUrl!),
             ],
-            if (session.status == SessionStatus.completed) ...[
+            if (session.status == SessionStatus.completed &&
+                session.booking?.feedback == null) ...[
               SizedBox(height: AppSpacing.lg),
               SessionActionButtons(session: session),
             ],

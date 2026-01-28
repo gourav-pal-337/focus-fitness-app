@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/routes/app_router.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -7,10 +9,7 @@ import '../../../core/widgets/buttons/custom_bottom.dart';
 import 'session_card.dart';
 
 class SessionActionButtons extends StatelessWidget {
-  const SessionActionButtons({
-    super.key,
-    required this.session,
-  });
+  const SessionActionButtons({super.key, required this.session});
 
   final SessionData session;
 
@@ -21,6 +20,8 @@ class SessionActionButtons extends StatelessWidget {
       children: [
         _RateSessionButton(
           onTap: () {
+            context.push(SessionDetailsRoute.path, extra: session);
+
             // TODO: Handle rate session
           },
         ),
@@ -40,11 +41,7 @@ class _RateSessionButton extends StatelessWidget {
       text: 'Rate your Session',
       type: ButtonType.text,
       onPressed: onTap,
-      icon: Icon(
-        Icons.thumb_up,
-        size: 18.sp,
-        color: AppColors.textPrimary,
-      ),
+      icon: Icon(Icons.thumb_up, size: 18.sp, color: AppColors.textPrimary),
       iconPosition: IconPosition.left,
       textColor: AppColors.textPrimary,
       textStyle: AppTextStyle.text14Medium.copyWith(
@@ -53,4 +50,3 @@ class _RateSessionButton extends StatelessWidget {
     );
   }
 }
-

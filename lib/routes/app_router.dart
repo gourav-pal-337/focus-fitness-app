@@ -707,31 +707,32 @@ abstract class SessionDetailsRoute {
     path: path,
     name: name,
     builder: (context, state) {
-      final trainerName = state.uri.queryParameters['trainerName'] ?? '';
-      final trainerImageUrl =
-          state.uri.queryParameters['trainerImageUrl'] ?? '';
-      final sessionType = state.uri.queryParameters['sessionType'] ?? '';
-      final duration = state.uri.queryParameters['duration'] ?? '';
-      final statusParam = state.uri.queryParameters['status'] ?? 'completed';
-      final date = state.uri.queryParameters['date'] ?? '';
+      final session = state.extra as SessionData;
+      // final trainerName = state.uri.queryParameters['trainerName'] ?? '';
+      // final trainerImageUrl =
+      //     state.uri.queryParameters['trainerImageUrl'] ?? '';
+      // final sessionType = state.uri.queryParameters['sessionType'] ?? '';
+      // final duration = state.uri.queryParameters['duration'] ?? '';
+      // final statusParam = state.uri.queryParameters['status'] ?? 'completed';
+      // final date = state.uri.queryParameters['date'] ?? '';
 
-      final status = statusParam == 'completed'
-          ? SessionStatus.completed
-          : statusParam == 'cancelled'
-          ? SessionStatus.cancelled
-          : SessionStatus.upcoming;
+      // final status = statusParam == 'completed'
+      //     ? SessionStatus.completed
+      //     : statusParam == 'cancelled'
+      //     ? SessionStatus.cancelled
+      //     : SessionStatus.upcoming;
 
-      final bookingId = state.uri.queryParameters['bookingId'];
+      // final bookingId = state.uri.queryParameters['bookingId'];
 
-      final session = SessionData(
-        trainerName: trainerName,
-        trainerImageUrl: trainerImageUrl,
-        sessionType: sessionType,
-        duration: duration,
-        status: status,
-        date: date,
-        bookingId: bookingId,
-      );
+      // final session = SessionData(
+      //   trainerName: trainerName,
+      //   trainerImageUrl: trainerImageUrl,
+      //   sessionType: sessionType,
+      //   duration: duration,
+      //   status: status,
+      //   date: date,
+      //   bookingId: bookingId,
+      // );
 
       return SessionDetailsScreen(session: session);
     },

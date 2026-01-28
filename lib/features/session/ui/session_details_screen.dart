@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/features/trainer/provider/linked_trainer_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -16,7 +17,6 @@ import '../widgets/session_card.dart' show SessionData, SessionStatus;
 import '../widgets/session_status_badge.dart';
 import '../widgets/cancel_session_dialog.dart';
 import '../widgets/session_cancelled_dialog.dart';
-import '../data/models/session_summary_response_model.dart';
 
 class SessionDetailsScreen extends StatefulWidget {
   const SessionDetailsScreen({super.key, required this.session});
@@ -46,11 +46,11 @@ class _SessionDetailsScreenState extends State<SessionDetailsScreen> {
         final provider = SessionDetailsProvider();
 
         // Call fetch asynchronously only for completed sessions
-        if (widget.session.status == SessionStatus.completed &&
-            widget.session.bookingId != null &&
-            widget.session.bookingId!.isNotEmpty) {
-          provider.fetchSessionSummary(widget.session.bookingId);
-        }
+        // if (widget.session.status == SessionStatus.completed &&
+        //     widget.session.bookingId != null &&
+        //     widget.session.bookingId!.isNotEmpty) {
+        //   provider.fetchSessionSummary(widget.session.bookingId);
+        // }
         return provider;
       },
       child: Scaffold(
@@ -68,9 +68,11 @@ class _SessionDetailsScreenState extends State<SessionDetailsScreen> {
                       _TrainerInfoCard(session: widget.session),
                       SizedBox(height: AppSpacing.lg),
                       _DateTimeBar(session: widget.session),
-                      if (widget.session.status == SessionStatus.completed) ...[
+
+                      if (widget.session.status == SessionStatus.completed &&
+                          widget.session.booking?.feedback == null) ...[
                         SizedBox(height: AppSpacing.xl),
-                        _SessionSummarySection(),
+                        _SessionSummarySection(session: widget.session),
                         SizedBox(height: AppSpacing.xl),
                         _FeedbackSection(),
                         SizedBox(height: AppSpacing.xl),
@@ -133,7 +135,7 @@ class _TrainerInfoCard extends StatelessWidget {
                     color: AppColors.grey400,
                   ),
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: 8.h),
                 SessionStatusBadge(status: session.status),
               ],
             ),
@@ -154,14 +156,24 @@ class _DateTimeBar extends StatelessWidget {
     // Parse date to get day of week - for now using mock data
     // In real app, parse the date string to get day of week
     return DateTimeBar(
-      date: 'Monday Jun 9, 2025',
-      time: '7:00 - 7:30 am',
+      date: session.date,
+      time: gettime(session),
       margin: EdgeInsets.zero, // No margin since parent already has padding
     );
   }
 }
 
+String gettime(SessionData session) {
+  DateTime startTime = DateTime.parse(session.booking!.startTime);
+  DateTime endTime = DateTime.parse(session.booking!.endTime);
+  return "${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')} - ${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}";
+}
+
 class _SessionSummarySection extends StatelessWidget {
+  const _SessionSummarySection({required this.session});
+
+  final SessionData session;
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<SessionDetailsProvider>();
@@ -216,228 +228,27 @@ class _SessionSummarySection extends StatelessWidget {
           ),
         ),
         SizedBox(height: AppSpacing.md),
-        // Performance Metrics
-        if (summary.performance != null || summary.weight != null) ...[
-          _PerformanceMetricsCard(summary: summary),
-          SizedBox(height: AppSpacing.md),
-        ],
-        // Exercises
-        if (summary.exercises != null && summary.exercises!.isNotEmpty) ...[
-          Text(
-            'Exercises',
-            style: AppTextStyle.text14SemiBold.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: AppSpacing.sm),
-          ...summary.exercises!.map(
-            (exercise) => _ExerciseCard(exercise: exercise),
-          ),
-          SizedBox(height: AppSpacing.md),
-        ],
+
         // Trainer Notes
-        if (summary.trainerNotes != null &&
-            summary.trainerNotes!.isNotEmpty) ...[
+        if (session.booking?.trainerNotes != null &&
+            session.booking!.trainerNotes!.isNotEmpty) ...[
           _NotesCard(
             title: 'Trainer Notes',
-            notes: summary.trainerNotes!,
+            notes: session.booking!.trainerNotes!,
             icon: Icons.person_outline,
           ),
           SizedBox(height: AppSpacing.md),
         ],
         // Client Notes
-        if (summary.clientNotes != null && summary.clientNotes!.isNotEmpty) ...[
+        if (session.booking?.notes != null &&
+            session.booking!.notes!.isNotEmpty) ...[
           _NotesCard(
             title: 'Your Notes',
-            notes: summary.clientNotes!,
+            notes: session.booking!.notes!,
             icon: Icons.note_outlined,
           ),
         ],
       ],
-    );
-  }
-}
-
-class _PerformanceMetricsCard extends StatelessWidget {
-  const _PerformanceMetricsCard({required this.summary});
-
-  final SessionSummary summary;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: AppRadius.medium,
-        border: Border.all(color: AppColors.grey200, width: 1),
-      ),
-      child: Row(
-        children: [
-          if (summary.weight != null) ...[
-            Expanded(
-              child: _MetricItem(
-                label: 'Weight',
-                value: '${summary.weight!.toStringAsFixed(1)} kg',
-                icon: Icons.monitor_weight_outlined,
-              ),
-            ),
-            if (summary.performance != null) ...[
-              SizedBox(width: AppSpacing.md),
-              Container(width: 1, height: 40.h, color: AppColors.grey200),
-              SizedBox(width: AppSpacing.md),
-            ],
-          ],
-          if (summary.performance != null) ...[
-            if (summary.performance!.sets != null)
-              Expanded(
-                child: _MetricItem(
-                  label: 'Sets',
-                  value: '${summary.performance!.sets}',
-                  icon: Icons.repeat_outlined,
-                ),
-              ),
-            if (summary.performance!.reps != null) ...[
-              SizedBox(width: AppSpacing.md),
-              Container(width: 1, height: 40.h, color: AppColors.grey200),
-              SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _MetricItem(
-                  label: 'Reps',
-                  value: '${summary.performance!.reps}',
-                  icon: Icons.fitness_center_outlined,
-                ),
-              ),
-            ],
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _MetricItem extends StatelessWidget {
-  const _MetricItem({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-
-  final String label;
-  final String value;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Icon(icon, size: 24.sp, color: AppColors.primary),
-        SizedBox(height: AppSpacing.xs),
-        Text(
-          value,
-          style: AppTextStyle.text16SemiBold.copyWith(
-            color: AppColors.textPrimary,
-          ),
-        ),
-        SizedBox(height: 2.h),
-        Text(
-          label,
-          style: AppTextStyle.text12Regular.copyWith(color: AppColors.grey400),
-        ),
-      ],
-    );
-  }
-}
-
-class _ExerciseCard extends StatelessWidget {
-  const _ExerciseCard({required this.exercise});
-
-  final ExerciseSummary exercise;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: AppRadius.medium,
-        border: Border.all(color: AppColors.grey200, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            exercise.name,
-            style: AppTextStyle.text14SemiBold.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-          if (exercise.sets != null ||
-              exercise.reps != null ||
-              exercise.weight != null ||
-              exercise.duration != null) ...[
-            SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.xs,
-              children: [
-                if (exercise.sets != null)
-                  _ExerciseDetailChip(label: 'Sets', value: '${exercise.sets}'),
-                if (exercise.reps != null)
-                  _ExerciseDetailChip(label: 'Reps', value: '${exercise.reps}'),
-                if (exercise.weight != null)
-                  _ExerciseDetailChip(
-                    label: 'Weight',
-                    value: '${exercise.weight!.toStringAsFixed(1)} kg',
-                  ),
-                if (exercise.duration != null)
-                  _ExerciseDetailChip(
-                    label: 'Duration',
-                    value:
-                        '${(exercise.duration! / 60).toStringAsFixed(0)} min',
-                  ),
-              ],
-            ),
-          ],
-          if (exercise.notes != null && exercise.notes!.isNotEmpty) ...[
-            SizedBox(height: AppSpacing.sm),
-            Text(
-              exercise.notes!,
-              style: AppTextStyle.text12Regular.copyWith(
-                color: AppColors.grey400,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _ExerciseDetailChip extends StatelessWidget {
-  const _ExerciseDetailChip({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.grey200.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(4.r),
-      ),
-      child: Text(
-        '$label: $value',
-        style: AppTextStyle.text12Regular.copyWith(
-          color: AppColors.textPrimary,
-        ),
-      ),
     );
   }
 }
@@ -588,6 +399,24 @@ class _ActionButton extends StatelessWidget {
 
   final SessionData session;
 
+  void bookAgain(BuildContext context) {
+    debugPrint(session.booking?.trainer?.id);
+    final trainerProv = context.read<LinkedTrainerProvider>();
+    if (session.booking?.trainer?.id != trainerProv?.trainer?.id) {
+    } else {
+      context.push(
+        TrainerProfileRoute.path.replaceAll(
+          ':trainerId',
+          session.booking?.trainer?.id ?? '',
+        ),
+      );
+      debugPrint('same trainer');
+    }
+    // trainerProv.setTrainer(session.booking?.trainer?.id);
+    // TODO: Handle book again
+    // context.pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -668,8 +497,7 @@ class _ActionButton extends StatelessWidget {
                     }
                   }
                 } else {
-                  // TODO: Handle book again
-                  context.pop();
+                  bookAgain(context);
                 }
               },
               width: double.infinity,
@@ -684,8 +512,7 @@ class _ActionButton extends StatelessWidget {
           text: 'Book Again',
           type: ButtonType.filled,
           onPressed: () {
-            // TODO: Handle book again
-            context.pop();
+            bookAgain(context);
           },
           width: double.infinity,
           backgroundColor: AppColors.primary,

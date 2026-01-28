@@ -150,6 +150,7 @@ class SessionHistoryProvider extends ChangeNotifier {
       date: dateStr,
       invoiceUrl: booking.invoiceUrl,
       bookingId: booking.id,
+      booking: booking,
     );
   }
 
