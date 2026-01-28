@@ -22,7 +22,8 @@ class ProfileApiService {
       } else {
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {
-          final errorMessage = responseData['error'] as String? ??
+          final errorMessage =
+              responseData['error'] as String? ??
               responseData['message'] as String? ??
               response.msg;
 
@@ -63,7 +64,8 @@ class ProfileApiService {
       } else {
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {
-          final errorMessage = responseData['error'] as String? ??
+          final errorMessage =
+              responseData['error'] as String? ??
               responseData['message'] as String? ??
               response.msg;
 
@@ -73,6 +75,32 @@ class ProfileApiService {
           );
         }
 
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Delete client account
+  Future<bool> deleteAccount({required String reason}) async {
+    try {
+      final response = await _apiHitter.deleteApiResponse(
+        Endpoints.deleteAccount,
+        data: {'reason': reason},
+      );
+
+      if (response.status) {
+        return true;
+      } else {
         throw ApiException(
           message: response.msg,
           statusCode: response.response?.statusCode,

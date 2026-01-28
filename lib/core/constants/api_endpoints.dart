@@ -19,6 +19,7 @@ class Endpoints {
   // Client profile endpoints
   static const String getClientProfile = '/client/profile';
   static const String updateClientProfile = '/client/profile';
+  static const String deleteAccount = '/client/profile';
 
   // Trainer endpoints
   static const String getTrainerByReferralCode = '/trainer/referral';
@@ -36,4 +37,8 @@ class Endpoints {
   static String rateSession(String bookingId) => '/bookings/$bookingId/rate';
   static String cancelBooking(String bookingId) =>
       '/bookings/$bookingId/cancel';
+
+  // Notification endpoints
+  static const String fcmToken = '/notifications/fcm-token';
+  static const String notifications = '/notifications';
 }

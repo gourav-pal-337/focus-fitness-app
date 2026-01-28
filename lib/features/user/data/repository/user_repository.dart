@@ -14,16 +14,26 @@ class UserRepository {
       final response = await _apiService.getUserDetails();
       return Success(response);
     } on ApiException catch (e) {
-      return Failure(
-        e.message,
-        code: e.statusCode,
-      );
+      return Failure(e.message, code: e.statusCode);
     } catch (e) {
-      return Failure(
-        e.toString().replaceAll('Exception: ', ''),
-        code: 500,
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  Future<Result<bool>> updateFcmToken({
+    required String token,
+    required String platform,
+  }) async {
+    try {
+      final success = await _apiService.updateFcmToken(
+        token: token,
+        platform: platform,
       );
+      return Success(success);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
 }
-

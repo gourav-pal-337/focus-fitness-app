@@ -11,6 +11,7 @@ class ClientProfileModel {
     this.preferredName,
     this.dateOfBirth,
     this.age,
+    this.gender,
     this.height,
     this.weight,
     this.fitnessLevel,
@@ -32,6 +33,7 @@ class ClientProfileModel {
   final String? preferredName;
   final String? dateOfBirth; // ISO 8601 date string (YYYY-MM-DD)
   final int? age; // Calculated from dateOfBirth
+  final String? gender;
   final double? height;
   final double? weight;
   final String? fitnessLevel;
@@ -57,6 +59,7 @@ class ClientProfileModel {
       preferredName: json['preferredName'] as String?,
       dateOfBirth: json['dob'] as String? ?? json['dateOfBirth'] as String?,
       age: json['age'] as int?,
+      gender: json['gender'] as String?,
       height: json['height'] != null
           ? (json['height'] as num).toDouble()
           : null,
@@ -81,4 +84,3 @@ class ClientProfileModel {
     );
   }
 }
-

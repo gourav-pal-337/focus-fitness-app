@@ -5,7 +5,7 @@ import '../data/services/profile_api_service.dart';
 import '../ui/edit_profile_details_screen.dart';
 
 /// Section types for edit profile screen
-enum EditProfileSection { personalDetails, fitnessGoals }
+enum EditProfileSection { personalDetails, fitnessGoals, accountDetails }
 
 class EditProfileDetailsProvider extends ChangeNotifier {
   EditProfileDetailsProvider({
@@ -62,6 +62,8 @@ class EditProfileDetailsProvider extends ChangeNotifier {
         return _buildPersonalDetailsRequest();
       case EditProfileSection.fitnessGoals:
         return _buildFitnessGoalsRequest();
+      case EditProfileSection.accountDetails:
+        return _buildAccountDetailsRequest();
     }
   }
 
@@ -165,6 +167,74 @@ class EditProfileDetailsProvider extends ChangeNotifier {
       weightGoal: weightGoal,
       bodyType: bodyType,
       performanceGoal: performanceGoal,
+    );
+  }
+
+  UpdateClientProfileRequestModel _buildAccountDetailsRequest() {
+    String? _getValue(String label) {
+      final index = _fields.indexWhere((f) => f.label == label);
+      if (index == -1) return null;
+      final value = _values[index].trim();
+      return value.isEmpty ? null : value;
+    }
+
+    final fullName = _getValue('Name');
+    // final email = _getValue('Email');
+    // final phone = _getValue('Contact Number');
+    final dobStr = _getValue('Date of birth');
+
+    final gender = _getValue('Gender');
+
+    String? dateOfBirth;
+    if (dobStr != null && dobStr.isNotEmpty) {
+      try {
+        final birthDate = DateTime.parse(dobStr);
+        dateOfBirth =
+            '${birthDate.year.toString().padLeft(4, '0')}-${birthDate.month.toString().padLeft(2, '0')}-${birthDate.day.toString().padLeft(2, '0')}';
+      } catch (e) {
+        try {
+          final months = {
+            'Jan': 1,
+            'Feb': 2,
+            'Mar': 3,
+            'Apr': 4,
+            'May': 5,
+            'Jun': 6,
+            'Jul': 7,
+            'Aug': 8,
+            'Sep': 9,
+            'Oct': 10,
+            'Nov': 11,
+            'Dec': 12,
+          };
+          final parts = dobStr.split(' ');
+          if (parts.length == 3 && months.containsKey(parts[1])) {
+            final day = int.parse(parts[0]);
+            final month = months[parts[1]]!;
+            final year = int.parse(parts[2]);
+            dateOfBirth =
+                '$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+          } else {
+            if (months.containsKey(parts[0])) {
+              final month = months[parts[0]]!;
+              final day = int.parse(parts[1].replaceAll(',', ''));
+              final year = int.parse(parts[2]);
+              dateOfBirth =
+                  '$year-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+            } else {
+              dateOfBirth = dobStr;
+            }
+          }
+        } catch (e2) {
+          dateOfBirth = dobStr;
+        }
+      }
+    }
+
+    return UpdateClientProfileRequestModel(
+      fullName: fullName,
+      dateOfBirth: dateOfBirth,
+      gender: gender,
     );
   }
 }

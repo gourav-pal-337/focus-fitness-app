@@ -43,9 +43,11 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
       controller.addListener(_onFieldChanged);
       return controller;
     }).toList();
-    
+
     // Store initial values for comparison
-    _initialValues = widget.fields.map((field) => field.value.isEmpty ? '' : field.value).toList();
+    _initialValues = widget.fields
+        .map((field) => field.value.isEmpty ? '' : field.value)
+        .toList();
   }
 
   void _onFieldChanged() {
@@ -127,8 +129,9 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
                   Consumer2<EditProfileDetailsProvider, ClientProfileProvider>(
                     builder: (context, editProvider, clientProvider, child) {
                       final hasChanges = _hasChanges();
-                      final isLoading = editProvider.isSaving || clientProvider.isLoading;
-                      
+                      final isLoading =
+                          editProvider.isSaving || clientProvider.isLoading;
+
                       return GestureDetector(
                         onTap: hasChanges && !isLoading
                             ? () => _handleSave(context)
@@ -176,6 +179,12 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
                                       controller: _controllers[index],
                                       hintText: field.hintText,
                                       isDateField: field.isDateField,
+                                      isDropdown:
+                                          field.label.toLowerCase() == 'gender',
+                                      dropdownItems:
+                                          field.label.toLowerCase() == 'gender'
+                                          ? ['Male', 'Female', 'Others']
+                                          : null,
                                       // No onChanged callback - values will be collected on save
                                     ),
                                     if (!isLast)

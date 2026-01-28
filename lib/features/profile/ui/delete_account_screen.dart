@@ -3,11 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/service/local_storage_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/custom_app_bar.dart';
+import '../../../routes/app_router.dart';
 import '../provider/delete_account_provider.dart';
 import '../widgets/delete_account_confirmation_dialog.dart';
 
@@ -23,9 +25,7 @@ class DeleteAccountScreen extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              const CustomAppBar(
-                title: 'Delete Account',
-              ),
+              const CustomAppBar(title: 'Delete Account'),
               Expanded(
                 child: Consumer<DeleteAccountProvider>(
                   builder: (context, provider, child) {
@@ -63,9 +63,7 @@ class _InitialDeleteView extends StatelessWidget {
               SizedBox(height: AppSpacing.xl),
               Text(
                 'Delete Account',
-                style: AppTextStyle.text16Regular.copyWith(
-                  color: Colors.red,
-                ),
+                style: AppTextStyle.text16Regular.copyWith(color: Colors.red),
               ),
               SizedBox(height: AppSpacing.xs),
               Text(
@@ -105,12 +103,12 @@ class _DeleteAccountForm extends StatelessWidget {
             _ReasonTextField(),
             SizedBox(height: AppSpacing.lg),
             Text(
-                    '⚠️ Warning: Once deleted, your account cannot be recovered. All subscriptions or purchased content will also be canceled.',
-                    style: AppTextStyle.text12Regular.copyWith(
-                      color: AppColors.textPrimary,
-                      height: 1.2,
-                    ),
-                  ),
+              '⚠️ Warning: Once deleted, your account cannot be recovered. All subscriptions or purchased content will also be canceled.',
+              style: AppTextStyle.text12Regular.copyWith(
+                color: AppColors.textPrimary,
+                height: 1.2,
+              ),
+            ),
             // Row(
             //   children: [
             //     Icon(
@@ -120,7 +118,7 @@ class _DeleteAccountForm extends StatelessWidget {
             //     ),
             //     SizedBox(width: AppSpacing.sm),
             //     Expanded(
-            //       child: 
+            //       child:
             //     ),
             //   ],
             // ),
@@ -131,10 +129,28 @@ class _DeleteAccountForm extends StatelessWidget {
                   onTap: () {
                     DeleteAccountConfirmationDialog.show(
                       context: context,
-                      onDelete: () {
-                        provider.deleteAccount();
-                        context.pop();
-                        // TODO: Handle account deletion and navigation
+                      onDelete: () async {
+                        if (provider.isLoading) return;
+                        final success = await provider.deleteAccount();
+                        if (context.mounted) {
+                          context.pop(); // Close the dialog
+
+                          if (success) {
+                            await LocalStorageService.clearAll();
+                            if (context.mounted) {
+                              AppRouter.router.go(OnboardingRoute.path);
+                            }
+                          } else {
+                            // Optionally show error message
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Failed to delete account. Please try again.',
+                                ),
+                              ),
+                            );
+                          }
+                        }
                       },
                       onCancel: () {
                         context.pop();
@@ -154,11 +170,23 @@ class _DeleteAccountForm extends StatelessWidget {
                           ),
                         ),
                         SizedBox(width: AppSpacing.xs),
-                        Icon(
-                          Icons.arrow_forward,
-                          size: 20.sp,
-                          color: Colors.red,
-                        ),
+                        provider.isLoading
+                            ? Center(
+                                child: Container(
+                                  margin: EdgeInsets.all(AppSpacing.xs),
+                                  height: 20.sp,
+                                  width: 20.sp,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.red,
+                                    strokeWidth: 2.sp,
+                                  ),
+                                ),
+                              )
+                            : Icon(
+                                Icons.arrow_forward,
+                                size: 20.sp,
+                                color: Colors.red,
+                              ),
                       ],
                     ),
                   ),
@@ -205,10 +233,7 @@ class _ReasonTextFieldState extends State<_ReasonTextField> {
           decoration: BoxDecoration(
             color: AppColors.background,
             borderRadius: AppRadius.small,
-            border: Border.all(
-              color: AppColors.grey200,
-              width: 1,
-            ),
+            border: Border.all(color: AppColors.grey200, width: 1),
           ),
           child: TextField(
             controller: _controller,

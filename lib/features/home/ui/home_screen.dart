@@ -5,6 +5,7 @@ import 'package:focus_fitness/core/constants/app_assets.dart';
 import 'package:focus_fitness/core/provider/session_popup_provider.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
 import 'package:focus_fitness/core/widgets/session_popup/session_popup_widget.dart';
+import 'package:focus_fitness/features/home/widgets/complete_profile_dialog.dart';
 import 'package:focus_fitness/features/profile/provider/edit_profile_details_provider.dart';
 import 'package:focus_fitness/features/trainer/provider/linked_trainer_provider.dart';
 import 'package:provider/provider.dart';
@@ -25,17 +26,40 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  void checkuserDetails() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final user = userProvider.user;
+
+    if (user != null) {
+      final isProfileIncomplete =
+          (user.gender == null || user.gender!.isEmpty) ||
+          (user.dob == null || user.dob!.isEmpty);
+
+      if (isProfileIncomplete) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const CompleteProfileDialog(),
+        );
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    final provider = Provider.of<LinkedTrainerProvider>(context, listen: false);
     // Fetch linked trainer when screen loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = Provider.of<LinkedTrainerProvider>(
-        context,
-        listen: false,
-      );
-      Provider.of<UserProvider>(context, listen: false).getFcmToken();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      // Ensure we have latest details
+      // await userProvider.fetchUserDetails();
+
+      if (!mounted) return;
+
+      userProvider.getFcmToken();
       provider.fetchLinkedTrainer();
+      checkuserDetails();
     });
   }
 

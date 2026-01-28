@@ -66,10 +66,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCWk9LC4zuUoK3qj3ZHhTe1D3MZXKuCmKw',
-    appId: '1:340118958004:ios:4acc07bec990dbe6c68ce1',
+    appId: '1:340118958004:ios:463a822d5f8651b1c68ce1',
     messagingSenderId: '340118958004',
     projectId: 'focus-fitness-90f35',
     storageBucket: 'focus-fitness-90f35.firebasestorage.app',
+    iosClientId: '340118958004-ua0nk1jo78basoajp9s5n5uus6dpnkgt.apps.googleusercontent.com',
     iosBundleId: 'com.focusFitness.app',
   );
+
 }

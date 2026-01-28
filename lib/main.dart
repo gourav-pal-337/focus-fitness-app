@@ -7,6 +7,7 @@ import 'package:focus_fitness/core/service/local_storage_service.dart';
 import 'package:focus_fitness/core/service/internet_connectivity_service.dart';
 import 'package:focus_fitness/features/authentication/provider/auth_provider.dart';
 import 'package:focus_fitness/features/authentication/provider/forgot_password_provider.dart';
+import 'package:focus_fitness/features/profile/provider/account_details_provider.dart';
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
 
 import 'package:focus_fitness/features/trainer/provider/linked_trainer_provider.dart';
@@ -94,6 +95,9 @@ class AppBootstrap extends StatelessWidget {
             ),
             ChangeNotifierProvider<TrainerProfileProvider>(
               create: (_) => TrainerProfileProvider(),
+            ),
+            ChangeNotifierProvider<AccountDetailsProvider>(
+              create: (_) => AccountDetailsProvider(),
             ),
           ],
           child: const App(),

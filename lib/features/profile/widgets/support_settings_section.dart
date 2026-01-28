@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
 import 'package:go_router/go_router.dart';
+
+import 'package:provider/provider.dart';
+import '../../../core/provider/user_provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../routes/app_router.dart';
+import '../provider/account_details_provider.dart';
+import '../provider/edit_profile_details_provider.dart';
+import '../ui/edit_profile_details_screen.dart';
 import '../widgets/logout_confirmation_dialog.dart';
 
 class SupportSettingsSection extends StatelessWidget {
@@ -52,11 +59,7 @@ class SupportSettingsSection extends StatelessWidget {
                   context.push(NotificationsRoute.path);
                 },
               ),
-              Divider(
-                color: AppColors.grey200,
-                thickness: 1,
-                height: 0,
-              ),
+              Divider(color: AppColors.grey200, thickness: 1, height: 0),
               _SettingsMenuItem(
                 icon: Icons.privacy_tip_outlined,
                 label: 'Privacy & Security',
@@ -64,33 +67,50 @@ class SupportSettingsSection extends StatelessWidget {
                   context.push(PrivacySecurityRoute.path);
                 },
               ),
-              Divider(
-                color: AppColors.grey200,
-                thickness: 1,
-                height: 0,
-              ),
+              Divider(color: AppColors.grey200, thickness: 1, height: 0),
               _SettingsMenuItem(
                 icon: Icons.person_outline,
                 label: 'Account Details',
-                onTap: () {
-                  context.push(AccountDetailsRoute.path);
+                onTap: () async {
+                  final provider = Provider.of<AccountDetailsProvider>(
+                    context,
+                    listen: false,
+                  );
+                  final userProvider = Provider.of<ClientProfileProvider>(
+                    context,
+                    listen: false,
+                  );
+                  await provider.init(userProvider.profile);
+
+                  if (context.mounted) {
+                    final fields = provider.fields.map((f) {
+                      return EditField(
+                        label: f.label,
+                        value: f.value,
+                        isDateField: f.label == 'Date of birth',
+                      );
+                    }).toList();
+
+                    // context.push(EditProfileDetailsRoute.path);
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => EditProfileDetailsScreen(
+                          title: 'Account Details',
+                          fields: fields,
+                          section: EditProfileSection.accountDetails,
+                        ),
+                      ),
+                    );
+                  }
                 },
               ),
-              Divider(
-                color: AppColors.grey200,
-                thickness: 1,
-                height: 0,
-              ),
+              Divider(color: AppColors.grey200, thickness: 1, height: 0),
               _SettingsMenuItem(
                 icon: Icons.language,
                 label: 'Language Preferences',
                 onTap: onLanguagePreferencesTap,
               ),
-              Divider(
-                color: AppColors.grey200,
-                thickness: 1,
-                height: 0,
-              ),
+              Divider(color: AppColors.grey200, thickness: 1, height: 0),
               _SettingsMenuItem(
                 icon: Icons.logout,
                 label: 'Logout',
@@ -139,17 +159,11 @@ class _SettingsMenuItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 20.sp,
-              color: color,
-            ),
+            Icon(icon, size: 20.sp, color: color),
             SizedBox(width: AppSpacing.md),
             Text(
               label,
-              style: AppTextStyle.text16Regular.copyWith(
-                color: color,
-              ),
+              style: AppTextStyle.text16Regular.copyWith(color: color),
             ),
           ],
         ),
@@ -157,4 +171,3 @@ class _SettingsMenuItem extends StatelessWidget {
     );
   }
 }
-

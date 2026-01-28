@@ -12,7 +12,12 @@
           "package_name": "com.example.focus_fitness"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "340118958004-6ljnc8n2ugvpn5ojm978ceopmc6ip068.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAtoyAjO6Ym_EtjbKYZPrXFhvVnQFydYKA"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "340118958004-6ljnc8n2ugvpn5ojm978ceopmc6ip068.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "340118958004-n15pgqa5c0e6m20fr0hce85h6hil2pon.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.focusFitness"
+              }
+            }
+          ]
         }
       }
     }

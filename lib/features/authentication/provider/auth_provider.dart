@@ -15,13 +15,7 @@ import '../data/models/register_response_model.dart';
 import '../data/repository/auth_repository.dart';
 
 /// UI state for authentication operations
-enum AuthState {
-  idle,
-  loading,
-  loginSuccess,
-  registerSuccess,
-  error,
-}
+enum AuthState { idle, loading, loginSuccess, registerSuccess, error }
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _repository = AuthRepository();
@@ -84,10 +78,12 @@ class AuthProvider extends ChangeNotifier {
 
   bool get isValidatingTrainer => _isValidatingTrainer;
   List<TrainerInfo> get foundTrainers => _foundTrainers;
-  TrainerInfo? get foundTrainer => _selectedTrainer; // For backward compatibility
+  TrainerInfo? get foundTrainer =>
+      _selectedTrainer; // For backward compatibility
   TrainerInfo? get selectedTrainer => _selectedTrainer;
   String? get trainerValidationError => _trainerValidationError;
-  bool get isTrainerValid => _selectedTrainer != null && _trainerValidationError == null;
+  bool get isTrainerValid =>
+      _selectedTrainer != null && _trainerValidationError == null;
   bool get hasTrainers => _foundTrainers.isNotEmpty;
 
   void updateTrainerId(String value) {
@@ -126,7 +122,9 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await _trainerRepository.searchTrainerByReferralCode(referralCode);
+      final result = await _trainerRepository.searchTrainerByReferralCode(
+        referralCode,
+      );
 
       await result.when(
         success: (response) async {

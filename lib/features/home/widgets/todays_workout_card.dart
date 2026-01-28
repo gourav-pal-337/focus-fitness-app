@@ -25,10 +25,7 @@ class TodaysWorkoutSection extends StatelessWidget {
             ),
             SizedBox(width: AppSpacing.sm),
             Expanded(
-              child: Container(
-                height: 1.h,
-                color: AppColors.grey200,
-              ),
+              child: Container(height: 1.h, color: AppColors.grey200),
             ),
           ],
         ),
@@ -47,75 +44,80 @@ class _TodaysWorkoutCard extends StatelessWidget {
         context.push('/session-history');
       },
       child: Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            color: AppColors.whiteBlue,
-            borderRadius: AppRadius.large,
-          ),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: AppRadius.medium,
-                child: Image.network(
-                  'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400',
+        clipBehavior: Clip.none,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: AppColors.whiteBlue,
+              borderRadius: AppRadius.large,
+            ),
+            child: Row(
+              children: [
+                SizedBox(
                   width: 104.w,
                   height: 100.h,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Strength Training',
-                      style: AppTextStyle.text16Medium.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
+                  child: ClipRRect(
+                    borderRadius: AppRadius.medium,
+                    child: Image.network(
+                      'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400',
+                      width: 104.w,
+                      height: 100.h,
+                      fit: BoxFit.cover,
                     ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      'with Alex',
-                      style: AppTextStyle.text12Regular.copyWith(
-                        color: AppColors.grey400,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ),
-        Positioned(
-          // top: -8.h,
-          top: 0,
-          right: AppSpacing.md,
-          child: Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: 4.h,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(6.r)),
-            ),
-            child: Text(
-              'Intermediate',
-              style: AppTextStyle.text10Regular.copyWith(
-                color: AppColors.background,
-              ),
+                SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'Strength Training',
+                        style: AppTextStyle.text16Medium.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        'with Alex',
+                        style: AppTextStyle.text12Regular.copyWith(
+                          color: AppColors.grey400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-      ],
+          Positioned(
+            // top: -8.h,
+            top: 0,
+            right: AppSpacing.md,
+            child: Container(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: 4.h,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(6.r),
+                ),
+              ),
+              child: Text(
+                'Intermediate',
+                style: AppTextStyle.text10Regular.copyWith(
+                  color: AppColors.background,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
-

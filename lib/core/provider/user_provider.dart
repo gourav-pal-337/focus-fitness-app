@@ -57,7 +57,7 @@ class UserProvider extends ChangeNotifier {
 
   Future<String?> getFcmToken() async {
     try {
-      if (defaultTargetPlatform == TargetPlatform.iOS) {
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
         String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
         if (apnsToken == null) {
           debugPrint("APNS Token NOT available, waiting...");
@@ -79,6 +79,20 @@ class UserProvider extends ChangeNotifier {
 
       final token = await FirebaseMessaging.instance.getToken();
       debugPrint("FCM Token: $token");
+
+      if (token != null) {
+        String platform = 'web';
+        if (!kIsWeb) {
+          if (defaultTargetPlatform == TargetPlatform.android)
+            platform = 'android';
+          else if (defaultTargetPlatform == TargetPlatform.iOS)
+            platform = 'ios';
+        }
+
+        // Update token on backend
+        await _userRepository.updateFcmToken(token: token, platform: platform);
+      }
+
       return token;
     } catch (e) {
       debugPrint("Error getting FCM token: $e");

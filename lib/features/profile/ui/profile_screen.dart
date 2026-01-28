@@ -31,14 +31,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final profileProvider = Provider.of<ClientProfileProvider>(context, listen: false);
+      final profileProvider = Provider.of<ClientProfileProvider>(
+        context,
+        listen: false,
+      );
       profileProvider.fetchProfile();
     });
   }
 
   Future<void> _onRefresh() async {
-    final linkedTrainerProvider = Provider.of<LinkedTrainerProvider>(context, listen: false);
-    final profileProvider = Provider.of<ClientProfileProvider>(context, listen: false);
+    final linkedTrainerProvider = Provider.of<LinkedTrainerProvider>(
+      context,
+      listen: false,
+    );
+    final profileProvider = Provider.of<ClientProfileProvider>(
+      context,
+      listen: false,
+    );
     await Future.wait([
       linkedTrainerProvider.fetchLinkedTrainer(),
       profileProvider.fetchProfile(),

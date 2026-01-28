@@ -114,18 +114,19 @@ class AccountDetailsScreen extends StatelessWidget {
                                 thickness: 1,
                                 height: 0,
                               ),
-                              _AccountPasswordRow(
-                                label: fields[5].label,
-                                value: provider.values[5],
-                                onChanged: (value) {
-                                  provider.updateValue(5, value);
-                                },
-                              ),
+                              // _AccountPasswordRow(
+                              //   label: fields[5].label,
+                              //   value: provider.values[5],
+                              //   onChanged: (value) {
+                              //     provider.updateValue(5, value);
+                              //   },
+                              // ),
                             ],
                           );
                         },
                       ),
                       SizedBox(height: AppSpacing.xl),
+
                       Consumer<AccountDetailsProvider>(
                         builder: (context, provider, child) {
                           return GestureDetector(
@@ -230,7 +231,9 @@ class _AccountPasswordRowState extends State<_AccountPasswordRow> {
                     });
                   },
                   child: Icon(
-                    _obscureText ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                    _obscureText
+                        ? Icons.visibility_outlined
+                        : Icons.visibility_off_outlined,
                     size: 20.sp,
                     color: AppColors.grey400,
                   ),
@@ -243,4 +246,3 @@ class _AccountPasswordRowState extends State<_AccountPasswordRow> {
     );
   }
 }
-

@@ -19,10 +19,7 @@ import '../../data/models/register_request_model.dart';
 import 'auth_mode.dart';
 
 class AuthWithEmailScreen extends StatefulWidget {
-  const AuthWithEmailScreen({
-    super.key,
-    required this.mode,
-  });
+  const AuthWithEmailScreen({super.key, required this.mode});
 
   final AuthMode mode;
 
@@ -98,6 +95,7 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
     }
 
     final authProvider = context.read<AuthProvider>();
+    final userProvider = context.read<UserProvider>();
 
     final request = RegisterRequestModel(
       fullName: authProvider.name.trim(),
@@ -111,10 +109,11 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
     await authProvider.registerWithEmail(request);
 
     if (authProvider.isRegisterSuccess && mounted) {
+      await userProvider.fetchUserDetails();
       // Navigate based on registration success
       if (authProvider.trainerId.isNotEmpty) {
         // Trainer linked, go to onboarding
-        context.go(OnboardingRoute.path);
+        AppRouter.router.go(HomeRoute.path);
       } else {
         // No trainer, go to enter trainer ID
         context.go(EnterTrainerIdRoute.path);
@@ -203,8 +202,9 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
                 Consumer<AuthProvider>(
                   builder: (context, authProvider, child) {
                     return CustomButton(
-                      text:
-                          isLogin ? 'Sign in with Email' : 'Sign up with Email',
+                      text: isLogin
+                          ? 'Sign in with Email'
+                          : 'Sign up with Email',
                       size: ButtonSize.large,
                       width: double.infinity,
                       height: 52.h,
@@ -283,9 +283,7 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
 }
 
 class _EmailField extends StatelessWidget {
-  const _EmailField({
-    required this.controller,
-  });
+  const _EmailField({required this.controller});
 
   final TextEditingController controller;
 
@@ -295,14 +293,8 @@ class _EmailField extends StatelessWidget {
       controller: controller,
       keyboardType: TextInputType.emailAddress,
       hintText: 'Email',
-      hintStyle: AppTextStyle.text14Regular.copyWith(
-        color: AppColors.grey400,
-      ),
-      prefixIcon: Icon(
-        Icons.mail_sharp,
-        size: 20.sp,
-        color: AppColors.grey400,
-      ),
+      hintStyle: AppTextStyle.text14Regular.copyWith(color: AppColors.grey400),
+      prefixIcon: Icon(Icons.mail_sharp, size: 20.sp, color: AppColors.grey400),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return 'Email is required';
@@ -317,9 +309,7 @@ class _EmailField extends StatelessWidget {
 }
 
 class _PasswordField extends StatelessWidget {
-  const _PasswordField({
-    required this.controller,
-  });
+  const _PasswordField({required this.controller});
 
   final TextEditingController controller;
 
@@ -328,9 +318,7 @@ class _PasswordField extends StatelessWidget {
     return AppTextFormField(
       controller: controller,
       hintText: 'Password',
-      hintStyle: AppTextStyle.text14Regular.copyWith(
-        color: AppColors.grey400,
-      ),
+      hintStyle: AppTextStyle.text14Regular.copyWith(color: AppColors.grey400),
       obscureText: true,
       prefixIcon: Icon(
         Icons.lock_outline,
@@ -365,9 +353,7 @@ class _ConfirmPasswordField extends StatelessWidget {
       controller: controller,
       hintText: 'Confirm Password',
       obscureText: true,
-      hintStyle: AppTextStyle.text14Regular.copyWith(
-        color: AppColors.grey400,
-      ),
+      hintStyle: AppTextStyle.text14Regular.copyWith(color: AppColors.grey400),
       prefixIcon: Icon(
         Icons.lock_outline,
         size: 20.sp,
@@ -410,9 +396,7 @@ class _SocialDivider extends StatelessWidget {
 }
 
 class _SocialRow extends StatelessWidget {
-  const _SocialRow({
-    required this.mode,
-  });
+  const _SocialRow({required this.mode});
 
   final AuthMode mode;
 
@@ -422,33 +406,21 @@ class _SocialRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SocialIconButton(
-          icon: AppImage(
-            path: AppAssets.google,
-            width: 28.w,
-            height: 28.h,
-          ),
+          icon: AppImage(path: AppAssets.google, width: 28.w, height: 28.h),
           onPressed: () {
             // TODO: Handle Google ${mode == AuthMode.login ? 'login' : 'signup'}.
           },
         ),
         SizedBox(width: AppSpacing.sm),
         SocialIconButton(
-          icon: AppImage(
-            path: AppAssets.apple,
-            width: 24.w,
-            height: 24.h,
-          ),
+          icon: AppImage(path: AppAssets.apple, width: 24.w, height: 24.h),
           onPressed: () {
             // TODO: Handle Apple ${mode == AuthMode.login ? 'login' : 'signup'}.
           },
         ),
         SizedBox(width: AppSpacing.sm),
         SocialIconButton(
-          icon: AppImage(
-            path: AppAssets.facebook,
-            width: 24.w,
-            height: 24.h,
-          ),
+          icon: AppImage(path: AppAssets.facebook, width: 24.w, height: 24.h),
           onPressed: () {
             // TODO: Handle Facebook ${mode == AuthMode.login ? 'login' : 'signup'}.
           },

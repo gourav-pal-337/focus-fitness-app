@@ -14,6 +14,8 @@ class EditDetailRow extends StatefulWidget {
     this.hintText,
     this.onChanged,
     this.isDateField = false,
+    this.isDropdown = false,
+    this.dropdownItems,
   });
 
   final String label;
@@ -22,6 +24,8 @@ class EditDetailRow extends StatefulWidget {
   final String? hintText;
   final ValueChanged<String>? onChanged;
   final bool isDateField;
+  final bool isDropdown;
+  final List<String>? dropdownItems;
 
   @override
   State<EditDetailRow> createState() => _EditDetailRowState();
@@ -40,7 +44,9 @@ class _EditDetailRowState extends State<EditDetailRow> {
     super.initState();
     // Create internal controller if not provided
     if (widget.controller == null) {
-      _internalController = TextEditingController(text: widget.value.isEmpty ? '' : widget.value);
+      _internalController = TextEditingController(
+        text: widget.value.isEmpty ? '' : widget.value,
+      );
       _isInternalController = true;
     } else {
       // Initialize provided controller with initial value if empty
@@ -86,8 +92,18 @@ class _EditDetailRowState extends State<EditDetailRow> {
         // Try parsing display format (e.g., "Jan 15, 1990")
         try {
           final months = {
-            'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-            'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+            'Jan': 1,
+            'Feb': 2,
+            'Mar': 3,
+            'Apr': 4,
+            'May': 5,
+            'Jun': 6,
+            'Jul': 7,
+            'Aug': 8,
+            'Sep': 9,
+            'Oct': 10,
+            'Nov': 11,
+            'Dec': 12,
           };
           final parts = _controller.text.split(' ');
           if (parts.length == 3 && months.containsKey(parts[0])) {
@@ -101,7 +117,9 @@ class _EditDetailRowState extends State<EditDetailRow> {
         }
       }
     }
-    initialDate ??= DateTime.now().subtract(const Duration(days: 365 * 25)); // Default to 25 years ago
+    initialDate ??= DateTime.now().subtract(
+      const Duration(days: 365 * 25),
+    ); // Default to 25 years ago
 
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -113,7 +131,8 @@ class _EditDetailRowState extends State<EditDetailRow> {
 
     if (picked != null) {
       // Format as ISO date (YYYY-MM-DD) for storage
-      final formattedDate = '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+      final formattedDate =
+          '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
       _controller.text = formattedDate;
       if (widget.onChanged != null) {
         widget.onChanged!(formattedDate);
@@ -138,7 +157,7 @@ class _EditDetailRowState extends State<EditDetailRow> {
         'Sep',
         'Oct',
         'Nov',
-        'Dec'
+        'Dec',
       ];
       return '${months[date.month - 1]} ${date.day}, ${date.year}';
     } catch (e) {
@@ -182,6 +201,65 @@ class _EditDetailRowState extends State<EditDetailRow> {
                       ),
                     ),
                   )
+                : widget.isDropdown
+                ? DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      value:
+                          widget.dropdownItems?.contains(_controller.text) ==
+                              true
+                          ? _controller.text
+                          : null,
+                      hint: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          widget.hintText ?? 'Select option',
+                          style: AppTextStyle.text16Regular.copyWith(
+                            color: AppColors.grey400,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.right,
+                        ),
+                      ),
+                      icon: const SizedBox.shrink(),
+                      alignment: Alignment.centerRight,
+                      selectedItemBuilder: (BuildContext context) {
+                        return widget.dropdownItems!.map((String value) {
+                          return Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              value,
+                              style: AppTextStyle.text16Regular.copyWith(
+                                color: AppColors.textPrimary,
+                              ),
+                              textAlign: TextAlign.right,
+                            ),
+                          );
+                        }).toList();
+                      },
+                      items: widget.dropdownItems?.map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(
+                            value,
+                            style: AppTextStyle.text16Regular.copyWith(
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            _controller.text = newValue;
+                          });
+                          if (widget.onChanged != null) {
+                            widget.onChanged!(newValue);
+                          }
+                        }
+                      },
+                    ),
+                  )
                 : TextField(
                     controller: _controller,
                     onChanged: (value) {
@@ -216,4 +294,3 @@ class _EditDetailRowState extends State<EditDetailRow> {
     );
   }
 }
-

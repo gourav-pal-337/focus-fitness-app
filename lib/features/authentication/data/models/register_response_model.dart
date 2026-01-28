@@ -59,7 +59,8 @@ class UserModel {
     this.email,
     this.phone,
     this.linkedTrainerId,
-
+    this.dob,
+    this.gender,
     this.isTrainerLinked,
     required this.emailVerified,
     required this.phoneVerified,
@@ -71,6 +72,8 @@ class UserModel {
   });
 
   final String id;
+  final String? dob;
+  final String? gender;
   final String role;
   final String? fullName;
   final String? profilePhoto;
@@ -91,6 +94,8 @@ class UserModel {
       id: json['id'] as String? ?? '',
       role: json['role'] as String? ?? '',
       fullName: json['fullName'] as String?,
+      gender: json['gender'] as String?,
+      // dob: json['dob'] as String?,
       profilePhoto: json['profilePhoto'] as String?,
       email: json['email'] as String?,
       phone: json['phone'] as String?,
@@ -104,6 +109,8 @@ class UserModel {
       createdAt: DateTime.parse(
         json['createdAt'] as String? ?? DateTime.now().toIso8601String(),
       ),
+      dob: json['dob'] as String? ?? json['dateOfBirth'] as String?,
+
       updatedAt: DateTime.parse(
         json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
       ),
