@@ -23,7 +23,12 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    Provider.of<SessionHistoryProvider>(context, listen: false).fetchBookings();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<SessionHistoryProvider>(
+        context,
+        listen: false,
+      ).fetchBookings();
+    });
   }
 
   @override
