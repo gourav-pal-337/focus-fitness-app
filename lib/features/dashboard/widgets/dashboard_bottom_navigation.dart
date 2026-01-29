@@ -36,10 +36,7 @@ class DashboardBottomNavigation extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            height: 1.h,
-            color: AppColors.grey200,
-          ),
+          Container(height: 1.h, color: AppColors.grey200),
           SafeArea(
             child: Container(
               height: 70.h,
@@ -47,41 +44,41 @@ class DashboardBottomNavigation extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-              _NavItem(
-                iconPath: AppAssets.home,
-                label: 'Home',
-                index: 0,
-                selectedIndex: selectedIndex,
-                onTap: onTap,
-              ),
-              _NavItem(
-                iconPath: AppAssets.workouts,
-                label: 'Workouts',
-                index: 1,
-                selectedIndex: selectedIndex,
-                onTap: onTap,
-              ),
-              _NavItem(
-                iconPath: AppAssets.subscriptions,
-                label: 'Subscriptions',
-                index: 2,
-                selectedIndex: selectedIndex,
-                onTap: onTap,
-              ),
-              _NavItem(
-                iconPath: AppAssets.support,
-                label: 'Support',
-                index: 3,
-                selectedIndex: selectedIndex,
-                onTap: onTap,
-              ),
-              _NavItem(
-                iconPath: AppAssets.profile,
-                label: 'Profile',
-                index: 4,
-                selectedIndex: selectedIndex,
-                onTap: onTap,
-              ),
+                  _NavItem(
+                    iconPath: AppAssets.home,
+                    label: 'Home',
+                    index: 0,
+                    selectedIndex: selectedIndex,
+                    onTap: onTap,
+                  ),
+                  _NavItem(
+                    iconPath: AppAssets.workouts,
+                    label: 'Workouts',
+                    index: 1,
+                    selectedIndex: selectedIndex,
+                    onTap: onTap,
+                  ),
+                  _NavItem(
+                    iconPath: AppAssets.subscriptions,
+                    label: 'Subscriptions',
+                    index: 2,
+                    selectedIndex: selectedIndex,
+                    onTap: onTap,
+                  ),
+                  _NavItem(
+                    iconPath: AppAssets.support,
+                    label: 'Support',
+                    index: 3,
+                    selectedIndex: selectedIndex,
+                    onTap: onTap,
+                  ),
+                  _NavItem(
+                    iconPath: AppAssets.sessionHistory,
+                    label: 'History',
+                    index: 4,
+                    selectedIndex: selectedIndex,
+                    onTap: onTap,
+                  ),
                 ],
               ),
             ),
@@ -133,7 +130,9 @@ class _NavItem extends StatelessWidget {
                 child: Text(
                   label,
                   style: AppTextStyle.text12Regular.copyWith(
-                    color: isSelected ? AppColors.textPrimary : AppColors.grey400,
+                    color: isSelected
+                        ? AppColors.textPrimary
+                        : AppColors.grey400,
                   ),
                 ),
               ),
@@ -143,4 +142,3 @@ class _NavItem extends StatelessWidget {
     );
   }
 }
-

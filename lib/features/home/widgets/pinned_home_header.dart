@@ -90,7 +90,7 @@ class PinnedHomeHeader extends StatelessWidget {
               // ),
               GestureDetector(
                 onTap: () {
-                  context.go(ProfileRoute.path);
+                  context.push(ProfileRoute.path);
                 },
                 child: Container(
                   width: 35.w,

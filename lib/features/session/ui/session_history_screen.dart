@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/routes/app_router.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -22,6 +24,9 @@ class SessionHistoryScreen extends StatelessWidget {
         body: CustomScrollView(
           slivers: [
             CustomSliverAppBar(
+              onBack: () {
+                context.go(HomeRoute.path);
+              },
               title: 'Session History',
               backgroundImage:
                   'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800',
@@ -40,11 +45,9 @@ class SessionHistoryScreen extends StatelessWidget {
             ),
             SliverPersistentHeader(
               pinned: true,
+
               // floating: true,
-              
-              delegate: _TabBarDelegate(
-                child: const SessionTabBar(),
-              ),
+              delegate: _TabBarDelegate(child: const SessionTabBar()),
             ),
             SliverPadding(
               padding: EdgeInsets.symmetric(
@@ -106,10 +109,7 @@ class SessionHistoryScreen extends StatelessWidget {
                     itemCount: sessions.length,
                     separatorBuilder: (context, index) => Padding(
                       padding: EdgeInsets.symmetric(vertical: 15.h),
-                      child: Divider(
-                        color: AppColors.grey300,
-                        height: 1,
-                      ),
+                      child: Divider(color: AppColors.grey300, height: 1),
                     ),
                     itemBuilder: (context, index) {
                       return SessionCard(session: sessions[index]);
@@ -124,7 +124,6 @@ class SessionHistoryScreen extends StatelessWidget {
     );
   }
 }
-
 
 class _TabBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget child;
@@ -145,13 +144,13 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return SizedBox(
       height: minExtent,
-      child: Container(
-        color: AppColors.background,
-        child: child,
-      ),
+      child: Container(color: AppColors.background, child: child),
     );
   }
 
@@ -160,4 +159,3 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
     return child != oldDelegate.child;
   }
 }
-

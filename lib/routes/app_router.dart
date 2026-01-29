@@ -88,7 +88,7 @@ abstract class AppRouter {
       TransactionSuccessfulRoute.route,
       DelinkTrainerRoute.route,
       DelinkTrainerSuccessRoute.route,
-      SessionHistoryRoute.route,
+      ProfileRoute.route,
       SessionDetailsRoute.route,
       FeedbackSuccessRoute.route,
       PastSubscriptionsRoute.route,
@@ -291,7 +291,7 @@ abstract class DashboardRoute {
       StatefulShellBranch(routes: [WorkoutsRoute.route]),
       StatefulShellBranch(routes: [SubscriptionsRoute.route]),
       StatefulShellBranch(routes: [SupportRoute.route]),
-      StatefulShellBranch(routes: [ProfileRoute.route]),
+      StatefulShellBranch(routes: [SessionHistoryRoute.route]),
     ],
   );
 }

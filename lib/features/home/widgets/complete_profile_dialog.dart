@@ -72,7 +72,7 @@ class CompleteProfileDialog extends StatelessWidget {
                   height: 56.h,
                   onPressed: () {
                     context.pop(); // Close dialog
-                    context.go(ProfileRoute.path);
+                    context.push(ProfileRoute.path);
                   },
                   width: double.infinity,
                   margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),

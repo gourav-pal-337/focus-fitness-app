@@ -40,9 +40,7 @@ class _TodaysWorkoutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        context.push('/session-history');
-      },
+      onTap: () {},
       child: Stack(
         clipBehavior: Clip.none,
         children: [

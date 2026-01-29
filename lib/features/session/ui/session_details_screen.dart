@@ -403,6 +403,15 @@ class _ActionButton extends StatelessWidget {
     debugPrint(session.booking?.trainer?.id);
     final trainerProv = context.read<LinkedTrainerProvider>();
     if (session.booking?.trainer?.id != trainerProv?.trainer?.id) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'You are not linked with this trainer now',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
     } else {
       context.push(
         TrainerProfileRoute.path.replaceAll(

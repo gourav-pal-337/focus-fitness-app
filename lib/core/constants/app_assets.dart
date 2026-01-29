@@ -13,6 +13,7 @@ abstract class AppAssets {
   static const String subscriptions = 'assets/icons/Subscription.svg';
   static const String workouts = 'assets/icons/Workout.svg';
   static const String profile = 'assets/icons/Profile.svg';
+  static const String sessionHistory = 'assets/icons/session_history.svg';
   static const String home = 'assets/icons/Home.svg';
   static const String support = 'assets/icons/Support.svg';
   static const String securePayment = 'assets/icons/shield-checkmark.svg';
