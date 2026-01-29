@@ -36,7 +36,8 @@ class TrainerApiService {
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {
           // Try to extract error message from various possible fields
-          final errorMessage = responseData['message'] as String? ??
+          final errorMessage =
+              responseData['message'] as String? ??
               responseData['error'] as String? ??
               response.msg;
 
@@ -70,9 +71,7 @@ class TrainerApiService {
       // Using GET with query parameter as per API documentation
       final response = await _apiHitter.getApiResponse(
         Endpoints.searchTrainer,
-        queryParameters: {
-          'referralCode': referralCode.trim().toUpperCase(),
-        },
+        queryParameters: {'referralCode': referralCode.trim().toUpperCase()},
       );
 
       if (response.status && response.response != null) {
@@ -83,17 +82,22 @@ class TrainerApiService {
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {
           // Try to extract error message from various possible fields
-          final errorMessage = (responseData['error'] as String?) ??
+          final errorMessage =
+              (responseData['error'] as String?) ??
               (responseData['message'] as String?) ??
               response.msg;
 
           throw ApiException(
-            message: errorMessage.isNotEmpty ? errorMessage : 'Failed to search trainer',
+            message: errorMessage.isNotEmpty
+                ? errorMessage
+                : 'Failed to search trainer',
             statusCode: response.response?.statusCode,
           );
         }
         throw ApiException(
-          message: response.msg.isNotEmpty ? response.msg : 'Failed to search trainer',
+          message: response.msg.isNotEmpty
+              ? response.msg
+              : 'Failed to search trainer',
           statusCode: response.response?.statusCode,
         );
       }
@@ -122,17 +126,22 @@ class TrainerApiService {
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {
           // Try to extract error message from various possible fields
-          final errorMessage = (responseData['error'] as String?) ??
+          final errorMessage =
+              (responseData['error'] as String?) ??
               (responseData['message'] as String?) ??
               response.msg;
 
           throw ApiException(
-            message: errorMessage.isNotEmpty ? errorMessage : 'Failed to get linked trainer',
+            message: errorMessage.isNotEmpty
+                ? errorMessage
+                : 'Failed to get linked trainer',
             statusCode: response.response?.statusCode,
           );
         }
         throw ApiException(
-          message: response.msg.isNotEmpty ? response.msg : 'Failed to get linked trainer',
+          message: response.msg.isNotEmpty
+              ? response.msg
+              : 'Failed to get linked trainer',
           statusCode: response.response?.statusCode,
         );
       }
@@ -164,7 +173,8 @@ class TrainerApiService {
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {
           // Try to extract error message from various possible fields
-          final errorMessage = responseData['message'] as String? ??
+          final errorMessage =
+              responseData['message'] as String? ??
               responseData['error'] as String? ??
               response.msg;
 
@@ -205,7 +215,8 @@ class TrainerApiService {
         // Handle error response
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {
-          final errorMessage = (responseData['error'] as String?) ??
+          final errorMessage =
+              (responseData['error'] as String?) ??
               (responseData['message'] as String?) ??
               response.msg;
 
@@ -248,7 +259,8 @@ class TrainerApiService {
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {
           // Try to extract error message from various possible fields
-          final errorMessage = (responseData['error'] as String?) ??
+          final errorMessage =
+              (responseData['error'] as String?) ??
               (responseData['message'] as String?) ??
               response.msg;
 
@@ -293,7 +305,8 @@ class TrainerApiService {
         // Handle error response
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {
-          final errorMessage = (responseData['error'] as String?) ??
+          final errorMessage =
+              (responseData['error'] as String?) ??
               (responseData['message'] as String?) ??
               response.msg;
 
@@ -321,4 +334,3 @@ class TrainerApiService {
     }
   }
 }
-

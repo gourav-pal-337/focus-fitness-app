@@ -39,10 +39,11 @@ class LinkedTrainerProvider extends ChangeNotifier {
     _isLoading = true;
     _error = null;
     notifyListeners();
-    
+
     try {
       final result = await _repository.getLinkedTrainer();
 
+      // print("response ::::: ${result.}");
       await result.when(
         success: (response) async {
           _isLinked = response.linked;
@@ -53,6 +54,7 @@ class LinkedTrainerProvider extends ChangeNotifier {
           notifyListeners();
         },
         failure: (message, code) {
+          print("message ::::: $message");
           _isLinked = false;
           _trainer = null;
           _profile = null;
@@ -151,4 +153,3 @@ class LinkedTrainerProvider extends ChangeNotifier {
     }
   }
 }
-

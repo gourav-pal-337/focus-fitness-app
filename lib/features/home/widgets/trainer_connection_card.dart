@@ -22,7 +22,7 @@ class TrainerConnectionCard extends StatelessWidget {
         if (provider.isLoading) {
           return const TrainerConnectionCardSkeleton();
         }
-
+        print("provider.trainer : ${provider.trainer}");
         // Show "No Trainer Assigned" UI when not linked
         if (!provider.isLinked || provider.trainer == null) {
           return Container(
@@ -77,7 +77,8 @@ class TrainerConnectionCard extends StatelessWidget {
 
         // Show trainer info when linked
         final trainer = provider.trainer!;
-        final relationshipStatus = provider.profile?.relationshipStatus ?? 'pending';
+        final relationshipStatus =
+            provider.profile?.relationshipStatus ?? 'pending';
         final isLive = relationshipStatus == 'live';
 
         return GestureDetector(
@@ -85,79 +86,83 @@ class TrainerConnectionCard extends StatelessWidget {
             // Navigate to trainer profile screen
             final trainerId = trainer.id;
             if (trainerId.isNotEmpty) {
-              context.push(TrainerProfileRoute.path.replaceAll(':trainerId', trainerId));
+              context.push(
+                TrainerProfileRoute.path.replaceAll(':trainerId', trainerId),
+              );
             }
           },
           child: Container(
             height: 72.h,
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
             decoration: BoxDecoration(
               color: AppColors.whiteBlue,
               borderRadius: AppRadius.medium,
             ),
             child: Row(
-            children: [
-              CircleAvatar(
-                radius: 26.r,
-                backgroundColor: AppColors.grey200,
-                backgroundImage: trainer.profilePhoto != null
-                    ? NetworkImage(trainer.profilePhoto!)
-                    : null,
-                child: trainer.profilePhoto == null
-                    ? Icon(
-                        Icons.person,
-                        size: 24.sp,
-                        color: AppColors.grey400,
-                      )
-                    : null,
-              ),
-              SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 26.r,
+                  backgroundColor: AppColors.grey200,
+                  backgroundImage: trainer.profilePhoto != null
+                      ? NetworkImage(trainer.profilePhoto!)
+                      : null,
+                  child: trainer.profilePhoto == null
+                      ? Icon(
+                          Icons.person,
+                          size: 24.sp,
+                          color: AppColors.grey400,
+                        )
+                      : null,
+                ),
+                SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        trainer.fullName ?? 'Trainer',
+                        style: AppTextStyle.text16Medium.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      // SizedBox(height: 2.h),
+                      Text(
+                        trainer.referralCode,
+                        style: AppTextStyle.text12Regular.copyWith(
+                          color: AppColors.grey400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
                   children: [
-                    Text(
-                      trainer.fullName ?? 'Trainer',
-                      style: AppTextStyle.text16Medium.copyWith(
-                        color: AppColors.textPrimary,
+                    Container(
+                      width: 8.w,
+                      height: 8.w,
+                      decoration: BoxDecoration(
+                        color: isLive ? AppColors.green : AppColors.grey400,
+                        shape: BoxShape.circle,
                       ),
                     ),
-                    // SizedBox(height: 2.h),
+                    SizedBox(width: 6.w),
                     Text(
-                      trainer.referralCode,
-                      style: AppTextStyle.text12Regular.copyWith(
-                        color: AppColors.grey400,
+                      isLive ? 'Connected' : 'Pending',
+                      style: AppTextStyle.text12Medium.copyWith(
+                        color: isLive ? AppColors.green : AppColors.grey400,
                       ),
                     ),
                   ],
                 ),
-              ),
-              Row(
-                children: [
-                  Container(
-                    width: 8.w,
-                    height: 8.w,
-                    decoration: BoxDecoration(
-                      color: isLive ? AppColors.green : AppColors.grey400,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    isLive ? 'Connected' : 'Pending',
-                    style: AppTextStyle.text12Medium.copyWith(
-                      color: isLive ? AppColors.green : AppColors.grey400,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
         );
       },
     );
   }
 }
-

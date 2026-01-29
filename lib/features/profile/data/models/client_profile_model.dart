@@ -58,7 +58,7 @@ class ClientProfileModel {
       fullName: json['fullName'] as String? ?? '',
       preferredName: json['preferredName'] as String?,
       dateOfBirth: json['dob'] as String? ?? json['dateOfBirth'] as String?,
-      age: json['age'] as int?,
+      age: int.parse(json['age'] as String? ?? '0'),
       gender: json['gender'] as String?,
       height: json['height'] != null
           ? (json['height'] as num).toDouble()

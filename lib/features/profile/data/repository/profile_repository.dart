@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../../../features/authentication/data/exceptions/api_exception.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
     show Result, Success, Failure;
@@ -15,15 +17,10 @@ class ProfileRepository {
       final response = await _apiService.getClientProfile();
       return Success(response);
     } on ApiException catch (e) {
-      return Failure(
-        e.message,
-        code: e.statusCode ?? 500,
-      );
+      debugPrint("profile error ${e.message}");
+      return Failure(e.message, code: e.statusCode ?? 500);
     } catch (e) {
-      return Failure(
-        e.toString().replaceAll('Exception: ', ''),
-        code: 500,
-      );
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
 
@@ -34,15 +31,9 @@ class ProfileRepository {
       final response = await _apiService.updateClientProfile(request);
       return Success(response);
     } on ApiException catch (e) {
-      return Failure(
-        e.message,
-        code: e.statusCode ?? 500,
-      );
+      return Failure(e.message, code: e.statusCode ?? 500);
     } catch (e) {
-      return Failure(
-        e.toString().replaceAll('Exception: ', ''),
-        code: 500,
-      );
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
 }

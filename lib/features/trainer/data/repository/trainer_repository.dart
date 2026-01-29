@@ -31,15 +31,9 @@ class TrainerRepository {
       final response = await _apiService.getTrainerByReferralCode(referralCode);
       return Success(response);
     } on ApiException catch (e) {
-      return Failure(
-        e.message,
-        code: e.statusCode,
-      );
+      return Failure(e.message, code: e.statusCode);
     } catch (e) {
-      return Failure(
-        e.toString().replaceAll('Exception: ', ''),
-        code: 500,
-      );
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
 
@@ -58,18 +52,14 @@ class TrainerRepository {
         );
       }
 
-      final response = await _apiService.searchTrainerByReferralCode(referralCode);
+      final response = await _apiService.searchTrainerByReferralCode(
+        referralCode,
+      );
       return Success(response);
     } on ApiException catch (e) {
-      return Failure(
-        e.message,
-        code: e.statusCode ?? 500,
-      );
+      return Failure(e.message, code: e.statusCode ?? 500);
     } catch (e) {
-      return Failure(
-        e.toString().replaceAll('Exception: ', ''),
-        code: 500,
-      );
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
 
@@ -79,15 +69,9 @@ class TrainerRepository {
       final response = await _apiService.getLinkedTrainer();
       return Success(response);
     } on ApiException catch (e) {
-      return Failure(
-        e.message,
-        code: e.statusCode ?? 500,
-      );
+      return Failure(e.message, code: e.statusCode ?? 500);
     } catch (e) {
-      return Failure(
-        e.toString().replaceAll('Exception: ', ''),
-        code: 500,
-      );
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
 
@@ -104,24 +88,15 @@ class TrainerRepository {
         );
       }
       if (request.fullName.trim().isEmpty) {
-        return Failure(
-          'Full name is required.',
-          code: 400,
-        );
+        return Failure('Full name is required.', code: 400);
       }
 
       final response = await _apiService.linkTrainer(request);
       return Success(response);
     } on ApiException catch (e) {
-      return Failure(
-        e.message,
-        code: e.statusCode,
-      );
+      return Failure(e.message, code: e.statusCode);
     } catch (e) {
-      return Failure(
-        e.toString().replaceAll('Exception: ', ''),
-        code: 500,
-      );
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
 
@@ -131,24 +106,15 @@ class TrainerRepository {
   ) async {
     try {
       if (trainerId.trim().isEmpty) {
-        return Failure(
-          'Trainer ID is required.',
-          code: 400,
-        );
+        return Failure('Trainer ID is required.', code: 400);
       }
 
       final response = await _apiService.getTrainerProfile(trainerId);
       return Success(response);
     } on ApiException catch (e) {
-      return Failure(
-        e.message,
-        code: e.statusCode ?? 500,
-      );
+      return Failure(e.message, code: e.statusCode ?? 500);
     } catch (e) {
-      return Failure(
-        e.toString().replaceAll('Exception: ', ''),
-        code: 500,
-      );
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
 
@@ -158,15 +124,9 @@ class TrainerRepository {
       final response = await _apiService.unlinkTrainer();
       return Success(response);
     } on ApiException catch (e) {
-      return Failure(
-        e.message,
-        code: e.statusCode ?? 500,
-      );
+      return Failure(e.message, code: e.statusCode ?? 500);
     } catch (e) {
-      return Failure(
-        e.toString().replaceAll('Exception: ', ''),
-        code: 500,
-      );
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
 
@@ -177,43 +137,24 @@ class TrainerRepository {
     try {
       // Validate required fields
       if (request.trainerId.trim().isEmpty) {
-        return Failure(
-          'Trainer ID is required.',
-          code: 400,
-        );
+        return Failure('Trainer ID is required.', code: 400);
       }
       if (request.sessionPlanId.trim().isEmpty) {
-        return Failure(
-          'Session plan ID is required.',
-          code: 400,
-        );
+        return Failure('Session plan ID is required.', code: 400);
       }
       if (request.startTime.trim().isEmpty) {
-        return Failure(
-          'Start time is required.',
-          code: 400,
-        );
+        return Failure('Start time is required.', code: 400);
       }
       if (request.endTime.trim().isEmpty) {
-        return Failure(
-          'End time is required.',
-          code: 400,
-        );
+        return Failure('End time is required.', code: 400);
       }
 
       final response = await _apiService.bookSession(request);
       return Success(response);
     } on ApiException catch (e) {
-      return Failure(
-        e.message,
-        code: e.statusCode ?? 500,
-      );
+      return Failure(e.message, code: e.statusCode ?? 500);
     } catch (e) {
-      return Failure(
-        e.toString().replaceAll('Exception: ', ''),
-        code: 500,
-      );
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
 }
-

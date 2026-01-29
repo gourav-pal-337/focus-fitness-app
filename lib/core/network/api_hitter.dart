@@ -238,7 +238,7 @@ class ApiHitter {
         debugPrint(errorMessage);
 
         LocalStorageService.clearAll();
-        AppRouter.router.go(LoginWithEmailRoute.path);
+        AppRouter.router.go(OnboardingRoute.path);
       }
 
       final responseData = e.response?.data;

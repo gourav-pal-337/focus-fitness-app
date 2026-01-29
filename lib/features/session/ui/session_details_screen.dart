@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/features/session/provider/session_history_provider.dart';
 import 'package:focus_fitness/features/trainer/provider/linked_trainer_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -445,6 +446,7 @@ class _ActionButton extends StatelessWidget {
   }
 
   Widget _buildButton(BuildContext context) {
+    final providerH = context.read<SessionHistoryProvider>();
     switch (session.status) {
       case SessionStatus.upcoming:
         return Consumer<SessionDetailsProvider>(
@@ -453,7 +455,10 @@ class _ActionButton extends StatelessWidget {
             return CustomButton(
               text: isCancelling ? 'Canceling...' : 'Cancel Session',
               type: ButtonType.filled,
-              isLoading: isCancelling,
+              isLoading:
+                  isCancelling ||
+                  provider.isSubmittingFeedback ||
+                  providerH.isLoading,
               onPressed: () {
                 CancelSessionDialog.show(
                   context: context,
@@ -465,8 +470,13 @@ class _ActionButton extends StatelessWidget {
                           context: context,
                           onOk: () async {
                             await provider.cancelSession(session.bookingId!);
+                            // await provider.fe;
+                            await context
+                                .read<SessionHistoryProvider>()
+                                .fetchBookings();
                             context
                               ..pop() // Close dialog
+                              ..pop()
                               ..pop(); // Close screen
                           },
                         );
@@ -501,6 +511,8 @@ class _ActionButton extends StatelessWidget {
                     final success = await provider.submitFeedback(
                       session.bookingId!,
                     );
+                    context.read<SessionHistoryProvider>().fetchBookings();
+                    context.pop();
                     if (success && context.mounted) {
                       context.push(FeedbackSuccessRoute.path);
                     }

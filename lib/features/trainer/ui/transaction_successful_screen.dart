@@ -2,12 +2,11 @@ import 'dart:math';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:focus_fitness/core/constants/app_assets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'package:flutter_svg/flutter_svg.dart';
-
-import '../../../core/constants/app_assets.dart';
 import '../../../core/provider/session_popup_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
@@ -83,7 +82,7 @@ class _TransactionSuccessfulScreenState
                         _SuccessIcon(),
                         SizedBox(height: AppSpacing.xl),
                         Text(
-                          'Transaction Successful',
+                          'Booking Confirmed!',
                           style: AppTextStyle.text24SemiBold.copyWith(
                             color: AppColors.textPrimary,
                           ),
@@ -91,18 +90,17 @@ class _TransactionSuccessfulScreenState
                         ),
                         SizedBox(height: AppSpacing.sm),
                         Text(
-                          'Your top up has been successful done',
+                          'Your session has been successfully booked.',
                           style: AppTextStyle.text16Medium.copyWith(
                             color: AppColors.grey400,
                           ),
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: AppSpacing.xl + AppSpacing.md),
-                        _SessionBookedSection(amount: widget.amount),
-                        SizedBox(height: AppSpacing.lg),
-                        _TransactionMethodSection(
-                          paymentMethod: widget.paymentMethod,
-                          cardNumber: widget.cardNumber,
+                        _BookingDetailsSection(
+                          trainerName: widget.trainerName,
+                          sessionDate: widget.sessionDate,
+                          sessionTime: widget.sessionTime,
                         ),
                         SizedBox(height: AppSpacing.xl + 20.h),
                       ],
@@ -119,7 +117,6 @@ class _TransactionSuccessfulScreenState
               ],
             ),
             // Confetti overlay - multiple emitters...
-            // (omitted for brevity, assume original layout is fine)
             Align(
               alignment: Alignment.topCenter,
               child: ConfettiWidget(
@@ -131,7 +128,6 @@ class _TransactionSuccessfulScreenState
                 numberOfParticles: 50,
                 gravity: 0.2,
                 shouldLoop: false,
-                // maximumSize: Size(10.w, 10.h),
               ),
             ),
             // Additional confetti from left
@@ -147,7 +143,6 @@ class _TransactionSuccessfulScreenState
                 numberOfParticles: 50,
                 gravity: 0.2,
                 shouldLoop: false,
-                //  maximumSize: Size(10.w, 10.h),
               ),
             ),
             // Additional confetti from right
@@ -196,118 +191,77 @@ class _SuccessIcon extends StatelessWidget {
   }
 }
 
-class _SessionBookedSection extends StatelessWidget {
-  const _SessionBookedSection({required this.amount});
+class _BookingDetailsSection extends StatelessWidget {
+  const _BookingDetailsSection({
+    this.trainerName,
+    this.sessionDate,
+    this.sessionTime,
+  });
 
-  final double amount;
+  final String? trainerName;
+  final String? sessionDate;
+  final String? sessionTime;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          'Session Booked',
-          style: AppTextStyle.text16SemiBold.copyWith(color: AppColors.grey400),
-        ),
-        SizedBox(height: AppSpacing.sm),
-        Text(
-          '\$${amount.toStringAsFixed(2)}',
-          style: AppTextStyle.text24Bold.copyWith(color: AppColors.textPrimary),
-        ),
-        SizedBox(height: AppSpacing.lg),
-        CustomPaint(
-          size: Size(double.infinity, 1.h),
-          painter: _DashedLinePainter(),
-        ),
-      ],
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        // color: AppColors.whiteBlue,
+        borderRadius: AppRadius.medium,
+        border: Border.all(color: AppColors.grey200),
+      ),
+      child: Column(
+        children: [
+          _DetailRow(
+            label: 'Trainer',
+            value: trainerName ?? 'N/A',
+            icon: Icons.person_outline,
+          ),
+          Divider(color: AppColors.grey200, height: 24.h),
+          _DetailRow(
+            label: 'Date',
+            value: sessionDate ?? 'N/A',
+            icon: Icons.calendar_today_outlined,
+          ),
+          Divider(color: AppColors.grey200, height: 24.h),
+          _DetailRow(
+            label: 'Time',
+            value: sessionTime ?? 'N/A',
+            icon: Icons.access_time,
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _DashedLinePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.grey300
-      ..strokeWidth = 1.h;
-
-    const dashWidth = 10.0;
-    const dashSpace = 10.0;
-    double startX = 0;
-
-    while (startX < size.width) {
-      canvas.drawLine(Offset(startX, 0), Offset(startX + dashWidth, 0), paint);
-      startX += dashWidth + dashSpace;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _TransactionMethodSection extends StatelessWidget {
-  const _TransactionMethodSection({
-    required this.paymentMethod,
-    required this.cardNumber,
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({
+    required this.label,
+    required this.value,
+    required this.icon,
   });
 
-  final String paymentMethod;
-  final String cardNumber;
+  final String label;
+  final String value;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
+        Icon(icon, size: 20.sp, color: AppColors.grey400),
+        SizedBox(width: AppSpacing.sm),
         Text(
-          'Transaction Method',
-          style: AppTextStyle.text16Regular.copyWith(color: AppColors.grey400),
+          label,
+          style: AppTextStyle.text14Regular.copyWith(color: AppColors.grey400),
         ),
-        SizedBox(height: AppSpacing.md),
-        Container(
-          padding: EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.whiteBlue,
-            borderRadius: AppRadius.medium,
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  color: Colors.black,
-                  borderRadius: AppRadius.small,
-                ),
-                child: Icon(
-                  Icons.account_balance_wallet,
-                  size: 24.sp,
-                  color: AppColors.whiteBlue,
-                ),
-              ),
-              SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      paymentMethod,
-                      style: AppTextStyle.text16SemiBold.copyWith(
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      cardNumber,
-                      style: AppTextStyle.text12SemiBold.copyWith(
-                        color: AppColors.grey400,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+        const Spacer(),
+        Text(
+          value,
+          style: AppTextStyle.text14SemiBold.copyWith(
+            color: AppColors.textPrimary,
           ),
         ),
       ],
@@ -363,40 +317,6 @@ class _GoToHomeButton extends StatelessWidget {
         onPressed: () {
           // Navigate to home/dashboard
           context.go('/dashboard/home');
-
-          // if (trainerName != null &&
-          //     sessionDate != null &&
-          //     sessionTime != null) {
-          //   // Schedule session popup
-          //   final sessionPopupProvider = Provider.of<SessionPopupProvider>(
-          //     context,
-          //     listen: false,
-          //   );
-
-          //   final data = SessionPopupData(
-          //     bookingId: bookingId!,
-          //     trainerName: trainerName!,
-          //     trainerImageUrl: null,
-          //     sessionDate: sessionDate!,
-          //     sessionTime: sessionTime!,
-          //     onJoinSession: () {
-          //       // TODO: Handle join session action
-          //     },
-          //   );
-          //   sessionPopupProvider.schedulePopupAt(
-          //     data,
-          //     DateTime.now().add(const Duration(seconds: 5)),
-          //   );
-
-          //   // sessionPopupProvider.schedulePopupAt(data, sessionStartTime!);
-          //   // if (sessionStartTime != null) {
-          //   // } else {
-          //   //   sessionPopupProvider.schedulePopup(
-          //   //     data,
-          //   //     delay: const Duration(seconds: 5),
-          //   //   );
-          //   // }
-          // }
         },
       ),
     );

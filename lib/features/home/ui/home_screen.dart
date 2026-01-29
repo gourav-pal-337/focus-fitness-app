@@ -4,10 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:focus_fitness/core/constants/app_assets.dart';
 import 'package:focus_fitness/core/provider/session_popup_provider.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
-import 'package:focus_fitness/core/widgets/session_popup/session_popup_widget.dart';
 import 'package:focus_fitness/features/home/widgets/complete_profile_dialog.dart';
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
-import 'package:focus_fitness/features/profile/provider/edit_profile_details_provider.dart';
 import 'package:focus_fitness/features/trainer/provider/linked_trainer_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -36,6 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     await profileProvider.fetchProfile();
     final user = profileProvider.profile;
+    print("user : ${user?.gender} | ");
     if (user != null) {
       final isProfileIncomplete =
           (user.gender == null || user.gender!.isEmpty) ||
@@ -79,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
           listen: false,
         );
         provider.fetchLinkedTrainer();
-        checkuserDetails();
+        // checkuserDetails();
       },
       child: Scaffold(
         backgroundColor: AppColors.background,

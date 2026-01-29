@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/core/theme/app_radius.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -204,6 +205,10 @@ class _EditDetailRowState extends State<EditDetailRow> {
                 : widget.isDropdown
                 ? DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
+                      dropdownColor: Colors.white,
+
+                      borderRadius: AppRadius.medium,
+                      isDense: true,
                       isExpanded: true,
                       value:
                           widget.dropdownItems?.contains(_controller.text) ==
@@ -218,6 +223,8 @@ class _EditDetailRowState extends State<EditDetailRow> {
                             color: AppColors.grey400,
                             fontStyle: FontStyle.italic,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           textAlign: TextAlign.right,
                         ),
                       ),

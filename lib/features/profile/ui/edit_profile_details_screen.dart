@@ -92,6 +92,7 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
 
     // Update provider with current values
     for (int i = 0; i < currentValues.length; i++) {
+      debugPrint("current value ${currentValues[i]}");
       provider.updateValue(i, currentValues[i]);
     }
 
@@ -107,6 +108,54 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
       if (mounted) {
         context.pop();
       }
+    }
+  }
+
+  bool _isDropdownField(String label) {
+    print("label name : $label");
+    final lowerLabel = label.toLowerCase();
+
+    bool value =
+        lowerLabel == 'gender' ||
+        lowerLabel == 'body type' ||
+        lowerLabel == 'performance goal' ||
+        lowerLabel == 'fitness level';
+    print("value : $value");
+    return value;
+  }
+
+  List<String> _getDropdownItems(String label) {
+    final lowerLabel = label.toLowerCase();
+    switch (lowerLabel) {
+      case 'gender':
+        return ['Male', 'Female', 'Others'];
+      case 'body type':
+        return [
+          "Lean",
+          "Athletic",
+          "Muscular",
+          "Fit",
+          "Average",
+          "Curvy",
+          "Bulky",
+        ];
+      case 'performance goal':
+        return [
+          "Lose Weight",
+          "Gain Muscle",
+          "Improve Stamina",
+          "Increase Strength",
+          "Improve Flexibility",
+          "Enhance Endurance",
+          "Improve Mobility",
+          "Get Fitter",
+          "Maintain Fitness",
+          "Improve Overall Health",
+        ];
+      case 'fitness level':
+        return ["Beginner", "Intermediate", "Advanced", "Athlete"];
+      default:
+        return [];
     }
   }
 
@@ -179,12 +228,10 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
                                       controller: _controllers[index],
                                       hintText: field.hintText,
                                       isDateField: field.isDateField,
-                                      isDropdown:
-                                          field.label.toLowerCase() == 'gender',
-                                      dropdownItems:
-                                          field.label.toLowerCase() == 'gender'
-                                          ? ['Male', 'Female', 'Others']
-                                          : null,
+                                      isDropdown: _isDropdownField(field.label),
+                                      dropdownItems: _getDropdownItems(
+                                        field.label,
+                                      ),
                                       // No onChanged callback - values will be collected on save
                                     ),
                                     if (!isLast)

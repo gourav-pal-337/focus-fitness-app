@@ -32,7 +32,7 @@ class AccountDetailsProvider extends ChangeNotifier {
   Future<void> init(ClientProfileModel? user) async {
     _isLoading = true;
     notifyListeners();
-
+    print("user gender : ${user?.gender}");
     if (user != null) {
       _fields = [
         AccountField(label: 'Name', value: user.fullName ?? ''),
@@ -78,6 +78,7 @@ class AccountDetailsProvider extends ChangeNotifier {
         dob = _formatDate(profileResponse.profile!.dateOfBirth!);
       }
 
+      ;
       _fields = [
         AccountField(label: 'Name', value: user?.fullName ?? ''),
         AccountField(label: 'Email', value: user?.email ?? ''),
@@ -138,7 +139,7 @@ class AccountDetailsProvider extends ChangeNotifier {
       // final email = _values[1];
       final gender = _values[2];
       final dobStr = _values[3];
-      // final phone = _values[4];
+      final phone = _values[4];
 
       String? dateOfBirth;
       if (dobStr.isNotEmpty) {
@@ -177,7 +178,10 @@ class AccountDetailsProvider extends ChangeNotifier {
         fullName: name,
         dateOfBirth: dateOfBirth,
         gender: gender.isEmpty ? null : gender,
+        phone: phone,
       );
+
+      debugPrint("request phone ${request.phone}");
 
       final response = await _apiService.updateClientProfile(request);
 

@@ -12,13 +12,29 @@ import '../provider/session_history_provider.dart';
 import '../widgets/session_card.dart';
 import '../widgets/session_tab_bar.dart';
 
-class SessionHistoryScreen extends StatelessWidget {
+class SessionHistoryScreen extends StatefulWidget {
   const SessionHistoryScreen({super.key});
 
   @override
+  State<SessionHistoryScreen> createState() => _SessionHistoryScreenState();
+}
+
+class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Provider.of<SessionHistoryProvider>(context, listen: false).fetchBookings();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => SessionHistoryProvider()..fetchBookings(),
+    return RefreshIndicator(
+      onRefresh: () async {
+        Provider.of<SessionHistoryProvider>(
+          context,
+          listen: false,
+        ).fetchBookings();
+      },
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: CustomScrollView(

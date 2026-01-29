@@ -25,7 +25,7 @@ class ClientProfileProvider extends ChangeNotifier {
 
     try {
       final result = await _repository.getClientProfile();
-
+      debugPrint("profile result ${result.toString()}");
       await result.when(
         success: (response) async {
           _profile = response.profile;
@@ -61,4 +61,3 @@ class ClientProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-
