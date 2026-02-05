@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:focus_fitness/core/constants/app_assets.dart';
-import 'package:focus_fitness/features/trainer/provider/trainer_profile_provider.dart';
+import 'package:focus_fitness/core/widgets/inputs/inputs.dart';
+import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
+import 'package:focus_fitness/features/trainer/data/models/link_trainer_response_model.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../provider/session_popup_provider.dart';
@@ -12,6 +14,9 @@ import '../../theme/app_spacing.dart';
 import '../../theme/app_text_styles.dart';
 import '../buttons/custom_bottom.dart';
 import '../../../routes/app_router.dart';
+import '../../../features/profile/data/services/profile_api_service.dart';
+import '../../../features/profile/data/models/update_client_profile_request_model.dart';
+import '../../provider/user_provider.dart';
 
 /// Global session popup widget that can be shown on any screen using Overlay
 class SessionPopupWidget extends StatefulWidget {
@@ -459,6 +464,12 @@ class SessionBottomSheetContent extends StatelessWidget {
       ),
       borderRadius: 12.r,
       onPressed: () async {
+        if (trainerConntact.isEmpty) {
+          _showUpdatePhoneNumberDialog(context);
+          onDismiss();
+          return;
+        }
+
         final Uri whatsappUrl = Uri.parse(
           'https://wa.me/$trainerConntact?text=Hello',
         );
@@ -470,6 +481,174 @@ class SessionBottomSheetContent extends StatelessWidget {
         }
 
         data.onJoinSession?.call();
+        onDismiss(); // Close the popup after action
+      },
+    );
+  }
+
+  void _showUpdatePhoneNumberDialog(BuildContext context) {
+    final TextEditingController phoneController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    bool isLoading = false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24.r),
+                  topRight: Radius.circular(24.r),
+                ),
+              ),
+              padding: EdgeInsets.only(
+                left: 24.w,
+                right: 24.w,
+                top: 24.h,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24.h,
+              ),
+              child: SafeArea(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40.w,
+                          height: 4.h,
+                          decoration: BoxDecoration(
+                            color: AppColors.grey300,
+                            borderRadius: BorderRadius.circular(2.r),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 24.h),
+                      Text(
+                        'Update Phone Number',
+                        style: AppTextStyle.text20Bold.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        'Please enter your WhatsApp number to connect with your trainer.',
+                        textAlign: TextAlign.center,
+                        style: AppTextStyle.text14Regular.copyWith(
+                          color: AppColors.textSecondary,
+                          height: 1.5,
+                        ),
+                      ),
+                      SizedBox(height: 24.h),
+                      AppTextFormField(
+                        controller: phoneController,
+                        keyboardType: TextInputType.phone,
+                        hintText: 'WhatsApp Number (e.g. +1234567890)',
+                        hintStyle: AppTextStyle.text14Regular.copyWith(
+                          color: AppColors.textSecondary.withValues(alpha: 0.6),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter a valid phone number';
+                          }
+                          return null;
+                        },
+                      ),
+                      SizedBox(height: 24.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: CustomButton(
+                              text: 'Cancel',
+                              type: ButtonType.outlined,
+                              textColor: AppColors.textSecondary,
+                              borderColor: AppColors.grey300,
+                              backgroundColor: Colors.transparent,
+                              onPressed: () => Navigator.pop(context),
+                              size: ButtonSize.medium,
+                              borderRadius: 12.r,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: CustomButton(
+                              text: 'Save',
+                              isLoading: isLoading,
+                              backgroundColor: AppColors.primary,
+                              textColor: Colors.white,
+                              borderRadius: 12.r,
+                              onPressed: () async {
+                                if (formKey.currentState!.validate()) {
+                                  setState(() => isLoading = true);
+                                  try {
+                                    await ProfileApiService()
+                                        .updateClientProfile(
+                                          UpdateClientProfileRequestModel(
+                                            phone: phoneController.text.trim(),
+                                          ),
+                                        );
+
+                                    await Future.delayed(
+                                      const Duration(seconds: 1),
+                                    );
+                                    if (context.mounted) {
+                                      await Provider.of<ClientProfileProvider>(
+                                        context,
+                                        listen: false,
+                                      ).fetchProfile();
+
+                                      if (context.mounted) {
+                                        Navigator.pop(context);
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Phone number updated successfully',
+                                            ),
+                                            backgroundColor: AppColors.primary,
+                                          ),
+                                        );
+                                        // onDismiss();
+                                      }
+                                    }
+                                  } catch (e) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Error: $e'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  } finally {
+                                    if (context.mounted) {
+                                      setState(() => isLoading = false);
+                                    }
+                                  }
+                                }
+                              },
+                              size: ButtonSize.medium,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
       },
     );
   }

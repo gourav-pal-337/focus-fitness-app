@@ -32,13 +32,15 @@ class CustomSliverAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var size  = MediaQuery.of(context).size;
+    var size = MediaQuery.of(context).size;
     final leadingWidth = showBackButton ? size.width * 0.7 : 0;
     return SliverAppBar(
+      toolbarHeight: 65.h,
+
       expandedHeight: expandedHeight ?? 200.h,
       floating: false,
-      // pinned: true,
-      backgroundColor: Colors.transparent,
+      pinned: true,
+      backgroundColor: AppColors.textPrimary,
       elevation: 0,
       leadingWidth: leadingWidth.toDouble(),
       leading: showBackButton
@@ -55,12 +57,12 @@ class CustomSliverAppBar extends StatelessWidget {
                         color: AppColors.background,
                       ),
                       SizedBox(width: AppSpacing.lg),
-                     Text(
-          title,
-          style: AppTextStyle.text20SemiBold.copyWith(
-            color: AppColors.background,
-          ),
-        ),
+                      Text(
+                        title,
+                        style: AppTextStyle.text20SemiBold.copyWith(
+                          color: AppColors.background,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -71,7 +73,9 @@ class CustomSliverAppBar extends StatelessWidget {
           ? [
               SafeArea(
                 child: Padding(
-                  padding: EdgeInsets.only(right: AppSpacing.screenPadding.right),
+                  padding: EdgeInsets.only(
+                    right: AppSpacing.screenPadding.right,
+                  ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: actions!,
@@ -81,45 +85,45 @@ class CustomSliverAppBar extends StatelessWidget {
             ]
           : null,
       flexibleSpace: FlexibleSpaceBar(
-       
         centerTitle: centerTitle,
-        titlePadding: titlePadding ??
+        titlePadding:
+            titlePadding ??
             EdgeInsets.only(
               left: showBackButton
                   ? AppSpacing.screenPadding.left + 32.w
                   : AppSpacing.screenPadding.left,
               bottom: AppSpacing.md,
             ),
-        background: ClipRRect(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(40),
-            bottomRight: Radius.circular(40),
-          ),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.network(
-                backgroundImage,
-                fit: BoxFit.cover,
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: gradientColors ??
-                        [
-                          Colors.black.withOpacity(0.6),
-                          Colors.black.withOpacity(0.8),
-                        ],
+        background: Container(
+          color: Colors.white,
+          child: ClipRRect(
+            borderRadius: BorderRadius.only(
+              bottomLeft: Radius.circular(40),
+              bottomRight: Radius.circular(40),
+            ),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(backgroundImage, fit: BoxFit.cover),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors:
+                          gradientColors ??
+                          [
+                            Colors.black.withOpacity(0.6),
+                            Colors.black.withOpacity(0.8),
+                          ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 }
-

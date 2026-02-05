@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Focus Fitness</string>
+	<string>Focus Fusion</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -46,6 +46,18 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
      <!-- Why is my app authenticating using face id? -->
+	 <key>CFBundleURLTypes</key>
+	 <array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.340118958004-ua0nk1jo78basoajp9s5n5uus6dpnkgt</string>
+			</array>
+		</dict>
+	</array>
+
 	<key>NSFaceIDUsageDescription</key>
     <string>We use Face ID to secure your account and provide a seamless login experience.</string>
 	<key>UIBackgroundModes</key>

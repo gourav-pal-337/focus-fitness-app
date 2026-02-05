@@ -44,7 +44,7 @@ class EditProfileDetailsProvider extends ChangeNotifier {
 
     try {
       final request = _buildRequest();
-      debugPrint("request data ${request.phone.toString()}");
+      debugPrint("request data ${request.email.toString()}");
       final response = await _apiService.updateClientProfile(request);
       _isSaving = false;
       notifyListeners();
@@ -180,10 +180,9 @@ class EditProfileDetailsProvider extends ChangeNotifier {
     }
 
     final fullName = _getValue('Name');
-    // final email = _getValue('Email');
+    final email = _getValue('Email');
     final phone = _getValue('Contact Number');
     final dobStr = _getValue('Date of birth');
-
     final gender = _getValue('Gender');
 
     String? dateOfBirth;
@@ -237,6 +236,7 @@ class EditProfileDetailsProvider extends ChangeNotifier {
       dateOfBirth: dateOfBirth,
       gender: gender,
       phone: phone,
+      email: email,
     );
   }
 }

@@ -107,7 +107,11 @@ class TrainerInfo {
                 )
                 .toList()
           : null,
-      whatsappNumber: json['waNumber'] as String?,
+      whatsappNumber: json['waNumber'] == null
+          ? null
+          : json['waNumber'].runtimeType != String
+          ? ""
+          : json['waNumber'] as String?,
     );
   }
 

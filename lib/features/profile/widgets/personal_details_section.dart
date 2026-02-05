@@ -29,7 +29,7 @@ class PersonalDetailsSection extends StatelessWidget {
         'Sep',
         'Oct',
         'Nov',
-        'Dec'
+        'Dec',
       ];
       return '${months[date.month - 1]} ${date.day}, ${date.year}';
     } catch (e) {
@@ -48,6 +48,9 @@ class PersonalDetailsSection extends StatelessWidget {
   }
 
   String? _formatAge(int? age, String? dateOfBirth) {
+    if (age == 0) {
+      return null;
+    }
     // Use age from profile if available, otherwise calculate from DOB
     if (age != null) {
       return '$age Years';
@@ -119,4 +122,3 @@ class PersonalDetailsSection extends StatelessWidget {
     );
   }
 }
-

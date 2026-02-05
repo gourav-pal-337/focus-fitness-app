@@ -32,6 +32,7 @@ class UserProvider extends ChangeNotifier {
       return await result.when(
         success: (response) async {
           _user = response.user;
+          print("user details : ${_user}");
           if (_user != null) {
             await LocalStorageService.saveUser(_user!);
           }

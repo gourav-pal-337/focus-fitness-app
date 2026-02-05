@@ -1,9 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-
 import '../../../../core/constants/app_assets.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -129,6 +130,55 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
     }
   }
 
+  Future<void> _handleGoogleLogin() async {
+    final authProvider = context.read<AuthProvider>();
+    if (authProvider.isLoading) {
+      return;
+    }
+    print("google login....");
+    await authProvider.signInWithGoogle();
+    _handleSocialAuthResult(authProvider);
+  }
+
+  Future<void> _handleAppleLogin() async {
+    final authProvider = context.read<AuthProvider>();
+    if (authProvider.isLoading) {
+      return;
+    }
+    print("apple login....");
+    await authProvider.signInWithApple();
+    _handleSocialAuthResult(authProvider);
+  }
+
+  Future<void> _handleSocialAuthResult(AuthProvider authProvider) async {
+    if (authProvider.isLoginSuccess && mounted) {
+      // Assuming social login provides enough info to skip profile setup for now
+      // or fetches user details if backend is linked
+      context.go(HomeRoute.path);
+    } else if (authProvider.isError && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.errorMessage),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+    }
+  }
+
+  String _getButtonText(AuthProvider authProvider) {
+    if (authProvider.isLoading) {
+      switch (authProvider.authMethod) {
+        case AuthMethod.google:
+          return 'Signing in with Google';
+        case AuthMethod.apple:
+          return 'Signing in with Apple';
+        case AuthMethod.email:
+          return isLogin ? 'Signing in...' : 'Signing up...';
+      }
+    }
+    return isLogin ? 'Sign in with Email' : 'Sign up with Email';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -202,9 +252,7 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
                 Consumer<AuthProvider>(
                   builder: (context, authProvider, child) {
                     return CustomButton(
-                      text: isLogin
-                          ? 'Sign in with Email'
-                          : 'Sign up with Email',
+                      text: _getButtonText(authProvider),
                       size: ButtonSize.large,
                       width: double.infinity,
                       height: 52.h,
@@ -272,7 +320,11 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
                 SizedBox(height: AppSpacing.lg * 1.5),
                 const _SocialDivider(),
                 SizedBox(height: AppSpacing.lg),
-                _SocialRow(mode: widget.mode),
+                _SocialRow(
+                  mode: widget.mode,
+                  onGooglePressed: _handleGoogleLogin,
+                  onApplePressed: _handleAppleLogin,
+                ),
               ],
             ),
           ),
@@ -396,9 +448,15 @@ class _SocialDivider extends StatelessWidget {
 }
 
 class _SocialRow extends StatelessWidget {
-  const _SocialRow({required this.mode});
+  const _SocialRow({
+    required this.mode,
+    required this.onGooglePressed,
+    required this.onApplePressed,
+  });
 
   final AuthMode mode;
+  final VoidCallback onGooglePressed;
+  final VoidCallback onApplePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -407,24 +465,21 @@ class _SocialRow extends StatelessWidget {
       children: [
         SocialIconButton(
           icon: AppImage(path: AppAssets.google, width: 28.w, height: 28.h),
-          onPressed: () {
-            // TODO: Handle Google ${mode == AuthMode.login ? 'login' : 'signup'}.
-          },
+          onPressed: onGooglePressed,
         ),
         SizedBox(width: AppSpacing.sm),
-        SocialIconButton(
-          icon: AppImage(path: AppAssets.apple, width: 24.w, height: 24.h),
-          onPressed: () {
-            // TODO: Handle Apple ${mode == AuthMode.login ? 'login' : 'signup'}.
-          },
-        ),
-        SizedBox(width: AppSpacing.sm),
-        SocialIconButton(
-          icon: AppImage(path: AppAssets.facebook, width: 24.w, height: 24.h),
-          onPressed: () {
-            // TODO: Handle Facebook ${mode == AuthMode.login ? 'login' : 'signup'}.
-          },
-        ),
+        if (Platform.isIOS)
+          SocialIconButton(
+            icon: AppImage(path: AppAssets.apple, width: 24.w, height: 24.h),
+            onPressed: onApplePressed,
+          ),
+        // SizedBox(width: AppSpacing.sm),
+        // SocialIconButton(
+        //   icon: AppImage(path: AppAssets.facebook, width: 24.w, height: 24.h),
+        //   onPressed: () {
+        //     // TODO: Handle Facebook ${mode == AuthMode.login ? 'login' : 'signup'}.
+        //   },
+        // ),
       ],
     );
   }

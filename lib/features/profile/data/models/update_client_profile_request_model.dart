@@ -3,6 +3,7 @@ class UpdateClientProfileRequestModel {
     this.fullName,
     this.preferredName,
     this.dateOfBirth,
+    this.email,
     this.age,
     this.height,
     this.weight,
@@ -32,6 +33,7 @@ class UpdateClientProfileRequestModel {
   final String? notes;
   final String? gender;
   final String? phone;
+  final String? email;
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
@@ -61,6 +63,7 @@ class UpdateClientProfileRequestModel {
     }
     // Include age when provided (calculated from DOB)
     addIfNotNull('age', age);
+    addIfNotNull('email', email);
     addIfNotNull('height', height);
     addIfNotNull('weight', weight);
     addIfNotNull('gender', gender);

@@ -11,6 +11,7 @@ import '../../../core/widgets/custom_sliver_app_bar.dart';
 import '../provider/session_history_provider.dart';
 import '../widgets/session_card.dart';
 import '../widgets/session_tab_bar.dart';
+import '../widgets/session_card_skeleton.dart';
 
 class SessionHistoryScreen extends StatefulWidget {
   const SessionHistoryScreen({super.key});
@@ -78,12 +79,15 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
               sliver: Consumer<SessionHistoryProvider>(
                 builder: (context, provider, child) {
                   if (provider.isLoading) {
-                    return SliverFillRemaining(
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
+                    return SliverList.separated(
+                      itemCount: 5,
+                      separatorBuilder: (context, index) => Padding(
+                        padding: EdgeInsets.symmetric(vertical: 15.h),
+                        child: Divider(color: AppColors.grey300, height: 1),
                       ),
+                      itemBuilder: (context, index) {
+                        return const SessionCardSkeleton();
+                      },
                     );
                   }
 
@@ -157,7 +161,7 @@ class _TabBarDelegate extends SliverPersistentHeaderDelegate {
     // Tab button vertical padding: AppSpacing.sm (8.w) * 2 = 16
     // Text height: ~20 (approximate)
     // Total: ~100
-    return 100.h;
+    return 70.h;
   }
 
   @override

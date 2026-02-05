@@ -88,6 +88,7 @@ class SupportSettingsSection extends StatelessWidget {
                         label: f.label,
                         value: f.value,
                         isDateField: f.label == 'Date of birth',
+                        hintText: f.hintText,
                       );
                     }).toList();
 

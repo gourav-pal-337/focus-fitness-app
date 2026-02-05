@@ -12,10 +12,7 @@ import '../../provider/auth_provider.dart';
 import 'auth_mode.dart';
 
 class AuthWithPhoneScreen extends StatelessWidget {
-  const AuthWithPhoneScreen({
-    super.key,
-    required this.mode,
-  });
+  const AuthWithPhoneScreen({super.key, required this.mode});
 
   final AuthMode mode;
 
@@ -23,7 +20,9 @@ class AuthWithPhoneScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final canProceed = context.watch<AuthProvider>().canProceedWithPhone;
+    final authProvider = context.watch<AuthProvider>();
+    final canProceed = authProvider.canProceedWithPhone;
+    final isLoading = authProvider.isLoading;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -76,7 +75,7 @@ class AuthWithPhoneScreen extends StatelessWidget {
           right: AppSpacing.screenPadding.right,
           bottom: AppSpacing.lg,
         ),
-        text: 'Continue',
+        text: isLoading ? 'Sending Code...' : 'Continue',
         size: ButtonSize.large,
         width: double.infinity,
         height: 52.h,
@@ -86,13 +85,40 @@ class AuthWithPhoneScreen extends StatelessWidget {
           color: AppColors.background,
         ),
         borderRadius: 12.r,
-        isEnabled: canProceed,
-        onPressed: canProceed
-            ? () {
-                final phoneNumber = context.read<AuthProvider>().phoneNumber;
-                final countryCode = context.read<AuthProvider>().countryCode;
-                final fullNumber = '$countryCode$phoneNumber';
-                context.push('/otp-verification/$fullNumber?mode=${mode.name}');
+        isEnabled: canProceed && !isLoading,
+        icon: isLoading
+            ? SizedBox(
+                width: 20.w,
+                height: 20.h,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.background,
+                  ),
+                ),
+              )
+            : null,
+        onPressed: (canProceed && !isLoading)
+            ? () async {
+                final success = await authProvider.sendOtp(
+                  purpose: mode == AuthMode.login ? 'login' : 'signup',
+                );
+
+                if (success && context.mounted) {
+                  final phoneNumber = authProvider.phoneNumber;
+                  final countryCode = authProvider.countryCode;
+                  final fullNumber = '$countryCode$phoneNumber';
+                  context.push(
+                    '/otp-verification/$fullNumber?mode=${mode.name}',
+                  );
+                } else if (context.mounted && authProvider.isError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(authProvider.errorMessage),
+                      backgroundColor: AppColors.primary,
+                    ),
+                  );
+                }
               }
             : null,
       ),
@@ -152,10 +178,7 @@ class _PhoneNumberFieldState extends State<_PhoneNumberField> {
               ),
               decoration: BoxDecoration(
                 border: Border(
-                  right: BorderSide(
-                    color: AppColors.grey300,
-                    width: 1,
-                  ),
+                  right: BorderSide(color: AppColors.grey300, width: 1),
                 ),
               ),
               child: Row(
@@ -206,4 +229,3 @@ class _PhoneNumberFieldState extends State<_PhoneNumberField> {
     );
   }
 }
-

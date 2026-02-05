@@ -12,10 +12,18 @@ import '../data/models/login_request_model.dart';
 import '../data/models/login_response_model.dart';
 import '../data/models/register_request_model.dart';
 import '../data/models/register_response_model.dart';
+import '../data/models/firebase_login_request_model.dart';
+import '../data/models/send_otp_request_model.dart';
+import '../data/models/send_otp_response_model.dart';
+import '../data/models/verify_otp_request_model.dart';
 import '../data/repository/auth_repository.dart';
+import '../data/services/social_auth_service.dart';
 
 /// UI state for authentication operations
 enum AuthState { idle, loading, loginSuccess, registerSuccess, error }
+
+/// Authentication method being used
+enum AuthMethod { email, google, apple }
 
 class AuthProvider extends ChangeNotifier {
   final AuthRepository _repository = AuthRepository();
@@ -49,11 +57,52 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<bool> sendOtp({
+    required String purpose,
+    String role = 'client',
+  }) async {
+    _setAuthState(AuthState.loading);
+    _errorMessage = '';
+
+    try {
+      final fullNumber = '$_countryCode$_phoneNumber';
+      debugPrint("Sending OTP to $fullNumber for $purpose");
+
+      final request = SendOtpRequestModel(
+        phone: fullNumber,
+        purpose: purpose,
+        role: role,
+      );
+
+      final result = await _repository.sendOtp(request);
+
+      return result.when(
+        success: (response) async {
+          _otpExpiresAt = response.expiresAt;
+          _setAuthState(AuthState.idle);
+          return true;
+        },
+        failure: (message, code) {
+          _errorMessage = message;
+          _errorCode = code;
+          _setAuthState(AuthState.error);
+          return false;
+        },
+      );
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _setAuthState(AuthState.error);
+      return false;
+    }
+  }
+
   // OTP Verification
   String _otp = '';
+  DateTime? _otpExpiresAt;
 
   String get otp => _otp;
-  bool get canProceedWithOtp => _otp.length == 4;
+  DateTime? get otpExpiresAt => _otpExpiresAt;
+  bool get canProceedWithOtp => _otp.length == 6;
 
   void updateOtp(String value) {
     _otp = value;
@@ -63,6 +112,46 @@ class AuthProvider extends ChangeNotifier {
   void clearOtp() {
     _otp = '';
     notifyListeners();
+  }
+
+  Future<void> verifyOtp({
+    required String purpose,
+    String role = 'client',
+  }) async {
+    _setAuthState(AuthState.loading);
+    _errorMessage = '';
+    _errorCode = null;
+
+    try {
+      final fullNumber = '$_countryCode$_phoneNumber';
+      debugPrint("Verifying OTP for $fullNumber");
+
+      final request = VerifyOtpRequestModel(
+        phone: fullNumber,
+        code: _otp,
+        purpose: purpose,
+        role: role,
+      );
+
+      final result = await _repository.verifyOtp(request);
+
+      await result.when(
+        success: (response) async {
+          _loginResponse = response;
+          await _storeLoginTokens(response);
+          _setAuthState(AuthState.loginSuccess);
+        },
+        failure: (message, code) {
+          _errorMessage = message;
+          _errorCode = code;
+          _setAuthState(AuthState.error);
+        },
+      );
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _errorCode = 500;
+      _setAuthState(AuthState.error);
+    }
   }
 
   // Trainer ID Entry
@@ -310,12 +399,14 @@ class AuthProvider extends ChangeNotifier {
 
   // Login/Register state
   AuthState _authState = AuthState.idle;
+  AuthMethod _authMethod = AuthMethod.email;
   LoginResponseModel? _loginResponse;
   RegisterResponseModel? _registerResponse;
   String _errorMessage = '';
   int? _errorCode;
 
   AuthState get authState => _authState;
+  AuthMethod get authMethod => _authMethod;
   LoginResponseModel? get loginResponse => _loginResponse;
   RegisterResponseModel? get registerResponse => _registerResponse;
   String get errorMessage => _errorMessage;
@@ -332,6 +423,7 @@ class AuthProvider extends ChangeNotifier {
 
   /// Login user with email and password
   Future<void> loginWithEmail(LoginRequestModel request) async {
+    _authMethod = AuthMethod.email;
     _setAuthState(AuthState.loading);
     _errorMessage = '';
     _errorCode = null;
@@ -363,6 +455,7 @@ class AuthProvider extends ChangeNotifier {
 
   /// Register user with email and password
   Future<void> registerWithEmail(RegisterRequestModel request) async {
+    _authMethod = AuthMethod.email;
     _setAuthState(AuthState.loading);
     _errorMessage = '';
     _errorCode = null;
@@ -388,6 +481,140 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       _errorMessage = e.toString().replaceAll('Exception: ', '');
       _errorCode = 500;
+      _setAuthState(AuthState.error);
+    }
+  }
+
+  // Social Auth
+  final SocialAuthService _socialAuthService = SocialAuthService();
+
+  Future<void> signInWithGoogle() async {
+    _authMethod = AuthMethod.google;
+    _setAuthState(AuthState.loading);
+    _errorMessage = '';
+
+    try {
+      final credential = await _socialAuthService.signInWithGoogle();
+      log("credential email: ${credential?.user?.email}");
+      log("credential displayName: ${credential?.user?.displayName}");
+      log("credential photoURL: ${credential?.user?.photoURL}");
+      log("credential emailVerified: ${credential?.user?.emailVerified}");
+      log("credential metadata: ${credential?.user?.metadata}");
+      log(
+        "credential lastSignInTime: ${credential?.user?.metadata.lastSignInTime}",
+      );
+      log(
+        "credential creationTime: ${credential?.user?.metadata.creationTime}",
+      );
+      log(
+        "credential refreshToken: ${credential?.user?.metadata.lastSignInTime}",
+      );
+      log("credential idToken: ${credential?.user?.metadata.lastSignInTime}");
+      log("credential: ${credential?.user?.uid}");
+      if (credential != null && credential.user != null) {
+        final token = await credential.user!.getIdToken();
+        if (token != null) {
+          final request = FirebaseLoginRequestModel(
+            idToken: token,
+            role: 'client',
+            email: credential.user!.email,
+            fullName: credential.user!.displayName,
+            provider: 'google',
+          );
+
+          final result = await _repository.firebaseLogin(request);
+
+          await result.when(
+            success: (response) async {
+              _loginResponse = response;
+              await _storeLoginTokens(response);
+              _setAuthState(AuthState.loginSuccess);
+            },
+            failure: (message, code) {
+              _errorMessage = message;
+              _errorCode = code;
+              _setAuthState(AuthState.error);
+            },
+          );
+        } else {
+          _errorMessage = "Failed to retrieve access token";
+          _setAuthState(AuthState.error);
+        }
+      } else {
+        // User cancelled or failed
+        if (credential == null) {
+          _setAuthState(AuthState.idle); // Reset to idle if cancelled
+        } else {
+          _errorMessage = "Google Sign In failed";
+          _setAuthState(AuthState.error);
+        }
+      }
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _setAuthState(AuthState.error);
+    }
+  }
+
+  Future<void> signInWithApple() async {
+    _authMethod = AuthMethod.apple;
+    _setAuthState(AuthState.loading);
+    _errorMessage = '';
+
+    try {
+      final credential = await _socialAuthService.signInWithApple();
+
+      log("credential email: ${credential?.user?.email}");
+      log("credential displayName: ${credential?.user?.displayName}");
+      log("credential photoURL: ${credential?.user?.photoURL}");
+      log("credential emailVerified: ${credential?.user?.emailVerified}");
+      log("credential metadata: ${credential?.user?.metadata}");
+      log(
+        "credential lastSignInTime: ${credential?.user?.metadata.lastSignInTime}",
+      );
+      log(
+        "credential creationTime: ${credential?.user?.metadata.creationTime}",
+      );
+      log(
+        "credential refreshToken: ${credential?.user?.metadata.lastSignInTime}",
+      );
+      log("credential idToken: ${credential?.user?.metadata.lastSignInTime}");
+      log("credential: ${credential?.user?.uid}");
+
+      if (credential != null && credential.user != null) {
+        final token = await credential.user!.getIdToken();
+        if (token != null) {
+          final request = FirebaseLoginRequestModel(
+            idToken: token,
+            role: 'client',
+            email: credential.user!.email,
+            fullName: credential.user!.displayName,
+            provider: 'apple',
+          );
+
+          final result = await _repository.firebaseLogin(request);
+
+          await result.when(
+            success: (response) async {
+              _loginResponse = response;
+              await _storeLoginTokens(response);
+              _setAuthState(AuthState.loginSuccess);
+            },
+            failure: (message, code) {
+              _errorMessage = message;
+              _errorCode = code;
+              _setAuthState(AuthState.error);
+            },
+          );
+        } else {
+          _errorMessage = "Failed to retrieve access token";
+          _setAuthState(AuthState.error);
+        }
+      } else {
+        _errorMessage = "Apple Sign In failed";
+        _setAuthState(AuthState.error);
+      }
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
       _setAuthState(AuthState.error);
     }
   }

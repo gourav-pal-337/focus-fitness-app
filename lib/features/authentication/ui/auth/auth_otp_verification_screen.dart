@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +12,7 @@ import '../../../../core/widgets/buttons/custom_bottom.dart';
 import '../../../../routes/app_router.dart';
 import '../../provider/auth_provider.dart';
 import 'auth_mode.dart';
+import 'otp_resend_timer.dart';
 
 class AuthOtpVerificationScreen extends StatelessWidget {
   const AuthOtpVerificationScreen({
@@ -65,7 +67,7 @@ class AuthOtpVerificationScreen extends StatelessWidget {
               ),
               SizedBox(height: AppSpacing.sm),
               Text(
-                'Enter the 4-digit OTP sent to your mobile number ending with $_maskedMobileNumber',
+                'Enter the 6-digit OTP sent to your mobile number ending with $_maskedMobileNumber',
                 style: AppTextStyle.text16Regular.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -73,19 +75,20 @@ class AuthOtpVerificationScreen extends StatelessWidget {
               SizedBox(height: AppSpacing.lg * 1.5),
               const _OtpInputFields(),
               SizedBox(height: AppSpacing.md),
-              Align(
-                alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () {
-                    // TODO: Handle resend code
-                  },
-                  child: Text(
-                    'Resend Code',
-                    style: AppTextStyle.text16Regular.copyWith(
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
+              Consumer<AuthProvider>(
+                builder: (context, provider, _) {
+                  if (provider.otpExpiresAt == null)
+                    return const SizedBox.shrink();
+
+                  return OtpResendTimer(
+                    expiresAt: provider.otpExpiresAt!,
+                    onResend: () {
+                      provider.sendOtp(
+                        purpose: mode == AuthMode.login ? 'login' : 'signup',
+                      );
+                    },
+                  );
+                },
               ),
             ],
           ),
@@ -93,32 +96,66 @@ class AuthOtpVerificationScreen extends StatelessWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
-      floatingActionButton: CustomButton(
-        margin: EdgeInsets.only(
-          left: AppSpacing.screenPadding.left,
-          right: AppSpacing.screenPadding.right,
-          bottom: AppSpacing.lg,
-        ),
-        text: isLogin ? 'Sign in' : 'Sign up',
-        size: ButtonSize.large,
-        width: double.infinity,
-        height: 52.h,
-        backgroundColor: canProceed ? AppColors.primary : AppColors.grey300,
-        textColor: AppColors.background,
-        textStyle: AppTextStyle.text16SemiBold.copyWith(
-          color: AppColors.background,
-        ),
-        borderRadius: 12.r,
-        isEnabled: canProceed,
-        onPressed: canProceed
-            ? () {
-                if (isLogin) {
-                  context.go(HomeRoute.path);
-                } else {
-                  context.push(LinkTrainerRoute.path);
-                }
-              }
-            : null,
+      floatingActionButton: Consumer<AuthProvider>(
+        builder: (context, provider, _) {
+          return CustomButton(
+            margin: EdgeInsets.only(
+              left: AppSpacing.screenPadding.left,
+              right: AppSpacing.screenPadding.right,
+              bottom: AppSpacing.lg,
+            ),
+            text: provider.isLoading
+                ? 'Verifying...'
+                : (isLogin ? 'Sign in' : 'Sign up'),
+            size: ButtonSize.large,
+            width: double.infinity,
+            height: 52.h,
+            backgroundColor: provider.canProceedWithOtp
+                ? AppColors.primary
+                : AppColors.grey300,
+            textColor: AppColors.background,
+            textStyle: AppTextStyle.text16SemiBold.copyWith(
+              color: AppColors.background,
+            ),
+            borderRadius: 12.r,
+            isEnabled: provider.canProceedWithOtp && !provider.isLoading,
+            icon: provider.isLoading
+                ? SizedBox(
+                    width: 20.w,
+                    height: 20.h,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.background,
+                      ),
+                    ),
+                  )
+                : null,
+            onPressed: (provider.canProceedWithOtp && !provider.isLoading)
+                ? () async {
+                    await provider.verifyOtp(
+                      purpose: isLogin ? 'login' : 'signup',
+                    );
+
+                    if (context.mounted) {
+                      if (provider.isLoginSuccess) {
+                        context.go(HomeRoute.path);
+                      } else if (provider.isError) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(provider.errorMessage),
+                            backgroundColor: AppColors.primary,
+                          ),
+                        );
+                      } else if (!isLogin && provider.isLoginSuccess) {
+                        // Handle successfully specific scenarios for signup if separate from generic login success
+                        context.push(LinkTrainerRoute.path);
+                      }
+                    }
+                  }
+                : null,
+          );
+        },
       ),
     );
   }
@@ -133,26 +170,16 @@ class _OtpInputFields extends StatelessWidget {
     final defaultPinTheme = PinTheme(
       width: 40.w,
       height: 60.h,
-      textStyle: AppTextStyle.text24Bold.copyWith(
-        color: AppColors.textPrimary,
-      ),
+      textStyle: AppTextStyle.text24Bold.copyWith(color: AppColors.textPrimary),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.grey300,
-            width: 1,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: AppColors.grey300, width: 1)),
       ),
     );
 
     final focusedPinTheme = defaultPinTheme.copyWith(
       decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(
-            color: AppColors.primary,
-            width: 1.5,
-          ),
+          bottom: BorderSide(color: AppColors.primary, width: 1.5),
         ),
       ),
     );
@@ -173,11 +200,8 @@ class _OtpInputFields extends StatelessWidget {
       cursor: Container(
         width: 2,
         height: 24.h,
-        decoration: BoxDecoration(
-          color: AppColors.primary,
-        ),
+        decoration: BoxDecoration(color: AppColors.primary),
       ),
     );
   }
 }
-

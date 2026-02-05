@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:focus_fitness/core/constants/app_assets.dart';
 import 'package:focus_fitness/core/provider/session_popup_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
 import 'package:focus_fitness/features/home/widgets/complete_profile_dialog.dart';
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
@@ -26,20 +27,22 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   Future<void> checkuserDetails() async {
-    // final userProvider = Provider.of<UserProvider>(context, listen: false);
-    // final user = userProvider.user;
     final profileProvider = Provider.of<ClientProfileProvider>(
       context,
       listen: false,
     );
     await profileProvider.fetchProfile();
     final user = profileProvider.profile;
+    debugPrint("phonenummm : ${user?.phone}");
+
     print("user : ${user?.gender} | ");
     if (user != null) {
       final isProfileIncomplete =
           (user.gender == null || user.gender!.isEmpty) ||
-          (user.dateOfBirth == null || user.dateOfBirth!.isEmpty);
-
+          (user.dateOfBirth == null || user.dateOfBirth!.isEmpty) ||
+          user.phone == null ||
+          user.phone!.isEmpty;
+      debugPrint("phonenummm : ${user.phone}");
       if (isProfileIncomplete) {
         showDialog(
           context: context,
@@ -50,22 +53,29 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
+  void initializeHome() {
     final provider = Provider.of<LinkedTrainerProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     // Fetch linked trainer when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
       // Ensure we have latest details
       // await userProvider.fetchUserDetails();
 
       if (!mounted) return;
-
-      userProvider.getFcmToken();
-      provider.fetchLinkedTrainer();
-      checkuserDetails();
+      Future.wait([
+        userProvider.fetchUserDetails(),
+        userProvider.getFcmToken(),
+        provider.fetchLinkedTrainer(),
+        checkuserDetails(),
+      ]);
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initializeHome();
   }
 
   @override
@@ -78,7 +88,9 @@ class _HomeScreenState extends State<HomeScreen> {
           listen: false,
         );
         provider.fetchLinkedTrainer();
-        // checkuserDetails();
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        userProvider.fetchUserDetails();
+        checkuserDetails();
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
@@ -120,64 +132,99 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         floatingActionButton: trainerProvider.trainer == null
             ? null
-            : FloatingActionButton(
-                backgroundColor: Colors.transparent,
-                splashColor: Color(0xFF25D366),
+            : Consumer<ClientProfileProvider>(
+                builder: (context, userProvider, child) {
+                  return GestureDetector(
+                    // splashFactory: NoSplash.splashFactory,
+                    // backgroundColor: Colors.transparent,
 
-                elevation: 0,
-                onPressed: () {
-                  //  if (trainerName != null &&
-                  //       sessionDate != null &&
-                  //       sessionTime != null) {
-                  // Schedule session popup
-                  final trainerProv = Provider.of<LinkedTrainerProvider>(
-                    context,
-                    listen: false,
-                  );
-                  final sessionPopupProvider =
-                      Provider.of<SessionPopupProvider>(context, listen: false);
+                    // // splashColor: Color(0xFF25D366),
+                    // elevation: 0,
+                    onTap: () async {
+                      // final userProvider = Provider.of<UserProvider>(
+                      //   context,
+                      //   listen: false,
+                      // );
+                      final trainerProv = Provider.of<LinkedTrainerProvider>(
+                        context,
+                        listen: false,
+                      );
 
-                  final data = SessionPopupData(
-                    trainerId: trainerProv.trainer?.id ?? '',
-                    trainerName: trainerProv.trainer?.fullName ?? '',
-                    trainerImageUrl: trainerProv.trainer?.profilePhoto,
-                    trainerContact: trainerProv.trainer?.whatsappNumber ?? '',
-                    sessionDate: "",
-                    sessionTime: "",
-                    onJoinSession: () {
-                      // TODO: Handle join session action
+                      final userPhone = userProvider.profile?.phone;
+                      final trainerWhatsapp =
+                          trainerProv.trainer?.whatsappNumber;
+                      debugPrint("userPhone : $userPhone");
+                      debugPrint("trainerWhatsapp : $trainerWhatsapp");
+                      // Check if User has a phone number first
+                      if (userPhone != null && userPhone.isNotEmpty) {
+                        if (trainerWhatsapp != null &&
+                            trainerWhatsapp.isNotEmpty) {
+                          final Uri whatsappUrl = Uri.parse(
+                            'https://wa.me/$trainerWhatsapp?text=Hello',
+                          );
+
+                          if (await canLaunchUrl(whatsappUrl)) {
+                            await launchUrl(
+                              whatsappUrl,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          } else {
+                            debugPrint('Could not launch $whatsappUrl');
+                          }
+                        } else {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  "Trainer WhatsApp number not available",
+                                ),
+                              ),
+                            );
+                          }
+                        }
+                      } else {
+                        // User phone missing -> Show popup to update
+                        final sessionPopupProvider =
+                            Provider.of<SessionPopupProvider>(
+                              context,
+                              listen: false,
+                            );
+
+                        final data = SessionPopupData(
+                          trainerId: trainerProv.trainer?.id ?? '',
+                          trainerName: trainerProv.trainer?.fullName ?? '',
+                          trainerImageUrl: trainerProv.trainer?.profilePhoto,
+                          // Passing empty contact triggers the "Update Phone" dialog in the popup
+                          trainerContact: '',
+                          sessionDate: "",
+                          sessionTime: "",
+                          onJoinSession: () {
+                            // TODO: Handle join session action
+                          },
+                        );
+                        sessionPopupProvider.showPopup(data);
+                      }
                     },
-                  );
-                  sessionPopupProvider.showPopup(data);
-
-                  // sessionPopupProvider.schedulePopupAt(data, sessionStartTime!);
-                  // if (sessionStartTime != null) {
-                  // } else {
-                  //   sessionPopupProvider.schedulePopup(
-                  //     data,
-                  //     delay: const Duration(seconds: 5),
-                  //   );
-                  // }
-                  // }
-                },
-                child: Container(
-                  height: 60.h,
-                  width: 60.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFF25D366),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
-                        blurRadius: 10,
-                        spreadRadius: 4,
-                        offset: Offset(0, 2),
+                    child: Container(
+                      height: 60.h,
+                      width: 60.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF25D366),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 10,
+                            spreadRadius: 4,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: SvgPicture.asset(AppAssets.whatsapp),
-                ),
+                      alignment: Alignment.center,
+                      child: SvgPicture.asset(AppAssets.whatsapp),
+                    ),
+                  );
+                },
               ),
       ),
     );

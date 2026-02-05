@@ -18,7 +18,7 @@ class SessionTabBar extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.screenPadding.left,
-        vertical: AppSpacing.xl,
+        vertical: AppSpacing.sm,
       ),
       child: Row(
         children: [
@@ -34,7 +34,9 @@ class SessionTabBar extends StatelessWidget {
             label: 'Upcoming',
             isSelected: selectedTab == SessionTab.upcoming,
             onTap: () {
-              context.read<SessionHistoryProvider>().selectTab(SessionTab.upcoming);
+              context.read<SessionHistoryProvider>().selectTab(
+                SessionTab.upcoming,
+              );
             },
           ),
           SizedBox(width: AppSpacing.sm),
@@ -50,7 +52,9 @@ class SessionTabBar extends StatelessWidget {
             label: 'Cancelled',
             isSelected: selectedTab == SessionTab.cancelled,
             onTap: () {
-              context.read<SessionHistoryProvider>().selectTab(SessionTab.cancelled);
+              context.read<SessionHistoryProvider>().selectTab(
+                SessionTab.cancelled,
+              );
             },
           ),
         ],
@@ -93,4 +97,3 @@ class _TabButton extends StatelessWidget {
     );
   }
 }
-

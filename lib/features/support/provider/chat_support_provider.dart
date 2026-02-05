@@ -18,7 +18,8 @@ class ChatSupportProvider extends ChangeNotifier {
     _messages.add(
       ChatMessageModel(
         id: '1',
-        message: 'Subject: Charged twice for monthly subscription\nHi, I was charged twice for my Focus Fitness monthly subscription. Can you help?',
+        message:
+            'Subject: Charged twice for monthly subscription\nHi, I was charged twice for my Focus Fusio monthly subscription. Can you help?',
         timestamp: DateTime.now().subtract(const Duration(hours: 1)),
         isUser: true,
       ),
@@ -28,7 +29,8 @@ class ChatSupportProvider extends ChangeNotifier {
     _messages.add(
       ChatMessageModel(
         id: '2',
-        message: 'Thanks! I checked your billing details and I can confirm two payments were processed today, about a minute apart.\nThis sometimes happens if the initial transaction doesn\'t immediately update. I can issue a refund for the duplicate charge.',
+        message:
+            'Thanks! I checked your billing details and I can confirm two payments were processed today, about a minute apart.\nThis sometimes happens if the initial transaction doesn\'t immediately update. I can issue a refund for the duplicate charge.',
         timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
         isUser: false,
       ),
@@ -37,7 +39,8 @@ class ChatSupportProvider extends ChangeNotifier {
     _messages.add(
       ChatMessageModel(
         id: '3',
-        message: '✓ Refund to your original payment method\nor\n✓ App credit added to your account',
+        message:
+            '✓ Refund to your original payment method\nor\n✓ App credit added to your account',
         timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
         isUser: false,
       ),
@@ -71,7 +74,8 @@ class ChatSupportProvider extends ChangeNotifier {
       'I\'ve processed your request. You should see the changes shortly.',
     ];
 
-    final randomResponse = responses[DateTime.now().millisecond % responses.length];
+    final randomResponse =
+        responses[DateTime.now().millisecond % responses.length];
 
     final supportMessage = ChatMessageModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -90,4 +94,3 @@ class ChatSupportProvider extends ChangeNotifier {
     super.dispose();
   }
 }
-

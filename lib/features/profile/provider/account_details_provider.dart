@@ -9,10 +9,15 @@ import '../data/models/update_client_profile_request_model.dart';
 import '../data/services/profile_api_service.dart';
 
 class AccountField {
-  const AccountField({required this.label, required this.value});
+  const AccountField({
+    required this.label,
+    required this.value,
+    required this.hintText,
+  });
 
   final String label;
   final String value;
+  final String hintText;
 }
 
 class AccountDetailsProvider extends ChangeNotifier {
@@ -35,16 +40,32 @@ class AccountDetailsProvider extends ChangeNotifier {
     print("user gender : ${user?.gender}");
     if (user != null) {
       _fields = [
-        AccountField(label: 'Name', value: user.fullName ?? ''),
-        AccountField(label: 'Email', value: user.email ?? ''),
-        AccountField(label: 'Gender', value: user.gender ?? ''),
+        AccountField(
+          label: 'Name',
+          value: user.fullName ?? '',
+          hintText: 'Enter your name',
+        ),
+        AccountField(
+          label: 'Email',
+          value: user.email ?? '',
+          hintText: 'Enter your email',
+        ),
+        AccountField(
+          label: 'Gender',
+          value: user.gender ?? '',
+          hintText: 'Enter your gender',
+        ),
         // AccountField(
         //   label: 'Date of birth',
         //   value: _formatDate(
         //     user.dateOfBirth.toString(),
         //   ), // Placeholder or if user has DOB
         // ),
-        AccountField(label: 'Contact Number', value: user.phone ?? ''),
+        AccountField(
+          label: 'Contact Number',
+          value: user.phone ?? '',
+          hintText: 'Enter your phone number',
+        ),
         // AccountField(label: 'Password', value: '************'),
       ];
       _values = _fields.map((field) => field.value).toList();
@@ -54,11 +75,27 @@ class AccountDetailsProvider extends ChangeNotifier {
     } else {
       // Fallback or empty
       _fields = [
-        const AccountField(label: 'Name', value: ''),
-        const AccountField(label: 'Email', value: ''),
-        const AccountField(label: 'Gender', value: ''),
+        const AccountField(
+          label: 'Name',
+          value: '',
+          hintText: 'Enter your name',
+        ),
+        const AccountField(
+          label: 'Email',
+          value: '',
+          hintText: 'Enter your email',
+        ),
+        const AccountField(
+          label: 'Gender',
+          value: '',
+          hintText: 'Enter your gender',
+        ),
         // const AccountField(label: 'Date of birth', value: ''),
-        const AccountField(label: 'Contact Number', value: ''),
+        const AccountField(
+          label: 'Contact Number',
+          value: '',
+          hintText: 'Enter your phone number',
+        ),
         // const AccountField(label: 'Password', value: '************'),
       ];
       _values = _fields.map((field) => field.value).toList();
@@ -80,12 +117,36 @@ class AccountDetailsProvider extends ChangeNotifier {
 
       ;
       _fields = [
-        AccountField(label: 'Name', value: user?.fullName ?? ''),
-        AccountField(label: 'Email', value: user?.email ?? ''),
-        AccountField(label: 'Gender', value: user?.gender ?? ''),
-        AccountField(label: 'Date of birth', value: dob),
-        AccountField(label: 'Contact Number', value: user?.phone ?? ''),
-        const AccountField(label: 'Password', value: '************'),
+        AccountField(
+          label: 'Name',
+          value: user?.fullName ?? '',
+          hintText: 'Enter your name',
+        ),
+        AccountField(
+          label: 'Email',
+          value: user?.email ?? '',
+          hintText: 'Enter your email',
+        ),
+        AccountField(
+          label: 'Gender',
+          value: user?.gender ?? '',
+          hintText: 'Enter your gender',
+        ),
+        AccountField(
+          label: 'Date of birth',
+          value: dob,
+          hintText: 'Enter your date of birth',
+        ),
+        AccountField(
+          label: 'Contact Number',
+          value: user?.phone ?? '',
+          hintText: 'Enter your phone number',
+        ),
+        const AccountField(
+          label: 'Password',
+          value: '************',
+          hintText: 'Enter your password',
+        ),
       ];
       _values = _fields.map((field) => field.value).toList();
     } catch (e) {
@@ -136,7 +197,7 @@ class AccountDetailsProvider extends ChangeNotifier {
 
     try {
       final name = _values[0];
-      // final email = _values[1];
+      final email = _values[1];
       final gender = _values[2];
       final dobStr = _values[3];
       final phone = _values[4];
@@ -179,6 +240,7 @@ class AccountDetailsProvider extends ChangeNotifier {
         dateOfBirth: dateOfBirth,
         gender: gender.isEmpty ? null : gender,
         phone: phone,
+        email: email,
       );
 
       debugPrint("request phone ${request.phone}");

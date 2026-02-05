@@ -37,7 +37,7 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
     // Initialize controllers for each field
     _controllers = widget.fields.map((field) {
       final controller = TextEditingController(
-        text: field.value.isEmpty ? '' : field.value,
+        text: field.value.isEmpty ? '' : field.value.toString().trim(),
       );
       // Add listener to detect changes
       controller.addListener(_onFieldChanged);
@@ -218,13 +218,16 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
                               ...widget.fields.asMap().entries.map((entry) {
                                 final index = entry.key;
                                 final field = entry.value;
+                                print(
+                                  "field value: ${field.hintText} : ${field.value}",
+                                );
                                 final isLast =
                                     index == widget.fields.length - 1;
                                 return Column(
                                   children: [
                                     EditDetailRow(
                                       label: field.label,
-                                      value: field.value,
+                                      value: field.value.toString().trim(),
                                       controller: _controllers[index],
                                       hintText: field.hintText,
                                       isDateField: field.isDateField,
