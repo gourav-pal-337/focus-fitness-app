@@ -52,7 +52,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 left: 0,
                 right: 0,
 
-                              child: SafeArea(
+                child: SafeArea(
                   child: Padding(
                     padding: EdgeInsets.only(
                       left: AppSpacing.screenPadding.left,
@@ -63,6 +63,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ? OnboardingPrimaryCta()
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               OnboardingPageIndicator(
                                 itemCount: provider.pages.length,

@@ -17,6 +17,7 @@ class ClientProfileModel {
     this.fitnessLevel,
     this.email,
     this.phone,
+    this.countryCode,
     this.goals,
     this.weightGoal,
     this.bodyType,
@@ -39,6 +40,7 @@ class ClientProfileModel {
   final String? fitnessLevel;
   final String? email;
   final String? phone;
+  final String? countryCode;
   final String status;
   final String? goals;
   final String? weightGoal;
@@ -67,8 +69,10 @@ class ClientProfileModel {
           ? (json['weight'] as num).toDouble()
           : null,
       fitnessLevel: json['fitnessLevel'] as String?,
+
       email: json['email'] as String?,
       phone: json['phone'] as String?,
+      countryCode: json['countryCode'] as String?,
       status: json['status'] as String? ?? 'active',
       goals: json['goals'] as String?,
       weightGoal: json['weightGoal'] as String?,

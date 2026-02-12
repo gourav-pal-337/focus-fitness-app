@@ -39,30 +39,22 @@ class ProfileDetailCard extends StatelessWidget {
             final isLast = entry.key == items.length - 1;
             return Column(
               children: [
-                _DetailRow(
-                  label: entry.value.label,
-                  value: entry.value.value,
-                ),
+                _DetailRow(label: entry.value.label, value: entry.value.value),
                 if (!isLast)
-                  Divider(
-                    color: AppColors.grey200,
-                    thickness: 1,
-                    height: 0,
-                  ),
+                  Divider(color: AppColors.grey200, thickness: 1, height: 0),
               ],
             );
           }),
           // SizedBox(height: AppSpacing.md),
-          Divider(
-            color: AppColors.grey200,
-            thickness: 1,
-            height: 0,
-          ),
+          Divider(color: AppColors.grey200, thickness: 1, height: 0),
           // SizedBox(height: AppSpacing.sm),
           GestureDetector(
             onTap: onEdit,
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 14.h,horizontal: AppSpacing.md),
+              padding: EdgeInsets.symmetric(
+                vertical: 14.h,
+                horizontal: AppSpacing.md,
+              ),
               child: Row(
                 // mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -91,31 +83,25 @@ class ProfileDetailCard extends StatelessWidget {
 }
 
 class ProfileDetailItem {
-  const ProfileDetailItem({
-    required this.label,
-    this.value,
-  });
+  const ProfileDetailItem({required this.label, this.value});
 
   final String label;
   final String? value;
 }
 
 class _DetailRow extends StatelessWidget {
-  const _DetailRow({
-    required this.label,
-    required this.value,
-  });
+  const _DetailRow({required this.label, required this.value});
 
   final String label;
   final String? value;
 
   @override
   Widget build(BuildContext context) {
-    final displayValue = value ?? 'Not set';
+    final displayValue = value ?? '  - ';
     final isPlaceholder = value == null || (value?.isEmpty ?? true);
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 11.h,horizontal: AppSpacing.md),
+      padding: EdgeInsets.symmetric(vertical: 11.h, horizontal: AppSpacing.md),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -128,9 +114,7 @@ class _DetailRow extends StatelessWidget {
           Text(
             displayValue,
             style: AppTextStyle.text16Regular.copyWith(
-              color: isPlaceholder
-                  ? AppColors.grey400
-                  : AppColors.textPrimary,
+              color: isPlaceholder ? AppColors.grey400 : AppColors.textPrimary,
               fontStyle: isPlaceholder ? FontStyle.italic : FontStyle.normal,
             ),
           ),
@@ -139,4 +123,3 @@ class _DetailRow extends StatelessWidget {
     );
   }
 }
-

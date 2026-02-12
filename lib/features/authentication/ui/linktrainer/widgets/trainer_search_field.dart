@@ -23,49 +23,63 @@ class _TrainerSearchFieldState extends State<TrainerSearchField> {
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
   Timer? _debounceTimer;
+  bool _touched = false;
 
   @override
   void initState() {
     super.initState();
     _controller.addListener(_onTextChanged);
+    _focusNode.addListener(_onFocusChange);
   }
 
   @override
   void dispose() {
     _debounceTimer?.cancel();
     _controller.removeListener(_onTextChanged);
+    _focusNode.removeListener(_onFocusChange);
     _controller.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
+  void _onFocusChange() {
+    if (!_focusNode.hasFocus) {
+      setState(() {
+        _touched = true;
+      });
+    } else {
+      setState(() {});
+    }
+  }
+
   void _onTextChanged() {
     final provider = context.read<AuthProvider>();
     final query = _controller.text.trim();
-    
+
     // If user starts typing and a trainer is selected, clear selection
-    if (provider.selectedTrainer != null && _controller.text != provider.selectedTrainer!.referralCode) {
+    if (provider.selectedTrainer != null &&
+        _controller.text != provider.selectedTrainer!.referralCode) {
       provider.clearTrainerValidation();
     }
-    
+
     // Update trainer ID immediately
     provider.updateTrainerId(_controller.text);
-    
+
     // Cancel previous timer
     _debounceTimer?.cancel();
-    
+
     // Clear results if query is empty
     if (query.isEmpty) {
       provider.clearTrainerValidation();
       return;
     }
-    
+
     // Only search if query is at least 4 characters (as per API requirement)
     if (query.length < 4) {
       provider.clearTrainerValidation();
       return;
     }
-    
+
     // Debounce the search API call (wait 500ms after user stops typing)
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
       if (mounted && _controller.text.trim() == query) {
@@ -77,8 +91,15 @@ class _TrainerSearchFieldState extends State<TrainerSearchField> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AuthProvider>();
-    final hasError = provider.trainerId.isEmpty && !_focusNode.hasFocus && provider.selectedTrainer == null;
-    final showDropdown = provider.hasTrainers && _focusNode.hasFocus && provider.selectedTrainer == null;
+    final hasError =
+        _touched &&
+        provider.trainerId.isEmpty &&
+        !_focusNode.hasFocus &&
+        provider.selectedTrainer == null;
+    final showDropdown =
+        provider.hasTrainers &&
+        _focusNode.hasFocus &&
+        provider.selectedTrainer == null;
     final showSelectedBox = provider.selectedTrainer != null;
 
     return Column(
@@ -101,19 +122,21 @@ class _TrainerSearchFieldState extends State<TrainerSearchField> {
             style: AppTextStyle.text16Regular.copyWith(
               color: AppColors.textPrimary,
             ),
-           
+
             decoration: InputDecoration(
               hintText: 'Enter trainer\'s name or referral code',
               hintStyle: AppTextStyle.text14Regular.copyWith(
                 color: AppColors.grey400,
               ),
-             
+
               contentPadding: EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: 16.h,
               ),
               suffixIcon: Icon(
-                showDropdown ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                showDropdown
+                    ? Icons.keyboard_arrow_up
+                    : Icons.keyboard_arrow_down,
                 color: AppColors.grey400,
                 size: 24.sp,
               ),
@@ -125,16 +148,12 @@ class _TrainerSearchFieldState extends State<TrainerSearchField> {
             children: [
               Text(
                 '*',
-                style: AppTextStyle.text14Regular.copyWith(
-                  color: Colors.red,
-                ),
+                style: AppTextStyle.text14Regular.copyWith(color: Colors.red),
               ),
               SizedBox(width: 4.w),
               Text(
                 'This field is required',
-                style: AppTextStyle.text14Regular.copyWith(
-                  color: Colors.red,
-                ),
+                style: AppTextStyle.text14Regular.copyWith(color: Colors.red),
               ),
             ],
           ),
@@ -143,12 +162,8 @@ class _TrainerSearchFieldState extends State<TrainerSearchField> {
         if (showDropdown) ...[
           SizedBox(height: 4.h),
           Container(
-            constraints: BoxConstraints(
-              maxHeight: 300.h,
-            ),
-            decoration: BoxDecoration(
-              
-            ),
+            constraints: BoxConstraints(maxHeight: 300.h),
+            decoration: BoxDecoration(),
             child: CupertinoScrollbar(
               thumbVisibility: true,
               controller: _scrollController,
@@ -162,7 +177,7 @@ class _TrainerSearchFieldState extends State<TrainerSearchField> {
                 itemBuilder: (context, index) {
                   final trainer = provider.foundTrainers[index];
                   final isSelected = provider.selectedTrainer?.id == trainer.id;
-                  
+
                   return _TrainerDropdownItem(
                     trainer: trainer,
                     isSelected: isSelected,
@@ -183,10 +198,7 @@ class _TrainerSearchFieldState extends State<TrainerSearchField> {
 }
 
 class _SelectedTrainerBox extends StatelessWidget {
-  const _SelectedTrainerBox({
-    required this.trainer,
-    required this.onClear,
-  });
+  const _SelectedTrainerBox({required this.trainer, required this.onClear});
 
   final TrainerInfo trainer;
   final VoidCallback onClear;
@@ -194,7 +206,10 @@ class _SelectedTrainerBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(8.r),
@@ -220,11 +235,7 @@ class _SelectedTrainerBox extends StatelessWidget {
                   : null,
             ),
             child: trainer.profilePhoto == null
-                ? Icon(
-                    Icons.person,
-                    size: 28.sp,
-                    color: AppColors.grey400,
-                  )
+                ? Icon(Icons.person, size: 28.sp, color: AppColors.grey400)
                 : null,
           ),
           SizedBox(width: AppSpacing.md),
@@ -252,11 +263,7 @@ class _SelectedTrainerBox extends StatelessWidget {
           // Clear button
           GestureDetector(
             onTap: onClear,
-            child: Icon(
-              Icons.close,
-              size: 20.sp,
-              color: AppColors.grey400,
-            ),
+            child: Icon(Icons.close, size: 20.sp, color: AppColors.grey400),
           ),
         ],
       ),
@@ -282,7 +289,9 @@ class _TrainerDropdownItem extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+          color: isSelected
+              ? AppColors.primary.withOpacity(0.1)
+              : Colors.transparent,
         ),
         child: Row(
           children: [
@@ -301,11 +310,7 @@ class _TrainerDropdownItem extends StatelessWidget {
                     : null,
               ),
               child: trainer.profilePhoto == null
-                  ? Icon(
-                      Icons.person,
-                      size: 24.sp,
-                      color: AppColors.grey400,
-                    )
+                  ? Icon(Icons.person, size: 24.sp, color: AppColors.grey400)
                   : null,
             ),
             SizedBox(width: AppSpacing.md),
@@ -332,15 +337,10 @@ class _TrainerDropdownItem extends StatelessWidget {
             ),
             // Selection Indicator
             if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: AppColors.primary,
-                size: 24.sp,
-              ),
+              Icon(Icons.check_circle, color: AppColors.primary, size: 24.sp),
           ],
         ),
       ),
     );
   }
 }
-

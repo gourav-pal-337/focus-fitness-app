@@ -16,6 +16,7 @@ class UpdateClientProfileRequestModel {
     this.notes,
     this.gender,
     this.phone,
+    this.countryCode,
   });
 
   final String? fullName;
@@ -33,6 +34,7 @@ class UpdateClientProfileRequestModel {
   final String? notes;
   final String? gender;
   final String? phone;
+  final String? countryCode;
   final String? email;
 
   Map<String, dynamic> toJson() {
@@ -90,6 +92,10 @@ class UpdateClientProfileRequestModel {
     );
     addIfNotNull('notes', notes?.trim().isEmpty == true ? null : notes?.trim());
     addIfNotNull('phone', phone?.trim().isEmpty == true ? null : phone?.trim());
+    addIfNotNull(
+      'countryCode',
+      countryCode?.trim().isEmpty == true ? null : countryCode?.trim(),
+    );
 
     return data;
   }

@@ -39,12 +39,12 @@ class PersonalDetailsSection extends StatelessWidget {
 
   String? _formatHeight(double? height) {
     if (height == null) return null;
-    return '${height.toStringAsFixed(0)}cm';
+    return '${height}cm';
   }
 
   String? _formatWeight(double? weight) {
     if (weight == null) return null;
-    return '${weight.toStringAsFixed(2)}kg';
+    return '${weight}kg';
   }
 
   String? _formatAge(int? age, String? dateOfBirth) {

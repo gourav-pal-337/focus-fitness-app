@@ -39,16 +39,25 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Phone Number Entry
+  // Mobile Number Entry
   String _countryCode = '+91';
+  String _countryFlag = '🇮🇳';
   String _phoneNumber = '';
 
   String get countryCode => _countryCode;
+  String get countryFlag => _countryFlag;
   String get phoneNumber => _phoneNumber;
-  bool get canProceedWithPhone => _phoneNumber.trim().isNotEmpty;
+  bool get canProceedWithPhone {
+    final phone = _phoneNumber.trim();
+    return phone.isNotEmpty &&
+        RegExp(r'^[0-9]+$').hasMatch(phone) &&
+        phone.length >= 7 &&
+        phone.length <= 15;
+  }
 
-  void updateCountryCode(String code) {
+  void updateCountryCode(String code, String flag) {
     _countryCode = code;
+    _countryFlag = flag;
     notifyListeners();
   }
 

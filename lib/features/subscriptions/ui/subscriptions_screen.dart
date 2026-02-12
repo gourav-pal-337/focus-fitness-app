@@ -24,9 +24,8 @@ class SubscriptionsScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (_) => SubscriptionProvider(),
       child: Scaffold(
-      backgroundColor: AppColors.background,
+        backgroundColor: AppColors.background,
         body: CustomScrollView(
-          
           slivers: [
             CustomSliverAppBar(
               onBack: () {

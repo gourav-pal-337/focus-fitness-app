@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_fitness/core/theme/app_radius.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/country_code_picker.dart';
 
 class EditDetailRow extends StatefulWidget {
   const EditDetailRow({
@@ -17,6 +19,8 @@ class EditDetailRow extends StatefulWidget {
     this.isDateField = false,
     this.isDropdown = false,
     this.dropdownItems,
+    this.initialCountryCode,
+    this.onCountryCodeChanged,
   });
 
   final String label;
@@ -27,6 +31,8 @@ class EditDetailRow extends StatefulWidget {
   final bool isDateField;
   final bool isDropdown;
   final List<String>? dropdownItems;
+  final String? initialCountryCode;
+  final ValueChanged<String>? onCountryCodeChanged;
 
   @override
   State<EditDetailRow> createState() => _EditDetailRowState();
@@ -35,6 +41,8 @@ class EditDetailRow extends StatefulWidget {
 class _EditDetailRowState extends State<EditDetailRow> {
   late TextEditingController _internalController;
   bool _isInternalController = false;
+  String _countryCode = '+91';
+  String _countryFlag = '🇮🇳';
 
   TextEditingController get _controller {
     return widget.controller ?? _internalController;
@@ -51,10 +59,19 @@ class _EditDetailRowState extends State<EditDetailRow> {
       _isInternalController = true;
     } else {
       // Initialize provided controller with initial value if empty
+      // Only do this if we haven't already initialized it externally?
+      // Actually standard pattern is to rely on external controller if provided.
       if (widget.controller!.text.isEmpty && widget.value.isNotEmpty) {
         widget.controller!.text = widget.value;
       }
     }
+
+    if (widget.initialCountryCode != null &&
+        widget.initialCountryCode!.isNotEmpty) {
+      _countryCode = widget.initialCountryCode!;
+    }
+
+    _initializePhoneField();
   }
 
   @override
@@ -64,12 +81,58 @@ class _EditDetailRowState extends State<EditDetailRow> {
     if (oldWidget.value != widget.value) {
       if (widget.controller != null) {
         // External controller - update if different
-        if (widget.controller != oldWidget.controller) {
-          widget.controller!.text = widget.value.isEmpty ? '' : widget.value;
+        if (widget.controller!.text != widget.value) {
+          widget.controller!.text = widget.value;
         }
       } else {
         // Internal controller - always update
-        _internalController.text = widget.value.isEmpty ? '' : widget.value;
+        _internalController.text = widget.value;
+      }
+      // Re-parse phone if it's a phone field
+      _initializePhoneField();
+    }
+
+    if (oldWidget.initialCountryCode != widget.initialCountryCode &&
+        widget.initialCountryCode != null) {
+      _countryCode = widget.initialCountryCode!;
+    }
+  }
+
+  void _initializePhoneField() {
+    if (widget.label.toLowerCase().contains('phone') ||
+        widget.label.toLowerCase().contains('mobile') ||
+        widget.label.toLowerCase().contains('contact')) {
+      final text = _controller.text.trim();
+
+      // If passing initialCountryCode, try to strip it from the text if present
+      if (widget.initialCountryCode != null &&
+          widget.initialCountryCode!.isNotEmpty) {
+        if (text.startsWith(widget.initialCountryCode!)) {
+          _controller.text = text
+              .substring(widget.initialCountryCode!.length)
+              .trim();
+          return;
+        }
+      }
+
+      if (text.startsWith('+')) {
+        // Simple logic: Assume +91 or match known codes if possible
+        if (text.startsWith('+91')) {
+          _countryCode = '+91';
+          _countryFlag = '🇮🇳';
+          _controller.text = text.substring(3).trim();
+        } else {
+          // Fallback: try to find space
+          final parts = text.split(' ');
+          if (parts.length > 1 && parts[0].startsWith('+')) {
+            _countryCode = parts[0];
+            _controller.text = text.substring(_countryCode.length).trim();
+          } else {
+            // Try to guess length 3 (+XX) or 4 (+XXX)
+            // Defaulting to keeping it as is might be safer if we can't determine code
+            // But let's assume if we have a valid country code in state, we use that.
+          }
+        }
       }
     }
   }
@@ -168,6 +231,11 @@ class _EditDetailRowState extends State<EditDetailRow> {
 
   @override
   Widget build(BuildContext context) {
+    final isPhone =
+        widget.label.toLowerCase().contains('phone') ||
+        widget.label.toLowerCase().contains('mobile') ||
+        widget.label.toLowerCase().contains('contact');
+
     return Padding(
       padding: EdgeInsets.symmetric(
         vertical: 14.h,
@@ -183,6 +251,31 @@ class _EditDetailRowState extends State<EditDetailRow> {
               ),
             ),
           ),
+          if (isPhone) ...[
+            Padding(
+              padding: const EdgeInsets.only(left: 0),
+              child: SizedBox(
+                child: MyCountryCodePicker(
+                  selectedCode: _countryCode,
+                  selectedFlag: _countryFlag,
+                  onCountryCodeTap: (code) {
+                    if (code != null) {
+                      setState(() {
+                        _countryCode = code.dialCode;
+                        _countryFlag = code.flag;
+                      });
+                      if (widget.onCountryCodeChanged != null) {
+                        widget.onCountryCodeChanged!(_countryCode);
+                      }
+                      if (widget.onChanged != null) {
+                        widget.onChanged!('$_countryCode${_controller.text}');
+                      }
+                    }
+                  },
+                ),
+              ),
+            ),
+          ],
           Expanded(
             child: widget.isDateField
                 ? GestureDetector(
@@ -270,12 +363,27 @@ class _EditDetailRowState extends State<EditDetailRow> {
                 : TextField(
                     controller: _controller,
                     onChanged: (value) {
-                      // Call onChanged if provided (for real-time updates in other screens)
+                      debugPrint("value : $value");
+                      if (isPhone) {
+                        if (widget.onChanged != null) {
+                          widget.onChanged!('$_countryCode$value');
+                        }
+                        return;
+                      }
                       if (widget.onChanged != null) {
                         widget.onChanged!(value);
                       }
                     },
                     textAlign: TextAlign.right,
+                    keyboardType: isPhone
+                        ? TextInputType.phone
+                        : TextInputType.text,
+                    inputFormatters: isPhone
+                        ? [
+                            LengthLimitingTextInputFormatter(10),
+                            FilteringTextInputFormatter.digitsOnly,
+                          ]
+                        : null,
                     style: AppTextStyle.text16Regular.copyWith(
                       color: _controller.text.isEmpty
                           ? AppColors.grey400

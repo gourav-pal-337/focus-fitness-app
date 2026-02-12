@@ -43,6 +43,8 @@ import '../features/support/ui/contact_support_screen.dart';
 import '../features/support/ui/ticket_details_screen.dart';
 import '../features/support/ui/chat_support_screen.dart';
 import '../features/support/ui/ticket_success_screen.dart';
+import '../features/support/ui/faq_screen.dart';
+import '../features/support/provider/support_provider.dart';
 import '../features/profile/ui/profile_screen.dart';
 import '../features/profile/ui/edit_profile_details_screen.dart';
 import '../features/profile/provider/edit_profile_details_provider.dart';
@@ -111,6 +113,7 @@ abstract class AppRouter {
       TicketDetailsRoute.route,
       ChatSupportRoute.route,
       TicketSuccessRoute.route,
+      FaqsRoute.route,
     ],
   );
 }
@@ -945,5 +948,21 @@ abstract class SampleRoute {
     path: path,
     name: 'sample',
     builder: (context, state) => const SampleScreen(),
+  );
+}
+
+abstract class FaqsRoute {
+  static const String path = '/dashboard/support/faqs';
+  static const String name = 'faqs';
+
+  static final GoRoute route = GoRoute(
+    path: path,
+    name: name,
+    builder: (context, state) {
+      return ChangeNotifierProvider<SupportProvider>(
+        create: (_) => SupportProvider(),
+        child: const FaqScreen(),
+      );
+    },
   );
 }

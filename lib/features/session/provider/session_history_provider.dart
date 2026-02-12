@@ -51,7 +51,7 @@ class SessionHistoryProvider extends ChangeNotifier {
       String? statusFilter;
       switch (_selectedTab) {
         case SessionTab.upcoming:
-          statusFilter = 'confirmed';
+          statusFilter = 'pending';
           break;
         case SessionTab.past:
           statusFilter = 'completed';

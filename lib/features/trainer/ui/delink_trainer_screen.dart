@@ -27,6 +27,8 @@ class DelinkTrainerScreen extends StatelessWidget {
             ),
             Expanded(
               child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: EdgeInsets.symmetric(
                   horizontal: AppSpacing.screenPadding.left,
                 ),
@@ -42,12 +44,16 @@ class DelinkTrainerScreen extends StatelessWidget {
                     SizedBox(height: AppSpacing.md),
                     const _DisclaimerNote(),
                     SizedBox(height: AppSpacing.xl),
-                    
-                    const _DelinkButton(),
-                    SizedBox(height: AppSpacing.xl),
                   ],
                 ),
               ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenPadding.left,
+                vertical: AppSpacing.md,
+              ),
+              child: SizedBox(height: 56.h, child: const _DelinkButton()),
             ),
           ],
         ),
@@ -77,11 +83,7 @@ class _TrainerInfoSection extends StatelessWidget {
               ? NetworkImage(trainer.profilePhoto!)
               : null,
           child: trainer.profilePhoto == null
-              ? Icon(
-                  Icons.person,
-                  size: 30.sp,
-                  color: AppColors.grey400,
-                )
+              ? Icon(Icons.person, size: 30.sp, color: AppColors.grey400)
               : null,
         ),
         SizedBox(width: AppSpacing.md),
@@ -138,10 +140,7 @@ class _ReasonDropdown extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.background,
               borderRadius: AppRadius.small,
-              border: Border.all(
-                color: AppColors.grey200,
-                width: 1,
-              ),
+              border: Border.all(color: AppColors.grey200, width: 1),
             ),
             child: Row(
               children: [
@@ -183,11 +182,7 @@ class _ReasonDropdown extends StatelessWidget {
           color: AppColors.grey400,
         );
       case 'Not Satisfied with Service':
-        return Icon(
-          Icons.star_outline,
-          size: 18.sp,
-          color: AppColors.grey400,
-        );
+        return Icon(Icons.star_outline, size: 18.sp, color: AppColors.grey400);
       case 'Found Another Trainer':
         return Icon(
           Icons.person_add_outlined,
@@ -195,24 +190,13 @@ class _ReasonDropdown extends StatelessWidget {
           color: AppColors.grey400,
         );
       case 'Personal Reasons':
-        return Icon(
-          Icons.info_outline,
-          size: 18.sp,
-          color: AppColors.grey400,
-        );
+        return Icon(Icons.info_outline, size: 18.sp, color: AppColors.grey400);
       default:
-        return Icon(
-          Icons.help_outline,
-          size: 18.sp,
-          color: AppColors.grey400,
-        );
+        return Icon(Icons.help_outline, size: 18.sp, color: AppColors.grey400);
     }
   }
 
-  void _showReasonDialog(
-    BuildContext context,
-    LinkedTrainerProvider provider,
-  ) {
+  void _showReasonDialog(BuildContext context, LinkedTrainerProvider provider) {
     final reasons = [
       'Trainer Unresponsive',
       'Not Satisfied with Service',
@@ -225,9 +209,7 @@ class _ReasonDropdown extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.background,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.medium,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
         title: Text(
           'Select Reason',
           style: AppTextStyle.text18SemiBold.copyWith(
@@ -270,7 +252,8 @@ class _AdditionalCommentsField extends StatefulWidget {
   const _AdditionalCommentsField();
 
   @override
-  State<_AdditionalCommentsField> createState() => _AdditionalCommentsFieldState();
+  State<_AdditionalCommentsField> createState() =>
+      _AdditionalCommentsFieldState();
 }
 
 class _AdditionalCommentsFieldState extends State<_AdditionalCommentsField> {
@@ -314,6 +297,8 @@ class _AdditionalCommentsFieldState extends State<_AdditionalCommentsField> {
           style: AppTextStyle.text14Regular.copyWith(
             color: AppColors.textPrimary,
           ),
+          keyboardType: TextInputType.multiline,
+          textInputAction: TextInputAction.newline,
           decoration: InputDecoration(
             hintText: 'Describe your problem in detail',
             hintStyle: AppTextStyle.text14Regular.copyWith(
@@ -321,26 +306,20 @@ class _AdditionalCommentsFieldState extends State<_AdditionalCommentsField> {
             ),
             border: OutlineInputBorder(
               borderRadius: AppRadius.small,
-              borderSide: BorderSide(
-                color: AppColors.grey200,
-                width: 1,
-              ),
+              borderSide: BorderSide(color: AppColors.grey200, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: AppRadius.small,
-              borderSide: BorderSide(
-                color: AppColors.grey200,
-                width: 1,
-              ),
+              borderSide: BorderSide(color: AppColors.grey200, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: AppRadius.small,
-              borderSide: BorderSide(
-                color: AppColors.primary,
-                width: 1.5,
-              ),
+              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
             ),
-            contentPadding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.md,
+            ),
           ),
         ),
       ],
@@ -377,7 +356,7 @@ class _DelinkButton extends StatelessWidget {
                 final success = await provider.unlinkTrainer();
 
                 if (success && context.mounted) {
-                  context.push(DelinkTrainerSuccessRoute.path);
+                  context.go(DelinkTrainerSuccessRoute.path);
                 }
               }
             : null,
@@ -390,13 +369,10 @@ class _DelinkButton extends StatelessWidget {
         child: Text(
           'Delink Trainer',
           style: AppTextStyle.text16SemiBold.copyWith(
-            color: provider.canDelink
-                ? Colors.red
-                : AppColors.grey400,
+            color: provider.canDelink ? Colors.red : AppColors.grey400,
           ),
         ),
       ),
     );
   }
 }
-

@@ -531,7 +531,7 @@ class SessionBottomSheetContent extends StatelessWidget {
                       ),
                       SizedBox(height: 24.h),
                       Text(
-                        'Update Phone Number',
+                        'Update mobile number',
                         style: AppTextStyle.text20Bold.copyWith(
                           color: AppColors.textPrimary,
                         ),
@@ -556,7 +556,7 @@ class SessionBottomSheetContent extends StatelessWidget {
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Please enter a valid phone number';
+                            return 'Please enter a valid mobile number';
                           }
                           return null;
                         },
@@ -611,7 +611,7 @@ class SessionBottomSheetContent extends StatelessWidget {
                                         ).showSnackBar(
                                           const SnackBar(
                                             content: Text(
-                                              'Phone number updated successfully',
+                                              'Mobile number updated successfully',
                                             ),
                                             backgroundColor: AppColors.primary,
                                           ),

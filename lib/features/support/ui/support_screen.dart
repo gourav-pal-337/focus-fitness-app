@@ -25,14 +25,13 @@ class SupportScreen extends StatelessWidget {
               title: 'Need Help?',
               centerTitle: true,
               onBack: () {
-                              context.go(HomeRoute.path);
-
-              }
+                context.go(HomeRoute.path);
+              },
             ),
             Expanded(
               child: SingleChildScrollView(
-          child: Column(
-            children: [
+                child: Column(
+                  children: [
                     // SizedBox(height: AppSpacing.sm),
                     // Text(
                     //   'We\'re here for you!\nIf you\'re facing an issue or have a question, just reach out and our support team will get back to you ASAP.',
@@ -47,14 +46,10 @@ class SupportScreen extends StatelessWidget {
                       title: 'FAQs',
                       description: 'View frequently asked questions',
                       onTap: () {
-                        // TODO: Navigate to FAQs screen
+                        context.push(FaqsRoute.path);
                       },
                     ),
-                    Divider(
-                      color: AppColors.grey200,
-                      thickness: 1,
-                      height: 0,
-                    ),
+                    Divider(color: AppColors.grey200, thickness: 1, height: 0),
                     SupportOptionItem(
                       icon: Icons.add_comment,
                       title: 'Contact Support',
@@ -63,11 +58,7 @@ class SupportScreen extends StatelessWidget {
                         context.push(ContactSupportRoute.path);
                       },
                     ),
-                    Divider(
-                      color: AppColors.grey200,
-                      thickness: 1,
-                      height: 0,
-                    ),
+                    Divider(color: AppColors.grey200, thickness: 1, height: 0),
                     SupportOptionItem(
                       icon: Icons.receipt_long_outlined,
                       title: 'Billing & Subscriptions',
@@ -76,58 +67,48 @@ class SupportScreen extends StatelessWidget {
                         context.go(SubscriptionsRoute.path);
                       },
                     ),
-                    Divider(
-                      color: AppColors.grey200,
-                      thickness: 1,
-                      height: 0,
-                    ),
+                    Divider(color: AppColors.grey200, thickness: 1, height: 0),
                     SupportOptionItem(
                       icon: Icons.check_circle_outline,
                       title: 'Track Ticket Status',
                       description: 'Track your ticket status here.',
                       onTap: () {
-                         ContactSupportBottomSheet.show(
-                    context: context,
-                    onCreateTicketTap: () {
-                      
-                       
-                     
-                      context.push(ContactSupportRoute.path);
-                    },
-                    onTrackTicketStatusTap: () {
-                      context.push(TicketDetailsRoute.path);
-                    },
-                  );
+                        ContactSupportBottomSheet.show(
+                          context: context,
+                          onCreateTicketTap: () {
+                            context.push(ContactSupportRoute.path);
+                          },
+                          onTrackTicketStatusTap: () {
+                            context.push(TicketDetailsRoute.path);
+                          },
+                        );
 
                         // TODO: Navigate to Track Ticket Status screen
                       },
                     ),
-                     Divider(
-                      color: AppColors.grey200,
-                      thickness: 1,
-                      height: 0,
-                    ),
+                    Divider(color: AppColors.grey200, thickness: 1, height: 0),
                     SizedBox(height: AppSpacing.xxl),
-                    
+
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding.left),
-                  child: Text(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.screenPadding.left,
+                      ),
+                      child: Text(
                         'We\'re here for you!\nIf you\'re facing an issue or have a question, just reach out and our support team will get back to you ASAP.',
                         style: AppTextStyle.text12Regular.copyWith(
                           color: AppColors.grey400,
                         ),
                         textAlign: TextAlign.center,
-                    ),
+                      ),
                     ),
                     SizedBox(height: AppSpacing.xl),
                   ],
-                  ),
                 ),
               ),
-            ],
+            ),
+          ],
         ),
       ),
     );
   }
 }
-

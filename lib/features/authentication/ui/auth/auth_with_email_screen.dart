@@ -185,145 +185,187 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.only(
-            left: AppSpacing.screenPadding.left,
-            right: AppSpacing.screenPadding.right,
-            bottom: AppSpacing.lg,
-          ),
+          padding: EdgeInsets.only(bottom: AppSpacing.lg),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: AppSpacing.md),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).maybePop(),
-                  child: Icon(
-                    Icons.arrow_back,
-                    size: 24.sp,
-                    color: AppColors.textPrimary,
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenPadding.left,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [SizedBox(height: AppSpacing.md)],
                   ),
                 ),
-                SizedBox(height: AppSpacing.lg),
-                Text(
-                  isLogin ? 'Login to your\nAccount' : 'Create\nAccount',
-                  style: AppTextStyle.text48Bold.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                SizedBox(height: AppSpacing.sm + 5),
-                Text(
-                  isLogin
-                      ? 'Welcome back! Please enter your details'
-                      : 'Set up your profile in a few steps.',
-                  style: AppTextStyle.text16Regular.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                SizedBox(height: AppSpacing.lg * 1.5),
-                _EmailField(controller: _emailController),
-                SizedBox(height: AppSpacing.sm),
-                _PasswordField(controller: _passwordController),
-                if (!isLogin) ...[
-                  SizedBox(height: AppSpacing.sm),
-                  _ConfirmPasswordField(
-                    controller: _confirmPasswordController,
-                    passwordController: _passwordController,
-                  ),
-                ],
-                if (isLogin) ...[
-                  SizedBox(height: AppSpacing.sm),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: GestureDetector(
-                      onTap: () {
-                        context.push(ForgotPasswordRoute.path);
-                      },
-                      child: Text(
-                        'Forgot Password?',
-                        style: AppTextStyle.text16Regular.copyWith(
-                          color: AppColors.grey400,
+                Stack(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.screenPadding.left,
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            GestureDetector(
+                              onTap: () => Navigator.of(context).maybePop(),
+                              child: Icon(
+                                Icons.arrow_back,
+                                size: 24.sp,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            SizedBox(height: AppSpacing.lg),
+                            Text(
+                              isLogin
+                                  ? 'Login to your\nAccount'
+                                  : 'Create\nAccount',
+                              style: AppTextStyle.text48Bold.copyWith(
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            SizedBox(height: AppSpacing.sm + 5),
+                            Text(
+                              isLogin
+                                  ? 'Welcome back! Please enter your details'
+                                  : 'Set up your profile in a few steps.',
+                              style: AppTextStyle.text16Regular.copyWith(
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
+                    Positioned(
+                      right: 0,
+                      top: 20,
+                      child: SizedBox(
+                        height: 180,
+                        // width: ,
+                        child: Image.asset(AppAssets.dumblesIcon),
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenPadding.left,
                   ),
-                ],
-                SizedBox(height: AppSpacing.lg * 1.5),
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, child) {
-                    return CustomButton(
-                      text: _getButtonText(authProvider),
-                      size: ButtonSize.large,
-                      width: double.infinity,
-                      height: 52.h,
-                      backgroundColor: AppColors.primary,
-                      textColor: AppColors.background,
-                      icon: authProvider.isLoading
-                          ? SizedBox(
-                              width: 20.w,
-                              height: 20.h,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.background,
-                                ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: AppSpacing.lg * 1.5),
+                      _EmailField(controller: _emailController),
+                      SizedBox(height: AppSpacing.sm),
+                      _PasswordField(controller: _passwordController),
+                      if (!isLogin) ...[
+                        SizedBox(height: AppSpacing.sm),
+                        _ConfirmPasswordField(
+                          controller: _confirmPasswordController,
+                          passwordController: _passwordController,
+                        ),
+                      ],
+                      if (isLogin) ...[
+                        SizedBox(height: AppSpacing.sm),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: GestureDetector(
+                            onTap: () {
+                              context.push(ForgotPasswordRoute.path);
+                            },
+                            child: Text(
+                              'Forgot Password?',
+                              style: AppTextStyle.text16Regular.copyWith(
+                                color: AppColors.grey400,
                               ),
-                            )
-                          : Icon(
-                              Icons.mail_outline,
-                              size: 20.sp,
+                            ),
+                          ),
+                        ),
+                      ],
+                      SizedBox(height: AppSpacing.lg * 1.5),
+                      Consumer<AuthProvider>(
+                        builder: (context, authProvider, child) {
+                          return CustomButton(
+                            text: _getButtonText(authProvider),
+                            size: ButtonSize.large,
+                            width: double.infinity,
+                            height: 52.h,
+                            backgroundColor: AppColors.primary,
+                            textColor: AppColors.background,
+                            icon: authProvider.isLoading
+                                ? SizedBox(
+                                    width: 20.w,
+                                    height: 20.h,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        AppColors.background,
+                                      ),
+                                    ),
+                                  )
+                                : Icon(
+                                    Icons.mail_outline,
+                                    size: 20.sp,
+                                    color: AppColors.background,
+                                  ),
+                            textStyle: AppTextStyle.text16SemiBold.copyWith(
                               color: AppColors.background,
                             ),
-                      textStyle: AppTextStyle.text16SemiBold.copyWith(
-                        color: AppColors.background,
+                            borderRadius: 12.r,
+                            onPressed: authProvider.isLoading
+                                ? null
+                                : () {
+                                    if (isLogin) {
+                                      _handleLogin();
+                                    } else {
+                                      _handleSignUp();
+                                    }
+                                  },
+                          );
+                        },
                       ),
-                      borderRadius: 12.r,
-                      onPressed: authProvider.isLoading
-                          ? null
-                          : () {
-                              if (isLogin) {
-                                _handleLogin();
-                              } else {
-                                _handleSignUp();
-                              }
-                            },
-                    );
-                  },
-                ),
-                SizedBox(height: AppSpacing.sm),
-                CustomButton(
-                  text: 'Use Phone Number instead',
-                  size: ButtonSize.large,
-                  width: double.infinity,
-                  height: 52.h,
-                  type: ButtonType.outlined,
-                  backgroundColor: AppColors.background,
-                  textColor: AppColors.textPrimary,
-                  borderColor: AppColors.grey300,
-                  borderRadius: 12.r,
-                  icon: Icon(
-                    Icons.phone_outlined,
-                    size: 20.sp,
-                    color: AppColors.textPrimary,
+                      SizedBox(height: AppSpacing.sm),
+                      CustomButton(
+                        text: 'Use mobile number instead',
+                        size: ButtonSize.large,
+                        width: double.infinity,
+                        height: 52.h,
+                        type: ButtonType.outlined,
+                        backgroundColor: AppColors.background,
+                        textColor: AppColors.textPrimary,
+                        borderColor: AppColors.grey300,
+                        borderRadius: 12.r,
+                        icon: Icon(
+                          Icons.phone_outlined,
+                          size: 20.sp,
+                          color: AppColors.textPrimary,
+                        ),
+                        textStyle: AppTextStyle.text16Medium.copyWith(
+                          color: AppColors.textPrimary,
+                        ),
+                        onPressed: () {
+                          if (isLogin) {
+                            context.push(LoginWithPhoneRoute.path);
+                          } else {
+                            context.push(SignupWithPhoneRoute.path);
+                          }
+                        },
+                      ),
+                      SizedBox(height: AppSpacing.lg * 1.5),
+                      const _SocialDivider(),
+                      SizedBox(height: AppSpacing.lg),
+                      _SocialRow(
+                        mode: widget.mode,
+                        onGooglePressed: _handleGoogleLogin,
+                        onApplePressed: _handleAppleLogin,
+                      ),
+                    ],
                   ),
-                  textStyle: AppTextStyle.text16Medium.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                  onPressed: () {
-                    if (isLogin) {
-                      context.push(LoginWithPhoneRoute.path);
-                    } else {
-                      context.push(SignupWithPhoneRoute.path);
-                    }
-                  },
-                ),
-                SizedBox(height: AppSpacing.lg * 1.5),
-                const _SocialDivider(),
-                SizedBox(height: AppSpacing.lg),
-                _SocialRow(
-                  mode: widget.mode,
-                  onGooglePressed: _handleGoogleLogin,
-                  onApplePressed: _handleAppleLogin,
                 ),
               ],
             ),

@@ -16,7 +16,8 @@ class ForgotPasswordScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ForgotPasswordProvider>();
-    final canProceed = provider.canProceedWithEmail && !provider.isRequestingReset;
+    final canProceed =
+        provider.canProceedWithEmail && !provider.isRequestingReset;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -62,37 +63,39 @@ class ForgotPasswordScreen extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
-      floatingActionButton: CustomButton(
-        margin: EdgeInsets.only(
-          left: AppSpacing.screenPadding.left,
-          right: AppSpacing.screenPadding.right,
-          bottom: AppSpacing.lg,
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: AppSpacing.screenPadding.left,
+            right: AppSpacing.screenPadding.right,
+            bottom: MediaQuery.of(context).viewInsets.bottom + AppSpacing.lg,
+          ),
+          child: CustomButton(
+            text: provider.isRequestingReset ? 'Sending...' : 'Reset Password',
+            size: ButtonSize.large,
+            width: double.infinity,
+            height: 52.h,
+            backgroundColor: canProceed ? AppColors.primary : AppColors.grey300,
+            textColor: AppColors.background,
+            textStyle: AppTextStyle.text16SemiBold.copyWith(
+              color: AppColors.background,
+            ),
+            borderRadius: 12.r,
+            isEnabled: canProceed,
+            onPressed: canProceed
+                ? () async {
+                    final provider = context.read<ForgotPasswordProvider>();
+                    final success = await provider.requestPasswordReset();
+
+                    if (success && context.mounted) {
+                      final email = provider.resetEmail;
+                      context.push('/check-email/$email');
+                    }
+                    // Error is shown in _ErrorDisplay widget
+                  }
+                : null,
+          ),
         ),
-        text: provider.isRequestingReset ? 'Sending...' : 'Reset Password',
-        size: ButtonSize.large,
-        width: double.infinity,
-        height: 52.h,
-        backgroundColor: canProceed ? AppColors.primary : AppColors.grey300,
-        textColor: AppColors.background,
-        textStyle: AppTextStyle.text16SemiBold.copyWith(
-          color: AppColors.background,
-        ),
-        borderRadius: 12.r,
-        isEnabled: canProceed,
-        onPressed: canProceed
-            ? () async {
-                final provider = context.read<ForgotPasswordProvider>();
-                final success = await provider.requestPasswordReset();
-                
-                if (success && context.mounted) {
-                  final email = provider.resetEmail;
-                  context.push('/check-email/$email');
-                }
-                // Error is shown in _ErrorDisplay widget
-              }
-            : null,
       ),
     );
   }
@@ -108,14 +111,8 @@ class _EmailField extends StatelessWidget {
     return AppTextFormField(
       keyboardType: TextInputType.emailAddress,
       hintText: 'Email',
-      hintStyle: AppTextStyle.text14Regular.copyWith(
-        color: AppColors.grey400,
-      ),
-      prefixIcon: Icon(
-        Icons.mail_sharp,
-        size: 20.sp,
-        color: AppColors.grey400,
-      ),
+      hintStyle: AppTextStyle.text14Regular.copyWith(color: AppColors.grey400),
+      prefixIcon: Icon(Icons.mail_sharp, size: 20.sp, color: AppColors.grey400),
       enabledBorderColor: AppColors.grey300,
       focusedBorderColor: AppColors.primary,
       textStyle: AppTextStyle.text16Regular.copyWith(
@@ -132,39 +129,30 @@ class _ErrorDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ForgotPasswordProvider>();
-    
+
     if (provider.resetRequestError != null) {
       return Container(
         padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: Colors.red.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(
-            color: Colors.red.withOpacity(0.3),
-          ),
+          border: Border.all(color: Colors.red.withOpacity(0.3)),
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.error,
-              color: Colors.red,
-              size: 20.sp,
-            ),
+            Icon(Icons.error, color: Colors.red, size: 20.sp),
             SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 provider.resetRequestError!,
-                style: AppTextStyle.text14Regular.copyWith(
-                  color: Colors.red,
-                ),
+                style: AppTextStyle.text14Regular.copyWith(color: Colors.red),
               ),
             ),
           ],
         ),
       );
     }
-    
+
     return const SizedBox.shrink();
   }
 }
-

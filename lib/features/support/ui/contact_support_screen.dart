@@ -30,7 +30,7 @@ class ContactSupportScreen extends StatelessWidget {
             children: [
               CustomAppBar(
                 title: 'Contact Support',
-               
+
                 onBack: () {
                   context.pop();
                 },
@@ -62,14 +62,28 @@ class ContactSupportScreen extends StatelessWidget {
                         SizedBox(height: AppSpacing.xl),
                         Consumer<ContactSupportProvider>(
                           builder: (context, provider, child) {
+                            if (provider.error != null) {
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(provider.error!)),
+                                );
+                              });
+                            }
+
                             return CustomButton(
-                              text: 'Submit Ticket',
-                              type: ButtonType.filled,
-                              onPressed: () {
-                                provider.submitTicket();
-                                // Navigate to success screen
-                                context.push(TicketSuccessRoute.path);
-                              },
+                              text: provider.isLoading
+                                  ? 'Submitting...'
+                                  : 'Submit Ticket',
+                              type: ButtonType.filled, // Assuming filled style
+                              onPressed: provider.isLoading
+                                  ? () {}
+                                  : () async {
+                                      final success = await provider
+                                          .submitTicket();
+                                      if (success && context.mounted) {
+                                        context.push(TicketSuccessRoute.path);
+                                      }
+                                    },
                               textStyle: AppTextStyle.text16SemiBold.copyWith(
                                 color: AppColors.background,
                               ),
@@ -93,4 +107,3 @@ class ContactSupportScreen extends StatelessWidget {
     );
   }
 }
-

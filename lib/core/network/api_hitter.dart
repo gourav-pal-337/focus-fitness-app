@@ -230,15 +230,24 @@ class ApiHitter {
   ApiResponse exception(DioException e) {
     if (e.response != null) {
       if (e.response?.statusCode == 401) {
-        final errorMessage =
-            (e.response?.data['error'] ??
-                    e.response?.data['msg'] ??
-                    'Something went wrong')
-                .toString();
-        debugPrint(errorMessage);
+        final path = e.requestOptions.path;
+        final isAuthRequest =
+            path.contains('/auth/login') ||
+            path.contains('/auth/verify-otp') ||
+            path.contains('/auth/firebase-login') ||
+            path.contains('/auth/register');
 
-        LocalStorageService.clearAll();
-        AppRouter.router.go(OnboardingRoute.path);
+        if (!isAuthRequest) {
+          final errorMessage =
+              (e.response?.data['error'] ??
+                      e.response?.data['msg'] ??
+                      'Something went wrong')
+                  .toString();
+          debugPrint(errorMessage);
+
+          LocalStorageService.clearAll();
+          AppRouter.router.go(OnboardingRoute.path);
+        }
       }
 
       final responseData = e.response?.data;

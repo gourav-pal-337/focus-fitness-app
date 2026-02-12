@@ -3,12 +3,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:focus_fitness/core/constants/app_assets.dart';
 import 'package:focus_fitness/core/provider/session_popup_provider.dart';
+import 'package:focus_fitness/features/support/widgets/auto_system_ui_wrapper.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
 import 'package:focus_fitness/features/home/widgets/complete_profile_dialog.dart';
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
 import 'package:focus_fitness/features/trainer/provider/linked_trainer_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:focus_fitness/features/profile/provider/account_details_provider.dart';
+import 'package:focus_fitness/features/profile/provider/edit_profile_details_provider.dart';
+import 'package:focus_fitness/features/profile/ui/edit_profile_details_screen.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -26,6 +30,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // ... existing imports ...
+
   Future<void> checkuserDetails() async {
     final profileProvider = Provider.of<ClientProfileProvider>(
       context,
@@ -37,12 +43,58 @@ class _HomeScreenState extends State<HomeScreen> {
 
     print("user : ${user?.gender} | ");
     if (user != null) {
+      // Check for phone number specifically (Account Details)
+      if ((user.phone == null || user.phone!.isEmpty) ||
+          (user.gender == null || user.gender!.isEmpty)) {
+        if (!mounted) return;
+
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => CompleteProfileDialog(
+            onConfirm: () async {
+              if (!mounted) return;
+
+              final accountProvider = Provider.of<AccountDetailsProvider>(
+                context,
+                listen: false,
+              );
+              await accountProvider.init(user);
+
+              if (mounted) {
+                final fields = accountProvider.fields.map((f) {
+                  return EditField(
+                    label: f.label,
+                    value: f.value,
+                    countryCode: f.countryCode,
+                    isDateField: f.label == 'Date of birth',
+                    hintText: f.hintText,
+                  );
+                }).toList();
+
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => EditProfileDetailsScreen(
+                      title: 'Account Details',
+                      fields: fields,
+                      section: EditProfileSection.accountDetails,
+                    ),
+                  ),
+                );
+              }
+            },
+          ),
+        );
+        return; // Return early if showing dialog
+      }
+
+      // Check for other profile details
       final isProfileIncomplete =
           (user.gender == null || user.gender!.isEmpty) ||
-          (user.dateOfBirth == null || user.dateOfBirth!.isEmpty) ||
-          user.phone == null ||
-          user.phone!.isEmpty;
-      debugPrint("phonenummm : ${user.phone}");
+          (user.dateOfBirth == null || user.dateOfBirth!.isEmpty);
+      debugPrint(
+        "isProfileIncomplete : $isProfileIncomplete ${user.gender} ${user.dateOfBirth}",
+      );
       if (isProfileIncomplete) {
         showDialog(
           context: context,
@@ -92,140 +144,144 @@ class _HomeScreenState extends State<HomeScreen> {
         userProvider.fetchUserDetails();
         checkuserDetails();
       },
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              SliverPersistentHeader(
-                // pinned: true,
-                floating: true,
-                delegate: PinnedHeaderDelegate(),
-              ),
-              SliverPadding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screenPadding.left,
+      child: AutoSystemUIWrapper(
+        headerColor: Colors.black,
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          body: SafeArea(
+            child: CustomScrollView(
+              slivers: [
+                // SliverAppBar(toolbarHeight: 0),
+                SliverPersistentHeader(
+                  // pinned: true,
+                  floating: true,
+                  delegate: PinnedHeaderDelegate(),
                 ),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate([
-                    SizedBox(height: 24.h),
-                    const TrainerConnectionCard(),
-                    SizedBox(height: 32.h),
-                    const TodaysWorkoutSection(),
-                    SizedBox(height: 32.h),
-                    const ProgressSection(),
-                    SizedBox(height: 32.h),
-                    // const TrainerSpotlightSection(),
-                    // SizedBox(height: 24.h),
-                    const TrainerSummarySection(),
-                    SizedBox(
-                      // width: 150,
-                      height: 100.h,
-                      child: Image.asset(AppAssets.homeScreenBottomImage),
-                    ),
-                    SizedBox(height: 32.h),
-                  ]),
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenPadding.left,
+                  ),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      SizedBox(height: 24.h),
+                      const TrainerConnectionCard(),
+                      SizedBox(height: 32.h),
+                      const TodaysWorkoutSection(),
+                      SizedBox(height: 32.h),
+                      const ProgressSection(),
+                      SizedBox(height: 32.h),
+                      // const TrainerSpotlightSection(),
+                      // SizedBox(height: 24.h),
+                      const TrainerSummarySection(),
+                      SizedBox(
+                        // width: 150,
+                        height: 100.h,
+                        child: Image.asset(AppAssets.homeScreenBottomImage),
+                      ),
+                      SizedBox(height: 32.h),
+                    ]),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        floatingActionButton: trainerProvider.trainer == null
-            ? null
-            : Consumer<ClientProfileProvider>(
-                builder: (context, userProvider, child) {
-                  return GestureDetector(
-                    // splashFactory: NoSplash.splashFactory,
-                    // backgroundColor: Colors.transparent,
+          floatingActionButton: trainerProvider.trainer == null
+              ? null
+              : Consumer<ClientProfileProvider>(
+                  builder: (context, userProvider, child) {
+                    return GestureDetector(
+                      // splashFactory: NoSplash.splashFactory,
+                      // backgroundColor: Colors.transparent,
 
-                    // // splashColor: Color(0xFF25D366),
-                    // elevation: 0,
-                    onTap: () async {
-                      // final userProvider = Provider.of<UserProvider>(
-                      //   context,
-                      //   listen: false,
-                      // );
-                      final trainerProv = Provider.of<LinkedTrainerProvider>(
-                        context,
-                        listen: false,
-                      );
+                      // // splashColor: Color(0xFF25D366),
+                      // elevation: 0,
+                      onTap: () async {
+                        // final userProvider = Provider.of<UserProvider>(
+                        //   context,
+                        //   listen: false,
+                        // );
+                        final trainerProv = Provider.of<LinkedTrainerProvider>(
+                          context,
+                          listen: false,
+                        );
 
-                      final userPhone = userProvider.profile?.phone;
-                      final trainerWhatsapp =
-                          trainerProv.trainer?.whatsappNumber;
-                      debugPrint("userPhone : $userPhone");
-                      debugPrint("trainerWhatsapp : $trainerWhatsapp");
-                      // Check if User has a phone number first
-                      if (userPhone != null && userPhone.isNotEmpty) {
-                        if (trainerWhatsapp != null &&
-                            trainerWhatsapp.isNotEmpty) {
-                          final Uri whatsappUrl = Uri.parse(
-                            'https://wa.me/$trainerWhatsapp?text=Hello',
-                          );
+                        final userPhone = userProvider.profile?.phone;
+                        final trainerWhatsapp =
+                            trainerProv.trainer?.whatsappNumber;
+                        debugPrint("userPhone : $userPhone");
+                        debugPrint("trainerWhatsapp : $trainerWhatsapp");
+                        // Check if User has a Mobile Number first
+                        if (userPhone != null && userPhone.isNotEmpty) {
+                          if (trainerWhatsapp != null &&
+                              trainerWhatsapp.isNotEmpty) {
+                            final Uri whatsappUrl = Uri.parse(
+                              'https://wa.me/$trainerWhatsapp?text=Hello',
+                            );
 
-                          if (await canLaunchUrl(whatsappUrl)) {
+                            // if (await canLaunchUrl(whatsappUrl)) {
                             await launchUrl(
                               whatsappUrl,
                               mode: LaunchMode.externalApplication,
                             );
+                            // } else {
+                            //   debugPrint('Could not launch $whatsappUrl');
+                            // }
                           } else {
-                            debugPrint('Could not launch $whatsappUrl');
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    "Trainer WhatsApp number not available",
+                                  ),
+                                ),
+                              );
+                            }
                           }
                         } else {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  "Trainer WhatsApp number not available",
-                                ),
-                              ),
-                            );
-                          }
-                        }
-                      } else {
-                        // User phone missing -> Show popup to update
-                        final sessionPopupProvider =
-                            Provider.of<SessionPopupProvider>(
-                              context,
-                              listen: false,
-                            );
+                          // User phone missing -> Show popup to update
+                          final sessionPopupProvider =
+                              Provider.of<SessionPopupProvider>(
+                                context,
+                                listen: false,
+                              );
 
-                        final data = SessionPopupData(
-                          trainerId: trainerProv.trainer?.id ?? '',
-                          trainerName: trainerProv.trainer?.fullName ?? '',
-                          trainerImageUrl: trainerProv.trainer?.profilePhoto,
-                          // Passing empty contact triggers the "Update Phone" dialog in the popup
-                          trainerContact: '',
-                          sessionDate: "",
-                          sessionTime: "",
-                          onJoinSession: () {
-                            // TODO: Handle join session action
-                          },
-                        );
-                        sessionPopupProvider.showPopup(data);
-                      }
-                    },
-                    child: Container(
-                      height: 60.h,
-                      width: 60.w,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFF25D366),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 10,
-                            spreadRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
+                          final data = SessionPopupData(
+                            trainerId: trainerProv.trainer?.id ?? '',
+                            trainerName: trainerProv.trainer?.fullName ?? '',
+                            trainerImageUrl: trainerProv.trainer?.profilePhoto,
+                            // Passing empty contact triggers the "Update Phone" dialog in the popup
+                            trainerContact: '',
+                            sessionDate: "",
+                            sessionTime: "",
+                            onJoinSession: () {
+                              // TODO: Handle join session action
+                            },
+                          );
+                          sessionPopupProvider.showPopup(data);
+                        }
+                      },
+                      child: Container(
+                        height: 60.h,
+                        width: 60.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xFF25D366),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 10,
+                              spreadRadius: 4,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        alignment: Alignment.center,
+                        child: SvgPicture.asset(AppAssets.whatsapp),
                       ),
-                      alignment: Alignment.center,
-                      child: SvgPicture.asset(AppAssets.whatsapp),
-                    ),
-                  );
-                },
-              ),
+                    );
+                  },
+                ),
+        ),
       ),
     );
   }

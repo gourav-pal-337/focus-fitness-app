@@ -30,6 +30,7 @@ class EditProfileDetailsScreen extends StatefulWidget {
 class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
   late List<TextEditingController> _controllers;
   late List<String> _initialValues;
+  late List<String?> _countryCodes;
 
   @override
   void initState() {
@@ -44,20 +45,21 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
       return controller;
     }).toList();
 
-    // Store initial values for comparison
+    // Store initial values
     _initialValues = widget.fields
         .map((field) => field.value.isEmpty ? '' : field.value)
         .toList();
+
+    // Initialize country codes
+    _countryCodes = widget.fields.map((field) => field.countryCode).toList();
   }
 
   void _onFieldChanged() {
-    // Trigger rebuild to update save button state
     setState(() {});
   }
 
   @override
   void dispose() {
-    // Remove listeners and dispose all controllers
     for (final controller in _controllers) {
       controller.removeListener(_onFieldChanged);
       controller.dispose();
@@ -66,11 +68,15 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
   }
 
   bool _hasChanges() {
-    // Compare current values with initial values
     for (int i = 0; i < _controllers.length; i++) {
       final currentValue = _controllers[i].text;
       final initialValue = _initialValues[i];
+      // simplified change detection
       if (currentValue != initialValue) {
+        return true;
+      }
+      // Check for country code changes
+      if (_countryCodes[i] != widget.fields[i].countryCode) {
         return true;
       }
     }
@@ -86,20 +92,29 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
     if (provider.isSaving) return;
 
     // Collect current values from all controllers
-    final List<String> currentValues = _controllers
-        .map((controller) => controller.text)
-        .toList();
+    final List<String> currentValues = [];
+
+    for (int i = 0; i < _controllers.length; i++) {
+      String val = _controllers[i].text;
+      if (_countryCodes[i] != null && _countryCodes[i]!.isNotEmpty) {
+        val = '${_countryCodes[i]}${val}';
+      }
+      currentValues.add(val);
+    }
 
     // Update provider with current values
     for (int i = 0; i < currentValues.length; i++) {
       debugPrint("current value ${currentValues[i]}");
       provider.updateValue(i, currentValues[i]);
+
+      if (_countryCodes[i] != null) {
+        provider.updateCountryCode(i, _countryCodes[i]!);
+      }
     }
 
     // Save to backend
     final success = await provider.save();
     if (success && mounted) {
-      // Refresh profile data after successful save
       final profileProvider = Provider.of<ClientProfileProvider>(
         context,
         listen: false,
@@ -235,7 +250,11 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
                                       dropdownItems: _getDropdownItems(
                                         field.label,
                                       ),
-                                      // No onChanged callback - values will be collected on save
+                                      initialCountryCode: field.countryCode,
+                                      onCountryCodeChanged: (code) {
+                                        _countryCodes[index] = code;
+                                        _onFieldChanged();
+                                      },
                                     ),
                                     if (!isLast)
                                       Divider(
@@ -269,10 +288,12 @@ class EditField {
     required this.value,
     this.hintText,
     this.isDateField = false,
+    this.countryCode,
   });
 
   final String label;
   final String value;
   final String? hintText;
   final bool isDateField;
+  final String? countryCode;
 }

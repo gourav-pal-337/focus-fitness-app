@@ -13,11 +13,13 @@ class AccountField {
     required this.label,
     required this.value,
     required this.hintText,
+    this.countryCode,
   });
 
   final String label;
   final String value;
   final String hintText;
+  final String? countryCode;
 }
 
 class AccountDetailsProvider extends ChangeNotifier {
@@ -39,6 +41,30 @@ class AccountDetailsProvider extends ChangeNotifier {
     notifyListeners();
     print("user gender : ${user?.gender}");
     if (user != null) {
+      String phone = user.phone ?? '';
+      String? countryCode = user.countryCode;
+
+      // Logic to separate country code if needed
+      if ((countryCode == null || countryCode.isEmpty) &&
+          phone.startsWith('+')) {
+        if (phone.startsWith('+91')) {
+          countryCode = '+91';
+          phone = phone.substring(3).trim();
+        } else {
+          // simpler fallback
+          final parts = phone.split(' ');
+          if (parts.length > 1 && parts[0].startsWith('+')) {
+            countryCode = parts[0];
+            phone = phone.substring(countryCode.length).trim();
+          }
+        }
+      } else if (countryCode != null &&
+          countryCode.isNotEmpty &&
+          phone.startsWith(countryCode)) {
+        // If phone still contains the code, strip it
+        phone = phone.substring(countryCode.length).trim();
+      }
+
       _fields = [
         AccountField(
           label: 'Name',
@@ -63,8 +89,9 @@ class AccountDetailsProvider extends ChangeNotifier {
         // ),
         AccountField(
           label: 'Contact Number',
-          value: user.phone ?? '',
-          hintText: 'Enter your phone number',
+          value: phone,
+          countryCode: countryCode,
+          hintText: 'Enter your mobile number',
         ),
         // AccountField(label: 'Password', value: '************'),
       ];
@@ -94,7 +121,7 @@ class AccountDetailsProvider extends ChangeNotifier {
         const AccountField(
           label: 'Contact Number',
           value: '',
-          hintText: 'Enter your phone number',
+          hintText: 'Enter your mobile number',
         ),
         // const AccountField(label: 'Password', value: '************'),
       ];
@@ -115,7 +142,17 @@ class AccountDetailsProvider extends ChangeNotifier {
         dob = _formatDate(profileResponse.profile!.dateOfBirth!);
       }
 
-      ;
+      String phone = user?.phone ?? '';
+      // Cannot easily access countryCode from UserProvider.user (RegisterResponseModel?)
+      // unless updated. assuming user?.phone is full string.
+      String countryCode = '+91'; // default? or try parse?
+
+      if (phone.startsWith('+91')) {
+        phone = phone.substring(3).trim();
+      } else {
+        // try parse?
+      }
+
       _fields = [
         AccountField(
           label: 'Name',
@@ -139,8 +176,9 @@ class AccountDetailsProvider extends ChangeNotifier {
         ),
         AccountField(
           label: 'Contact Number',
-          value: user?.phone ?? '',
-          hintText: 'Enter your phone number',
+          value: phone,
+          countryCode: countryCode,
+          hintText: 'Enter your mobile number',
         ),
         const AccountField(
           label: 'Password',

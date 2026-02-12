@@ -58,35 +58,16 @@ class PinnedHomeHeader extends StatelessWidget {
               ),
               Row(
                 children: [
-                  GestureDetector(
-                    onTap: () => context.push(NotificationsRoute.path),
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Icon(
-                          Icons.notifications_outlined,
-                          size: 24.sp,
-                          color: AppColors.textPrimary,
-                        ),
-                        Positioned(
-                          top: -2.h,
-                          right: -2.w,
-                          child: Container(
-                            width: 8.w,
-                            height: 8.w,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: AppColors.background,
-                                width: 1.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                  Badge(
+                    isLabelVisible: false,
+                    backgroundColor: AppColors.primary,
+                    child: Icon(
+                      Icons.notifications_outlined,
+                      size: 24.sp,
+                      color: AppColors.textPrimary,
                     ),
                   ),
+
                   SizedBox(width: 16.w),
                   // CircleAvatar(
                   //   radius: 20.r,

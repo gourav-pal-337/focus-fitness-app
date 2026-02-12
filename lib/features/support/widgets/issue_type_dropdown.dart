@@ -37,10 +37,7 @@ class IssueTypeDropdown extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   borderRadius: AppRadius.small,
-                  border: Border.all(
-                    color: AppColors.grey200,
-                    width: 1,
-                  ),
+                  border: Border.all(color: AppColors.grey200, width: 1),
                 ),
                 child: Row(
                   children: [
@@ -81,21 +78,13 @@ class IssueTypeDropdown extends StatelessWidget {
     BuildContext context,
     ContactSupportProvider provider,
   ) {
-    final issueTypes = [
-      'Technical Issue',
-      'Billing Issue',
-      'Account Issue',
-      'Feature Request',
-      'Other',
-    ];
+    final issueTypes = ['Payments', 'Chat', 'Bookings', 'Account', 'Other'];
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.background,
-        shape: RoundedRectangleBorder(
-          borderRadius: AppRadius.medium,
-        ),
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.medium),
         title: Text(
           'Select Issue Type',
           style: AppTextStyle.text18SemiBold.copyWith(
@@ -123,5 +112,3 @@ class IssueTypeDropdown extends StatelessWidget {
     );
   }
 }
-
-

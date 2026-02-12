@@ -18,7 +18,8 @@ class EnterTrainerIdScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
     // Can proceed if trainer is selected or if input is not empty (will search on click)
-    final canProceed = authProvider.isTrainerValid || authProvider.canProceedWithTrainerId;
+    final canProceed =
+        authProvider.isTrainerValid || authProvider.canProceedWithTrainerId;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -32,15 +33,15 @@ class EnterTrainerIdScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: AppSpacing.md),
-              GestureDetector(
-                onTap: () => Navigator.of(context).maybePop(),
-                child: Icon(
-                  Icons.arrow_back,
-                  size: 24.sp,
-                  color: AppColors.textPrimary,
-                ),
-              ),
+              // SizedBox(height: AppSpacing.md),
+              // GestureDetector(
+              //   onTap: () => Navigator.of(context).maybePop(),
+              //   child: Icon(
+              //     Icons.arrow_back,
+              //     size: 24.sp,
+              //     color: AppColors.textPrimary,
+              //   ),
+              // ),
               SizedBox(height: AppSpacing.lg),
               Text(
                 'Enter trainer referral code',
@@ -71,58 +72,61 @@ class EnterTrainerIdScreen extends StatelessWidget {
           right: AppSpacing.screenPadding.right,
           bottom: AppSpacing.lg,
         ),
-                text: 'Next',
-                size: ButtonSize.large,
-                width: double.infinity,
-                height: 52.h,
-                backgroundColor: canProceed ? AppColors.primary : AppColors.grey300,
-                // Light blue color from design
-                textColor: AppColors.background,
-                icon: Icon(
-                  Icons.arrow_forward,
-                  size: 20.sp,
-                  color: AppColors.background,
-                ),
-                textStyle: AppTextStyle.text16SemiBold.copyWith(
-                  color: AppColors.background,
-                ),
-                iconPosition: IconPosition.right,
-                borderRadius: 12.r,
-                isEnabled: canProceed,
-                onPressed: canProceed
-                    ? () async {
-                        final provider = context.read<AuthProvider>();
-                        
-                        // If trainer is already selected, navigate directly
-                        if (provider.isTrainerValid && provider.selectedTrainer != null) {
-                          final trainerId = provider.selectedTrainer!.referralCode;
-                          context.push('/link-trainer/$trainerId');
-                          return;
-                        }
-                        
-                        // If trainers found but none selected, show error
-                        if (provider.hasTrainers && provider.selectedTrainer == null) {
-                          // Error will be shown in _TrainerValidationInfo
-                          return;
-                        }
-                        
-                        // Otherwise, search trainer by referral code
-                        final trainerId = provider.trainerId.trim();
-                        await provider.searchTrainer(trainerId);
-                        
-                        // Check if trainer was selected (auto-selected if only one found)
-                        if (provider.isTrainerValid && provider.selectedTrainer != null) {
-                          // Navigate to link trainer screen - trainer info is in provider
-                          context.push('/link-trainer/${provider.selectedTrainer!.referralCode}');
-                        }
-                        // If search failed, error will be shown in _TrainerValidationInfo
-                      }
-                    : null,
-              ),
+        text: 'Next',
+        size: ButtonSize.large,
+        width: double.infinity,
+        height: 52.h,
+        backgroundColor: canProceed ? AppColors.primary : AppColors.grey300,
+        // Light blue color from design
+        textColor: AppColors.background,
+        icon: Icon(
+          Icons.arrow_forward,
+          size: 20.sp,
+          color: AppColors.background,
+        ),
+        textStyle: AppTextStyle.text16SemiBold.copyWith(
+          color: AppColors.background,
+        ),
+        iconPosition: IconPosition.right,
+        borderRadius: 12.r,
+        isEnabled: canProceed,
+        onPressed: canProceed
+            ? () async {
+                final provider = context.read<AuthProvider>();
+
+                // If trainer is already selected, navigate directly
+                if (provider.isTrainerValid &&
+                    provider.selectedTrainer != null) {
+                  final trainerId = provider.selectedTrainer!.referralCode;
+                  context.push('/link-trainer/$trainerId');
+                  return;
+                }
+
+                // If trainers found but none selected, show error
+                if (provider.hasTrainers && provider.selectedTrainer == null) {
+                  // Error will be shown in _TrainerValidationInfo
+                  return;
+                }
+
+                // Otherwise, search trainer by referral code
+                final trainerId = provider.trainerId.trim();
+                await provider.searchTrainer(trainerId);
+
+                // Check if trainer was selected (auto-selected if only one found)
+                if (provider.isTrainerValid &&
+                    provider.selectedTrainer != null) {
+                  // Navigate to link trainer screen - trainer info is in provider
+                  context.push(
+                    '/link-trainer/${provider.selectedTrainer!.referralCode}',
+                  );
+                }
+                // If search failed, error will be shown in _TrainerValidationInfo
+              }
+            : null,
+      ),
     );
   }
 }
-
 
 class _TrainerValidationInfo extends StatelessWidget {
   const _TrainerValidationInfo();
@@ -157,9 +161,6 @@ class _TrainerValidationInfo extends StatelessWidget {
       );
     }
 
-   
-    
-
     // Show error message if search failed
     if (provider.trainerValidationError != null) {
       return Container(
@@ -167,24 +168,16 @@ class _TrainerValidationInfo extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.red.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(
-            color: Colors.red.withOpacity(0.3),
-          ),
+          border: Border.all(color: Colors.red.withOpacity(0.3)),
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.error,
-              color: Colors.red,
-              size: 20.sp,
-            ),
+            Icon(Icons.error, color: Colors.red, size: 20.sp),
             SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 provider.trainerValidationError!,
-                style: AppTextStyle.text14Regular.copyWith(
-                  color: Colors.red,
-                ),
+                style: AppTextStyle.text14Regular.copyWith(color: Colors.red),
               ),
             ),
           ],

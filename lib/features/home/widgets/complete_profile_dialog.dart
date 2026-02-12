@@ -15,7 +15,9 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../routes/app_router.dart';
 
 class CompleteProfileDialog extends StatelessWidget {
-  const CompleteProfileDialog({super.key});
+  const CompleteProfileDialog({super.key, this.onConfirm});
+
+  final VoidCallback? onConfirm;
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +74,11 @@ class CompleteProfileDialog extends StatelessWidget {
                   height: 56.h,
                   onPressed: () {
                     context.pop(); // Close dialog
-                    context.push(ProfileRoute.path);
+                    if (onConfirm != null) {
+                      onConfirm!();
+                    } else {
+                      context.push(ProfileRoute.path);
+                    }
                   },
                   width: double.infinity,
                   margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),

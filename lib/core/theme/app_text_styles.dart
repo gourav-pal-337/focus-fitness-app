@@ -4,7 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 abstract class AppTextStyle {
   static const String montserat = "Montserrat";
   static const String lato = 'Lato';
-  static const String defaultFontFamily = lato;
+  static const String sfpro = 'SFPRO';
+  static const String defaultFontFamily = sfpro;
 
   // 48px Text Styles
   static TextStyle text48Regular = TextStyle(
@@ -71,7 +72,7 @@ abstract class AppTextStyle {
     letterSpacing: -0.72, // -2%
     fontFamily: defaultFontFamily,
   );
-  
+
   // 32px Text Styles
   static TextStyle text32Regular = TextStyle(
     fontSize: 32.sp,
@@ -101,8 +102,6 @@ abstract class AppTextStyle {
     fontFamily: defaultFontFamily,
   );
 
-
-
   // 28px Text Styles
   static TextStyle text28Regular = TextStyle(
     fontSize: 28.sp,
@@ -128,7 +127,6 @@ abstract class AppTextStyle {
     height: 1.33, // 32px
     fontFamily: defaultFontFamily,
   );
-
 
   // 24px Text Styles
   static TextStyle text24Regular = TextStyle(
@@ -303,8 +301,7 @@ abstract class AppTextStyle {
     height: 1.5, // 18px
     fontFamily: defaultFontFamily,
   );
-  
-  
+
   // 10px Text Styles
   static TextStyle text10Regular = TextStyle(
     fontSize: 10.sp,
@@ -333,5 +330,4 @@ abstract class AppTextStyle {
     height: 1.5, // 18px
     fontFamily: defaultFontFamily,
   );
-  
 }

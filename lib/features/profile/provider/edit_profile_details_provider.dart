@@ -14,6 +14,7 @@ class EditProfileDetailsProvider extends ChangeNotifier {
   }) : _fields = fields,
        _apiService = ProfileApiService() {
     _values = fields.map((field) => field.value).toList();
+    _countryCodes = fields.map((field) => field.countryCode).toList();
   }
 
   final List<EditField> _fields;
@@ -21,17 +22,26 @@ class EditProfileDetailsProvider extends ChangeNotifier {
   final ProfileApiService _apiService;
 
   List<String> _values = [];
+  List<String?> _countryCodes = [];
   bool _isSaving = false;
   String? _error;
 
   List<EditField> get fields => _fields;
   List<String> get values => _values;
+  List<String?> get countryCodes => _countryCodes;
   bool get isSaving => _isSaving;
   String? get error => _error;
 
   void updateValue(int index, String value) {
     if (index >= 0 && index < _values.length) {
       _values[index] = value;
+      notifyListeners();
+    }
+  }
+
+  void updateCountryCode(int index, String code) {
+    if (index >= 0 && index < _countryCodes.length) {
+      _countryCodes[index] = code;
       notifyListeners();
     }
   }
@@ -179,9 +189,17 @@ class EditProfileDetailsProvider extends ChangeNotifier {
       return value.isEmpty ? null : value;
     }
 
+    String? _getCountryCode(String label) {
+      final index = _fields.indexWhere((f) => f.label == label);
+      if (index == -1) return null;
+      final value = _countryCodes[index]?.trim();
+      return (value == null || value.isEmpty) ? null : value;
+    }
+
     final fullName = _getValue('Name');
     final email = _getValue('Email');
     final phone = _getValue('Contact Number');
+    final countryCode = _getCountryCode('Contact Number');
     final dobStr = _getValue('Date of birth');
     final gender = _getValue('Gender');
 
@@ -236,6 +254,7 @@ class EditProfileDetailsProvider extends ChangeNotifier {
       dateOfBirth: dateOfBirth,
       gender: gender,
       phone: phone,
+      countryCode: countryCode,
       email: email,
     );
   }
