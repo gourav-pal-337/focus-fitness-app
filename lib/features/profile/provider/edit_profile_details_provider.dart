@@ -54,7 +54,7 @@ class EditProfileDetailsProvider extends ChangeNotifier {
 
     try {
       final request = _buildRequest();
-      debugPrint("request data ${request.email.toString()}");
+      print("request data ${request.toJson()}");
       final response = await _apiService.updateClientProfile(request);
       _isSaving = false;
       notifyListeners();
@@ -202,7 +202,7 @@ class EditProfileDetailsProvider extends ChangeNotifier {
     final countryCode = _getCountryCode('Contact Number');
     final dobStr = _getValue('Date of birth');
     final gender = _getValue('Gender');
-
+    debugPrint("Country Code:::: $countryCode");
     String? dateOfBirth;
     if (dobStr != null && dobStr.isNotEmpty) {
       try {

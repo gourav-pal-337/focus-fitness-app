@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:focus_fitness/core/constants/app_assets.dart';
+import 'package:focus_fitness/core/widgets/country_code_picker.dart';
 import 'package:focus_fitness/core/widgets/inputs/inputs.dart';
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
 import 'package:focus_fitness/features/trainer/data/models/link_trainer_response_model.dart';
@@ -490,6 +492,8 @@ class SessionBottomSheetContent extends StatelessWidget {
     final TextEditingController phoneController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     bool isLoading = false;
+    String countryCode = '+91';
+    String countryFlag = '🇮🇳';
 
     showModalBottomSheet(
       context: context,
@@ -550,9 +554,28 @@ class SessionBottomSheetContent extends StatelessWidget {
                       AppTextFormField(
                         controller: phoneController,
                         keyboardType: TextInputType.phone,
-                        hintText: 'WhatsApp Number (e.g. +1234567890)',
+                        hintText: 'WhatsApp Number (e.g. 1234567890)',
                         hintStyle: AppTextStyle.text14Regular.copyWith(
                           color: AppColors.textSecondary.withValues(alpha: 0.6),
+                        ),
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(10),
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        prefixIcon: SizedBox(
+                          width: 100.w,
+                          child: MyCountryCodePicker(
+                            selectedCode: countryCode,
+                            selectedFlag: countryFlag,
+                            onCountryCodeTap: (code) {
+                              if (code != null) {
+                                setState(() {
+                                  countryCode = code.dialCode;
+                                  countryFlag = code.flag;
+                                });
+                              }
+                            },
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -592,6 +615,7 @@ class SessionBottomSheetContent extends StatelessWidget {
                                         .updateClientProfile(
                                           UpdateClientProfileRequestModel(
                                             phone: phoneController.text.trim(),
+                                            countryCode: countryCode,
                                           ),
                                         );
 

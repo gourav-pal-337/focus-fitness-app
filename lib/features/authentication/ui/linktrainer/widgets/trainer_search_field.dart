@@ -133,13 +133,13 @@ class _TrainerSearchFieldState extends State<TrainerSearchField> {
                 horizontal: AppSpacing.md,
                 vertical: 16.h,
               ),
-              suffixIcon: Icon(
-                showDropdown
-                    ? Icons.keyboard_arrow_up
-                    : Icons.keyboard_arrow_down,
-                color: AppColors.grey400,
-                size: 24.sp,
-              ),
+              // suffixIcon: Icon(
+              //   showDropdown
+              //       ? Icons.keyboard_arrow_up
+              //       : Icons.keyboard_arrow_down,
+              //   color: AppColors.grey400,
+              //   size: 24.sp,
+              // ),
             ),
           ),
         if (hasError && !showSelectedBox) ...[

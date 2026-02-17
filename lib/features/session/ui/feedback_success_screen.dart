@@ -38,9 +38,10 @@ class FeedbackSuccessScreen extends StatelessWidget {
                     ),
                     SizedBox(height: AppSpacing.md),
                     Text(
-                      'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.',
-                      style: AppTextStyle.text16Medium.copyWith(
-                        color: AppColors.grey400,
+                      'Your feedback helps us improve your experience. We appreciate your time and effort.',
+                      style: AppTextStyle.text14Regular.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.5,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -72,16 +73,9 @@ class _SuccessIcon extends StatelessWidget {
           height: 60.w,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(
-              color: AppColors.primary,
-              width: 3,
-            ),
+            border: Border.all(color: AppColors.primary, width: 3),
           ),
-          child: Icon(
-            Icons.check,
-            size: 40.sp,
-            color: AppColors.primary,
-          ),
+          child: Icon(Icons.check, size: 40.sp, color: AppColors.primary),
         ),
       ),
     );
@@ -117,4 +111,3 @@ class _GoToHomeButton extends StatelessWidget {
     );
   }
 }
-

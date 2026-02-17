@@ -47,14 +47,43 @@ class _FaqScreenState extends State<FaqScreen> {
                     return const Center(child: Text('No FAQs available'));
                   }
 
-                  return ListView.separated(
+                  final groupedFaqs = <String, List<FaqModel>>{};
+                  for (var faq in provider.faqs) {
+                    final category = faq.category ?? 'General';
+                    if (!groupedFaqs.containsKey(category)) {
+                      groupedFaqs[category] = [];
+                    }
+                    groupedFaqs[category]!.add(faq);
+                  }
+
+                  return ListView.builder(
                     padding: EdgeInsets.all(AppSpacing.md),
-                    itemCount: provider.faqs.length,
-                    separatorBuilder: (context, index) =>
-                        Divider(color: AppColors.grey200, height: 1),
+                    itemCount: groupedFaqs.length,
                     itemBuilder: (context, index) {
-                      final faq = provider.faqs[index];
-                      return _FaqItem(faq: faq);
+                      final category = groupedFaqs.keys.elementAt(index);
+                      final faqs = groupedFaqs[category]!;
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (index > 0) SizedBox(height: AppSpacing.lg),
+                          Text(
+                            _formatCategory(category),
+                            style: AppTextStyle.text24SemiBold.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          SizedBox(height: AppSpacing.md),
+                          ...faqs.map((faq) {
+                            return Column(
+                              children: [
+                                _FaqItem(faq: faq),
+                                Divider(color: AppColors.grey200, height: 1),
+                              ],
+                            );
+                          }),
+                        ],
+                      );
                     },
                   );
                 },
@@ -64,6 +93,17 @@ class _FaqScreenState extends State<FaqScreen> {
         ),
       ),
     );
+  }
+
+  String _formatCategory(String category) {
+    if (category.isEmpty) return 'General';
+    return category
+        .split('_')
+        .map((word) {
+          if (word.isEmpty) return '';
+          return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
+        })
+        .join(' ');
   }
 }
 

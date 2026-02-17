@@ -1,3 +1,4 @@
+import 'package:canopas_country_picker/canopas_country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -59,8 +60,6 @@ class _EditDetailRowState extends State<EditDetailRow> {
       _isInternalController = true;
     } else {
       // Initialize provided controller with initial value if empty
-      // Only do this if we haven't already initialized it externally?
-      // Actually standard pattern is to rely on external controller if provided.
       if (widget.controller!.text.isEmpty && widget.value.isNotEmpty) {
         widget.controller!.text = widget.value;
       }
@@ -68,7 +67,9 @@ class _EditDetailRowState extends State<EditDetailRow> {
 
     if (widget.initialCountryCode != null &&
         widget.initialCountryCode!.isNotEmpty) {
+      debugPrint('initialCountryCode: ${widget.initialCountryCode}');
       _countryCode = widget.initialCountryCode!;
+      _countryFlag = _getFlagForCode(_countryCode);
     }
 
     _initializePhoneField();
@@ -77,61 +78,65 @@ class _EditDetailRowState extends State<EditDetailRow> {
   @override
   void didUpdateWidget(EditDetailRow oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Update controller if value changed
-    if (oldWidget.value != widget.value) {
-      if (widget.controller != null) {
-        // External controller - update if different
-        if (widget.controller!.text != widget.value) {
-          widget.controller!.text = widget.value;
-        }
-      } else {
-        // Internal controller - always update
-        _internalController.text = widget.value;
-      }
-      // Re-parse phone if it's a phone field
-      _initializePhoneField();
+    // Update controller if value changed - but be careful not to overwrite user input
+    // Only update if the PROP value changed significantly (e.g. parent forced update)
+    if (oldWidget.value != widget.value && widget.value != _controller.text) {
+      // _controller.text = widget.value; // Removing this auto-update for now as it causes jumps if logic differs
     }
 
     if (oldWidget.initialCountryCode != widget.initialCountryCode &&
         widget.initialCountryCode != null) {
       _countryCode = widget.initialCountryCode!;
+      _countryFlag = _getFlagForCode(_countryCode);
     }
+  }
+
+  String _getFlagForCode(String code) {
+    CountryCode countryCode = CountryCode.getCountryCodeByDialCode(
+      dialCode: code,
+    );
+    return countryCode.flag;
   }
 
   void _initializePhoneField() {
     if (widget.label.toLowerCase().contains('phone') ||
         widget.label.toLowerCase().contains('mobile') ||
         widget.label.toLowerCase().contains('contact')) {
-      final text = _controller.text.trim();
+      // The parent EditProfileDetailsScreen now handles stripping the code from the initial value passed to controller.
+      // So _controller.text should ALREADY be stripped of the code if the parent did its job.
 
-      // If passing initialCountryCode, try to strip it from the text if present
-      if (widget.initialCountryCode != null &&
-          widget.initialCountryCode!.isNotEmpty) {
-        if (text.startsWith(widget.initialCountryCode!)) {
-          _controller.text = text
-              .substring(widget.initialCountryCode!.length)
-              .trim();
-          return;
-        }
-      }
+      // However, we still need to set our local _countryCode if it wasn't passed via initialCountryCode prop
+      // but might be hiding in the text (fallback).
 
-      if (text.startsWith('+')) {
-        // Simple logic: Assume +91 or match known codes if possible
-        if (text.startsWith('+91')) {
-          _countryCode = '+91';
-          _countryFlag = '🇮🇳';
-          _controller.text = text.substring(3).trim();
-        } else {
-          // Fallback: try to find space
-          final parts = text.split(' ');
-          if (parts.length > 1 && parts[0].startsWith('+')) {
-            _countryCode = parts[0];
-            _controller.text = text.substring(_countryCode.length).trim();
+      if (widget.initialCountryCode == null ||
+          widget.initialCountryCode!.isEmpty) {
+        final text = _controller.text.trim();
+        if (text.startsWith('+')) {
+          if (text.startsWith('+91')) {
+            _countryCode = '+91';
+            _countryFlag = '🇮🇳';
+            // If text still has it, strip it (though parent should have done it)
+            if (_controller.text.startsWith('+91')) {
+              _controller.text = text.substring(3).trim();
+            }
           } else {
-            // Try to guess length 3 (+XX) or 4 (+XXX)
-            // Defaulting to keeping it as is might be safer if we can't determine code
-            // But let's assume if we have a valid country code in state, we use that.
+            // checking other codes...
+            final parts = text.split(' ');
+            if (parts.length > 1 && parts[0].startsWith('+')) {
+              _countryCode = parts[0];
+              _countryFlag = _getFlagForCode(_countryCode);
+              _controller.text = text.substring(_countryCode.length).trim();
+            }
           }
+        }
+
+        // Sync back the detected or default country code to parent
+        if (widget.onCountryCodeChanged != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              widget.onCountryCodeChanged!(_countryCode);
+            }
+          });
         }
       }
     }
@@ -150,10 +155,8 @@ class _EditDetailRowState extends State<EditDetailRow> {
     DateTime? initialDate;
     if (_controller.text.isNotEmpty) {
       try {
-        // Try parsing as ISO format first (YYYY-MM-DD)
         initialDate = DateTime.parse(_controller.text);
       } catch (e) {
-        // Try parsing display format (e.g., "Jan 15, 1990")
         try {
           final months = {
             'Jan': 1,
@@ -176,14 +179,10 @@ class _EditDetailRowState extends State<EditDetailRow> {
             final year = int.parse(parts[2]);
             initialDate = DateTime(year, month, day);
           }
-        } catch (e2) {
-          // Use current date if parsing fails
-        }
+        } catch (e2) {}
       }
     }
-    initialDate ??= DateTime.now().subtract(
-      const Duration(days: 365 * 25),
-    ); // Default to 25 years ago
+    initialDate ??= DateTime.now().subtract(const Duration(days: 365 * 25));
 
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -194,7 +193,6 @@ class _EditDetailRowState extends State<EditDetailRow> {
     );
 
     if (picked != null) {
-      // Format as ISO date (YYYY-MM-DD) for storage
       final formattedDate =
           '${picked.year.toString().padLeft(4, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
       _controller.text = formattedDate;
@@ -207,7 +205,6 @@ class _EditDetailRowState extends State<EditDetailRow> {
   String _formatDateForDisplay(String dateStr) {
     if (dateStr.isEmpty) return '';
     try {
-      // Parse ISO date (YYYY-MM-DD) and format for display
       final date = DateTime.parse(dateStr);
       final months = [
         'Jan',
@@ -267,15 +264,16 @@ class _EditDetailRowState extends State<EditDetailRow> {
                       if (widget.onCountryCodeChanged != null) {
                         widget.onCountryCodeChanged!(_countryCode);
                       }
-                      if (widget.onChanged != null) {
-                        widget.onChanged!('$_countryCode${_controller.text}');
-                      }
+                      // We do NOT call widget.onChanged here anymore because
+                      // the text field content hasn't changed.
+                      // The parent tracks country code separately via onCountryCodeChanged.
                     }
                   },
                 ),
               ),
             ),
           ],
+
           Expanded(
             child: widget.isDateField
                 ? GestureDetector(
@@ -299,7 +297,6 @@ class _EditDetailRowState extends State<EditDetailRow> {
                 ? DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       dropdownColor: Colors.white,
-
                       borderRadius: AppRadius.medium,
                       isDense: true,
                       isExpanded: true,
@@ -365,8 +362,10 @@ class _EditDetailRowState extends State<EditDetailRow> {
                     onChanged: (value) {
                       debugPrint("value : $value");
                       if (isPhone) {
+                        // For phone, we just pass the RAW phone number.
+                        // The parent converts it to 'code+phone' on SAVE.
                         if (widget.onChanged != null) {
-                          widget.onChanged!('$_countryCode$value');
+                          widget.onChanged!(value);
                         }
                         return;
                       }
@@ -384,6 +383,7 @@ class _EditDetailRowState extends State<EditDetailRow> {
                             FilteringTextInputFormatter.digitsOnly,
                           ]
                         : null,
+                    // ... decoration ...
                     style: AppTextStyle.text16Regular.copyWith(
                       color: _controller.text.isEmpty
                           ? AppColors.grey400
@@ -392,6 +392,7 @@ class _EditDetailRowState extends State<EditDetailRow> {
                           ? FontStyle.italic
                           : FontStyle.normal,
                     ),
+
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.zero,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/features/trainer/data/models/trainer_referral_response_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -86,9 +87,7 @@ class TrainerConnectionCard extends StatelessWidget {
             // Navigate to trainer profile screen
             final trainerId = trainer.id;
             if (trainerId.isNotEmpty) {
-              context.push(
-                TrainerProfileRoute.path.replaceAll(':trainerId', trainerId),
-              );
+              context.push(TrainerProfileRoute.path, extra: trainer);
             }
           },
           child: Container(

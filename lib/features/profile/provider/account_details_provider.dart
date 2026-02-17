@@ -122,6 +122,7 @@ class AccountDetailsProvider extends ChangeNotifier {
           label: 'Contact Number',
           value: '',
           hintText: 'Enter your mobile number',
+          countryCode: '+91',
         ),
         // const AccountField(label: 'Password', value: '************'),
       ];

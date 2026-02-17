@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/features/trainer/data/models/trainer_referral_response_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -558,8 +559,8 @@ abstract class TrainerProfileRoute {
     path: path,
     name: name,
     builder: (context, state) {
-      final trainerId = state.pathParameters['trainerId'] ?? '';
-      return TrainerProfileScreen(trainerId: trainerId);
+      final trainerInfo = state.extra as TrainerInfo;
+      return TrainerProfileScreen(trainerInfo: trainerInfo);
     },
   );
 }

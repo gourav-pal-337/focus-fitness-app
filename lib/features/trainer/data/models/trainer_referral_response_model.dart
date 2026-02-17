@@ -90,7 +90,9 @@ class TrainerInfo {
       userId: json['userId'] as String?,
       fullName: json['fullName'] as String?,
       preferredName: json['preferredName'] as String?,
-      profilePhoto: json['profilePhoto'] as String?,
+      profilePhoto:
+          //  "https://media.istockphoto.com/id/517188688/photo/mountain-landscape.jpg?s=612x612&w=0&k=20&c=A63koPKaCyIwQWOTFBRWXj_PwCrR4cEoOw2S9Q7yVl8="
+          json['profilePhoto'] as String?,
       bioSummary: json['bioSummary'] as String?,
       expertiseAreas: json['expertiseAreas'] != null
           ? List<String>.from(json['expertiseAreas'] as List)

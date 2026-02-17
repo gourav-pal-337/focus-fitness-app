@@ -37,7 +37,7 @@ class DelinkTrainerSuccessScreen extends StatelessWidget {
                     ),
                     SizedBox(height: AppSpacing.md),
                     Text(
-                      'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium.',
+                      "Your trainer has been successfully delinked from your account. You can continue using the app or link a new trainer at any time from your profile.",
                       style: AppTextStyle.text16Medium.copyWith(
                         color: AppColors.grey400,
                       ),
@@ -67,11 +67,7 @@ class _DelinkedIcon extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           // Chain links icon - using custom painter for better control
-          Icon(
-            Icons.link,
-            size: 100.sp,
-            color: Colors.red,
-          ),
+          Icon(Icons.link, size: 100.sp, color: Colors.red),
           // Diagonal line through the links
           Transform.rotate(
             angle: -0.785, // -45 degrees in radians
@@ -119,4 +115,3 @@ class _GoToHomeButton extends StatelessWidget {
     );
   }
 }
-

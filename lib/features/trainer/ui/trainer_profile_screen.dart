@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_fitness/features/home/widgets/trainer_summary_section.dart';
+import 'package:focus_fitness/features/trainer/data/models/trainer_referral_response_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -20,25 +21,15 @@ import '../widgets/date_selector.dart';
 import '../widgets/time_slot_selector.dart';
 
 class TrainerProfileScreen extends StatelessWidget {
-  const TrainerProfileScreen({
-    super.key,
-    required this.trainerId,
-    this.trainerName = 'James Gustavsson',
-    this.trainerSpecialty = 'HIIT & Cardio',
-    this.trainerRating = 4.6,
-    this.trainerImageUrl,
-  });
+  const TrainerProfileScreen({super.key, required this.trainerInfo});
 
-  final String trainerId;
-  final String trainerName;
-  final String trainerSpecialty;
-  final double trainerRating;
-  final String? trainerImageUrl;
+  final TrainerInfo? trainerInfo;
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => TrainerProfileProvider()..fetchTrainerProfile(trainerId),
+      create: (_) =>
+          TrainerProfileProvider()..fetchTrainerProfile(trainerInfo!.id),
       child: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, result) {
@@ -59,7 +50,9 @@ class TrainerProfileScreen extends StatelessWidget {
             slivers: [
               SliverList(
                 delegate: SliverChildListDelegate([
-                  TrainerProfileHeader(trainerImageUrl: trainerImageUrl),
+                  TrainerProfileHeader(
+                    trainerImageUrl: trainerInfo?.profilePhoto,
+                  ),
                   SizedBox(height: 50.h),
                   Consumer<TrainerProfileProvider>(
                     builder: (context, provider, _) {
@@ -77,22 +70,30 @@ class TrainerProfileScreen extends StatelessWidget {
                           ),
                         );
                       }
+                      //                       const TrainerProfileScreen({
+                      //   super.key,
+                      //   required this.trainerId,
+                      //   this.trainerName = 'James Gustavsson',
+                      //   this.trainerSpecialty = 'HIIT & Cardio',
+                      //   this.trainerRating = 4.6,
+                      //   this.trainerImageUrl,
+                      // });
 
                       final trainer = provider.trainer;
                       if (trainer == null) {
                         return TrainerInfoSection(
-                          name: trainerName,
-                          specialty: trainerSpecialty,
-                          rating: trainerRating,
-                          imageUrl: trainerImageUrl,
+                          name: trainerInfo?.fullName ?? "trainer",
+                          specialty: "HIIT & Cardio",
+                          rating: 4.6,
+                          imageUrl: trainerInfo?.profilePhoto ?? "",
                         );
                       }
 
                       return TrainerInfoSection(
-                        name: trainer.fullName ?? trainerName,
-                        specialty: trainerSpecialty,
-                        rating: trainer.avgRating ?? trainerRating,
-                        imageUrl: trainer.profilePhoto ?? trainerImageUrl,
+                        name: trainer.fullName ?? "trainer",
+                        specialty: "HIIT & Cardio",
+                        rating: trainer.avgRating ?? 4.6,
+                        imageUrl: trainer.profilePhoto ?? "",
                       );
                     },
                   ),

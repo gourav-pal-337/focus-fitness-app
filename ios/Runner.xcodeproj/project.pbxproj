@@ -15,8 +15,8 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		CABF017B1072E5F68A220CE0 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F610225CCF352C78416E781 /* Pods_Runner.framework */; };
 		CDE6245CE99D9B194DAAC3AF /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B525B49D6F4B828E13CCE28 /* Pods_RunnerTests.framework */; };
-		F24C3A245767C7E1765C1337 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F610225CCF352C78416E781 /* Pods_Runner.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,7 +75,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F24C3A245767C7E1765C1337 /* Pods_Runner.framework in Frameworks */,
+				CABF017B1072E5F68A220CE0 /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

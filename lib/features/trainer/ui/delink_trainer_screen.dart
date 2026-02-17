@@ -10,6 +10,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/custom_app_bar.dart';
 import '../../../routes/app_router.dart';
 import '../../trainer/provider/linked_trainer_provider.dart';
+import '../../authentication/provider/auth_provider.dart';
 
 class DelinkTrainerScreen extends StatelessWidget {
   const DelinkTrainerScreen({super.key});
@@ -27,8 +28,8 @@ class DelinkTrainerScreen extends StatelessWidget {
             ),
             Expanded(
               child: SingleChildScrollView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
+                // keyboardDismissBehavior:
+                //     ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: EdgeInsets.symmetric(
                   horizontal: AppSpacing.screenPadding.left,
                 ),
@@ -48,10 +49,11 @@ class DelinkTrainerScreen extends StatelessWidget {
                 ),
               ),
             ),
+
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: AppSpacing.screenPadding.left,
-                vertical: AppSpacing.md,
+                vertical: AppSpacing.sm,
               ),
               child: SizedBox(height: 56.h, child: const _DelinkButton()),
             ),
@@ -297,6 +299,9 @@ class _AdditionalCommentsFieldState extends State<_AdditionalCommentsField> {
           style: AppTextStyle.text14Regular.copyWith(
             color: AppColors.textPrimary,
           ),
+          cursorColor: AppColors.primary,
+          cursorHeight: 15.h,
+          // cursorWidth: 2.w,
           keyboardType: TextInputType.multiline,
           textInputAction: TextInputAction.newline,
           decoration: InputDecoration(
@@ -356,6 +361,8 @@ class _DelinkButton extends StatelessWidget {
                 final success = await provider.unlinkTrainer();
 
                 if (success && context.mounted) {
+                  // Clear selected trainer in AuthProvider
+                  context.read<AuthProvider>().clearTrainerValidation();
                   context.go(DelinkTrainerSuccessRoute.path);
                 }
               }

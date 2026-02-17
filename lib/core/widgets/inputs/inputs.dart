@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:focus_fitness/core/theme/app_colors.dart';
@@ -25,6 +26,7 @@ class AppTextFormField extends StatelessWidget {
     this.hintStyle,
     this.enabledBorderColor,
     this.focusedBorderColor,
+    this.inputFormatters,
   });
 
   final TextEditingController? controller;
@@ -34,6 +36,7 @@ class AppTextFormField extends StatelessWidget {
   final bool obscureText;
   final int maxLines;
   final bool? enabled;
+  final List<TextInputFormatter>? inputFormatters;
 
   final String? hintText;
   final Widget? prefixIcon;
@@ -50,7 +53,8 @@ class AppTextFormField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final baseTextStyle =
-        textStyle ?? AppTextStyle.text16Regular.copyWith(color: AppColors.textPrimary);
+        textStyle ??
+        AppTextStyle.text16Regular.copyWith(color: AppColors.textPrimary);
 
     return TextFormField(
       controller: controller,
@@ -64,9 +68,11 @@ class AppTextFormField extends StatelessWidget {
       cursorColor: AppColors.primary,
       validator: validator,
       onChanged: onChanged,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: hintStyle ??
+        hintStyle:
+            hintStyle ??
             AppTextStyle.text16Regular.copyWith(
               color: AppColors.grey100.withOpacity(0.7),
             ),
@@ -95,4 +101,3 @@ class AppTextFormField extends StatelessWidget {
     );
   }
 }
-

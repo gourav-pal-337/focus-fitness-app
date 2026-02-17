@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -26,9 +29,15 @@ class AttachScreenshotWidget extends StatelessWidget {
             ),
             SizedBox(height: AppSpacing.sm),
             GestureDetector(
-              onTap: () {
-                // TODO: Implement image picker
-                // For now, just a placeholder
+              onTap: () async {
+                final ImagePicker picker = ImagePicker();
+                final XFile? image = await picker.pickImage(
+                  source: ImageSource.gallery,
+                );
+
+                if (image != null) {
+                  provider.updateScreenshotPath(image.path);
+                }
               },
               child: Container(
                 width: double.infinity,
@@ -36,18 +45,15 @@ class AttachScreenshotWidget extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   borderRadius: AppRadius.small,
-                  border: Border.all(
-                    color: AppColors.grey200,
-                    width: 1,
-                  ),
+                  border: Border.all(color: AppColors.grey200, width: 1),
                 ),
                 child: provider.screenshotPath != null
                     ? Stack(
                         children: [
                           ClipRRect(
                             borderRadius: AppRadius.small,
-                            child: Image.asset(
-                              provider.screenshotPath!,
+                            child: Image.file(
+                              File(provider.screenshotPath!),
                               width: double.infinity,
                               height: double.infinity,
                               fit: BoxFit.cover,
@@ -91,5 +97,3 @@ class AttachScreenshotWidget extends StatelessWidget {
     );
   }
 }
-
-

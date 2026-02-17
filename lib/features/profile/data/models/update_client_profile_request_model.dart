@@ -93,7 +93,7 @@ class UpdateClientProfileRequestModel {
     addIfNotNull('notes', notes?.trim().isEmpty == true ? null : notes?.trim());
     addIfNotNull('phone', phone?.trim().isEmpty == true ? null : phone?.trim());
     addIfNotNull(
-      'countryCode',
+      'phoneCountry',
       countryCode?.trim().isEmpty == true ? null : countryCode?.trim(),
     );
 

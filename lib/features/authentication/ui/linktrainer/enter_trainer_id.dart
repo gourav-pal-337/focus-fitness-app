@@ -64,65 +64,67 @@ class EnterTrainerIdScreen extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: CustomButton(
-        margin: EdgeInsets.only(
-          left: AppSpacing.screenPadding.left,
-          right: AppSpacing.screenPadding.right,
-          bottom: AppSpacing.lg,
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenPadding.left,
+            vertical: AppSpacing.md,
+          ),
+          child: CustomButton(
+            text: 'Next',
+            size: ButtonSize.large,
+            width: double.infinity,
+            height: 52.h,
+            backgroundColor: canProceed ? AppColors.primary : AppColors.grey300,
+            // Light blue color from design
+            textColor: AppColors.background,
+            icon: Icon(
+              Icons.arrow_forward,
+              size: 20.sp,
+              color: AppColors.background,
+            ),
+            textStyle: AppTextStyle.text16SemiBold.copyWith(
+              color: AppColors.background,
+            ),
+            iconPosition: IconPosition.right,
+            borderRadius: 12.r,
+            isEnabled: canProceed,
+            onPressed: canProceed
+                ? () async {
+                    final provider = context.read<AuthProvider>();
+
+                    // If trainer is already selected, navigate directly
+                    if (provider.isTrainerValid &&
+                        provider.selectedTrainer != null) {
+                      final trainerId = provider.selectedTrainer!.referralCode;
+                      context.push('/link-trainer/$trainerId');
+                      return;
+                    }
+
+                    // If trainers found but none selected, show error
+                    if (provider.hasTrainers &&
+                        provider.selectedTrainer == null) {
+                      // Error will be shown in _TrainerValidationInfo
+                      return;
+                    }
+
+                    // Otherwise, search trainer by referral code
+                    final trainerId = provider.trainerId.trim();
+                    await provider.searchTrainer(trainerId);
+
+                    // Check if trainer was selected (auto-selected if only one found)
+                    if (provider.isTrainerValid &&
+                        provider.selectedTrainer != null) {
+                      // Navigate to link trainer screen - trainer info is in provider
+                      context.push(
+                        '/link-trainer/${provider.selectedTrainer!.referralCode}',
+                      );
+                    }
+                    // If search failed, error will be shown in _TrainerValidationInfo
+                  }
+                : null,
+          ),
         ),
-        text: 'Next',
-        size: ButtonSize.large,
-        width: double.infinity,
-        height: 52.h,
-        backgroundColor: canProceed ? AppColors.primary : AppColors.grey300,
-        // Light blue color from design
-        textColor: AppColors.background,
-        icon: Icon(
-          Icons.arrow_forward,
-          size: 20.sp,
-          color: AppColors.background,
-        ),
-        textStyle: AppTextStyle.text16SemiBold.copyWith(
-          color: AppColors.background,
-        ),
-        iconPosition: IconPosition.right,
-        borderRadius: 12.r,
-        isEnabled: canProceed,
-        onPressed: canProceed
-            ? () async {
-                final provider = context.read<AuthProvider>();
-
-                // If trainer is already selected, navigate directly
-                if (provider.isTrainerValid &&
-                    provider.selectedTrainer != null) {
-                  final trainerId = provider.selectedTrainer!.referralCode;
-                  context.push('/link-trainer/$trainerId');
-                  return;
-                }
-
-                // If trainers found but none selected, show error
-                if (provider.hasTrainers && provider.selectedTrainer == null) {
-                  // Error will be shown in _TrainerValidationInfo
-                  return;
-                }
-
-                // Otherwise, search trainer by referral code
-                final trainerId = provider.trainerId.trim();
-                await provider.searchTrainer(trainerId);
-
-                // Check if trainer was selected (auto-selected if only one found)
-                if (provider.isTrainerValid &&
-                    provider.selectedTrainer != null) {
-                  // Navigate to link trainer screen - trainer info is in provider
-                  context.push(
-                    '/link-trainer/${provider.selectedTrainer!.referralCode}',
-                  );
-                }
-                // If search failed, error will be shown in _TrainerValidationInfo
-              }
-            : null,
       ),
     );
   }

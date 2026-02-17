@@ -1,10 +1,10 @@
 class Endpoints {
   // TODO: Update baseUrl with actual API base URL
   static const String baseUrl =
-      //   'https://focus-fusion-api.applore.in/api/mobile'; // dev
-      // 'http://localhost:4000/api/mobile';
-      // 'https://gmrwk6wb-4000.inc1.devtunnels.ms/api/mobile';
-      'https://sl5n9v1k-4000.inc1.devtunnels.ms/api/mobile'; //sahil dev
+      'https://focus-fusion-api.applore.in/api/mobile'; // dev
+  // 'http://localhost:4000/api/mobile';
+  // 'https://gmrwk6wb-4000.inc1.devtunnels.ms/api/mobile';
+  // 'https://sl5n9v1k-4000.inc1.devtunnels.ms/api/mobile'; //sahil dev
 
   static const String uploadFile = '/upload';
 

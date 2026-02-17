@@ -62,10 +62,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           children: [
             CustomAppBar(
-              onBack: () {
-                // context.go(HomeRoute.path);
-                context.pop();
-              },
+              // onBack: () {
+              //   // context.go(HomeRoute.path);
+              //   context.pop();
+              // },
               title: 'Profile',
               // centerTitle: true,
             ),

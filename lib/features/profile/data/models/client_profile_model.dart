@@ -71,8 +71,12 @@ class ClientProfileModel {
       fitnessLevel: json['fitnessLevel'] as String?,
 
       email: json['email'] as String?,
-      phone: json['phone'] as String?,
-      countryCode: json['countryCode'] as String?,
+      phone: ((json['phone'] as String?)?.replaceAll(
+        json['phoneCountry'] as String? ?? json['countryCode'] as String? ?? '',
+        '',
+      )),
+      countryCode:
+          json['phoneCountry'] as String? ?? json['countryCode'] as String?,
       status: json['status'] as String? ?? 'active',
       goals: json['goals'] as String?,
       weightGoal: json['weightGoal'] as String?,
