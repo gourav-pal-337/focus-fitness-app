@@ -133,10 +133,20 @@ class AuthOtpVerificationScreen extends StatelessWidget {
                 : null,
             onPressed: (provider.canProceedWithOtp && !provider.isLoading)
                 ? () async {
+                    if (!isLogin && provider.name.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Please enter your name'),
+                          backgroundColor: AppColors.primary,
+                        ),
+                      );
+                      return;
+                    }
                     await provider.verifyOtp(
                       purpose: isLogin ? 'login' : 'signup',
+                      fullname: provider.name,
                     );
-
+                    if (provider.isLoginSuccess) {}
                     if (context.mounted) {
                       if (provider.isLoginSuccess) {
                         context.go(HomeRoute.path);

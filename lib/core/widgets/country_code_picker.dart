@@ -21,7 +21,7 @@ class MyCountryCodePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loginProv = context.watch<AuthProvider>();
+    // final loginProv = context.watch<AuthProvider>();
     return GestureDetector(
       onTap: () async {
         if (readOnly) {
@@ -36,6 +36,8 @@ class MyCountryCodePicker extends StatelessWidget {
         if (code != null) {
           // loginProv.updateCountryCode(code?.dialCode, code?.flag);
           onCountryCodeTap(code);
+          debugPrint("Selected code: ${code.dialCode}");
+          debugPrint("Selected flag: ${code.flag}");
         }
       },
       child: Container(
@@ -53,10 +55,10 @@ class MyCountryCodePicker extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(selectedCode ?? "+91", style: const TextStyle(fontSize: 15)),
+            Text(selectedCode ?? "+44", style: const TextStyle(fontSize: 15)),
             5.horizontalSpace,
             Text(
-              selectedFlag ?? "🇮🇳",
+              selectedFlag ?? "🇬🇧",
               style: TextStyle(fontSize: 14, color: AppColors.grey400),
             ),
             5.horizontalSpace,

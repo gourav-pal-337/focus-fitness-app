@@ -23,10 +23,7 @@ class EnterNameScreen extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          const AppImage(
-            path: AppAssets.login,
-            fit: BoxFit.cover,
-          ),
+          const AppImage(path: AppAssets.login, fit: BoxFit.cover),
           Container(
             decoration: const BoxDecoration(
               gradient: AppGradients.onboardingOverlay,
@@ -115,6 +112,3 @@ class _NameField extends StatelessWidget {
     );
   }
 }
-
-
-

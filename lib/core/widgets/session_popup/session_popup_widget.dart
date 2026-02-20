@@ -492,8 +492,8 @@ class SessionBottomSheetContent extends StatelessWidget {
     final TextEditingController phoneController = TextEditingController();
     final formKey = GlobalKey<FormState>();
     bool isLoading = false;
-    String countryCode = '+91';
-    String countryFlag = '🇮🇳';
+    String countryCode = '+44';
+    String countryFlag = '🇬🇧';
 
     showModalBottomSheet(
       context: context,

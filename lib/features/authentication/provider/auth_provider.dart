@@ -40,8 +40,8 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Mobile Number Entry
-  String _countryCode = '+91';
-  String _countryFlag = '🇮🇳';
+  String _countryCode = '+44';
+  String _countryFlag = '🇬🇧';
   String _phoneNumber = '';
 
   String get countryCode => _countryCode;
@@ -126,6 +126,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> verifyOtp({
     required String purpose,
     String role = 'client',
+    String fullname = '',
   }) async {
     _setAuthState(AuthState.loading);
     _errorMessage = '';
@@ -140,6 +141,7 @@ class AuthProvider extends ChangeNotifier {
         code: _otp,
         purpose: purpose,
         role: role,
+        name: fullname,
       );
 
       final result = await _repository.verifyOtp(request);

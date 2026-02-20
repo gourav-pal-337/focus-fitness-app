@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
-import 'package:go_router/go_router.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
@@ -13,7 +12,6 @@ import 'package:path/path.dart' as path;
 import '../constants/api_endpoints.dart';
 import '../service/local_storage_service.dart';
 import '../utils/app_utils.dart';
-import '../utils/extensions/string_extensions.dart';
 import '../../routes/app_router.dart';
 
 /// API client for making HTTP requests

@@ -23,7 +23,7 @@ class LogoutConfirmationDialog extends StatelessWidget {
     return showDialog<void>(
       context: context,
       barrierColor: AppColors.textPrimary.withValues(alpha: 0.5),
-      barrierDismissible: false,
+      // barrierDismissible: false,
       builder: (context) =>
           LogoutConfirmationDialog(onLogout: onLogout, onCancel: onCancel),
     );
@@ -57,7 +57,7 @@ class LogoutConfirmationDialog extends StatelessWidget {
               ),
               SizedBox(height: AppSpacing.md),
               Text(
-                'You will need to enter your mobile number to log in again',
+                'You’ll need to use your email or mobile number to log in again.',
                 style: AppTextStyle.text16Regular.copyWith(
                   color: AppColors.grey400,
                 ),

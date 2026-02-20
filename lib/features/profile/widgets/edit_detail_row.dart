@@ -42,8 +42,8 @@ class EditDetailRow extends StatefulWidget {
 class _EditDetailRowState extends State<EditDetailRow> {
   late TextEditingController _internalController;
   bool _isInternalController = false;
-  String _countryCode = '+91';
-  String _countryFlag = '🇮🇳';
+  String _countryCode = '+44';
+  String _countryFlag = '🇬🇧';
 
   TextEditingController get _controller {
     return widget.controller ?? _internalController;
@@ -92,9 +92,11 @@ class _EditDetailRowState extends State<EditDetailRow> {
   }
 
   String _getFlagForCode(String code) {
+    debugPrint('code: $code');
     CountryCode countryCode = CountryCode.getCountryCodeByDialCode(
       dialCode: code,
     );
+    debugPrint('countryCode: ${countryCode.flag}');
     return countryCode.flag;
   }
 

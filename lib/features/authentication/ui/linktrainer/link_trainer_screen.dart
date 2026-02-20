@@ -14,32 +14,28 @@ import '../../../trainer/provider/linked_trainer_provider.dart';
 import '../../provider/auth_provider.dart';
 
 class LinkTrainerScreen extends StatelessWidget {
-  const LinkTrainerScreen({
-    super.key,
-    required this.trainerId,
-  });
+  const LinkTrainerScreen({super.key, required this.trainerId});
 
   final String trainerId;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              _buildHeader(context),
-              _buildContent(context),
-              // _buildVerifyButton(context),
-            ],
-          ),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            _buildHeader(context),
+            _buildContent(context),
+            // _buildVerifyButton(context),
+          ],
         ),
-        floatingActionButton: _buildVerifyButton(context),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-        floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
-      );
+      ),
+      floatingActionButton: _buildVerifyButton(context),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonAnimator: FloatingActionButtonAnimator.noAnimation,
+    );
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -156,17 +152,11 @@ class LinkTrainerScreen extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.red.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(
-                      color: Colors.red.withOpacity(0.3),
-                    ),
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.error,
-                        color: Colors.red,
-                        size: 20.sp,
-                      ),
+                      Icon(Icons.error, color: Colors.red, size: 20.sp),
                       SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
@@ -185,8 +175,9 @@ class LinkTrainerScreen extends StatelessWidget {
                 size: ButtonSize.large,
                 width: double.infinity,
                 height: 52.h,
-                backgroundColor:
-                    isLoading ? AppColors.grey300 : AppColors.primary,
+                backgroundColor: isLoading
+                    ? AppColors.grey300
+                    : AppColors.primary,
                 textColor: AppColors.background,
                 textStyle: AppTextStyle.text16SemiBold.copyWith(
                   color: AppColors.background,
@@ -197,10 +188,11 @@ class LinkTrainerScreen extends StatelessWidget {
                     ? null
                     : () async {
                         // Get user info from UserProvider or AuthProvider
-                        final fullName = userProvider.user?.fullName ??
-                            authProvider.name;
+                        final fullName =
+                            userProvider.user?.fullName ?? authProvider.name;
                         final email = userProvider.user?.email;
-                        final phone = userProvider.user?.phone ??
+                        final phone =
+                            userProvider.user?.phone ??
                             (authProvider.phoneNumber.isNotEmpty
                                 ? '${authProvider.countryCode}${authProvider.phoneNumber}'
                                 : null);
@@ -216,7 +208,8 @@ class LinkTrainerScreen extends StatelessWidget {
                         if (success && context.mounted) {
                           // Refresh linked trainer data
                           _showSuccessModal(context);
-                          final linkedTrainerProvider = context.read<LinkedTrainerProvider>();
+                          final linkedTrainerProvider = context
+                              .read<LinkedTrainerProvider>();
                           await linkedTrainerProvider.refresh();
                         }
                         // Error is already shown in the error container above
@@ -245,9 +238,7 @@ class LinkTrainerScreen extends StatelessWidget {
 }
 
 class _SuccessModal extends StatelessWidget {
-  const _SuccessModal({
-    required this.onContinue,
-  });
+  const _SuccessModal({required this.onContinue});
 
   final VoidCallback onContinue;
 
@@ -308,4 +299,3 @@ class _SuccessModal extends StatelessWidget {
     );
   }
 }
-

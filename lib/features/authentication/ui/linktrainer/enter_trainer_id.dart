@@ -33,15 +33,17 @@ class EnterTrainerIdScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // SizedBox(height: AppSpacing.md),
-              // GestureDetector(
-              //   onTap: () => Navigator.of(context).maybePop(),
-              //   child: Icon(
-              //     Icons.arrow_back,
-              //     size: 24.sp,
-              //     color: AppColors.textPrimary,
-              //   ),
-              // ),
+              if (context.canPop()) ...[
+                SizedBox(height: AppSpacing.md),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).maybePop(),
+                  child: Icon(
+                    Icons.arrow_back,
+                    size: 24.sp,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
               SizedBox(height: AppSpacing.lg),
               Text(
                 'Enter trainer referral code',
