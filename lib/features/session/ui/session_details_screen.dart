@@ -32,12 +32,6 @@ class _SessionDetailsScreenState extends State<SessionDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    final provider = SessionDetailsProvider();
-    debugPrint("Booking ID: ${widget.session.bookingId}");
-    if (widget.session.bookingId != null &&
-        widget.session.bookingId!.isNotEmpty) {
-      provider.fetchSessionSummary(widget.session.bookingId);
-    }
   }
 
   @override
@@ -45,13 +39,10 @@ class _SessionDetailsScreenState extends State<SessionDetailsScreen> {
     return ChangeNotifierProvider(
       create: (_) {
         final provider = SessionDetailsProvider();
-
-        // Call fetch asynchronously only for completed sessions
-        // if (widget.session.status == SessionStatus.completed &&
-        //     widget.session.bookingId != null &&
-        //     widget.session.bookingId!.isNotEmpty) {
-        //   provider.fetchSessionSummary(widget.session.bookingId);
-        // }
+        if (widget.session.bookingId != null &&
+            widget.session.bookingId!.isNotEmpty) {
+          provider.fetchBookingPayment(widget.session.bookingId);
+        }
         return provider;
       },
       child: Scaffold(
@@ -70,10 +61,12 @@ class _SessionDetailsScreenState extends State<SessionDetailsScreen> {
                       SizedBox(height: AppSpacing.lg),
                       _DateTimeBar(session: widget.session),
 
+                      _NotesSection(session: widget.session),
+
+                      SizedBox(height: AppSpacing.xl),
+                      _PaymentDetailsSection(session: widget.session),
                       if (widget.session.status == SessionStatus.completed &&
                           widget.session.booking?.feedback == null) ...[
-                        SizedBox(height: AppSpacing.xl),
-                        _SessionSummarySection(session: widget.session),
                         SizedBox(height: AppSpacing.xl),
                         _FeedbackSection(),
                         SizedBox(height: AppSpacing.xl),
@@ -170,17 +163,17 @@ String gettime(SessionData session) {
   return "${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')} - ${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}";
 }
 
-class _SessionSummarySection extends StatelessWidget {
-  const _SessionSummarySection({required this.session});
+class _PaymentDetailsSection extends StatelessWidget {
+  const _PaymentDetailsSection({required this.session});
 
   final SessionData session;
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<SessionDetailsProvider>();
-    final summary = provider.summary;
-    final isLoading = provider.isLoadingSummary;
-    final error = provider.summaryError;
+    final payment = provider.payment;
+    final isLoading = provider.isLoadingPayment;
+    final error = provider.paymentError;
 
     if (isLoading) {
       return Center(
@@ -195,7 +188,7 @@ class _SessionSummarySection extends StatelessWidget {
       return Container(
         padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.grey200.withOpacity(0.3),
+          color: AppColors.grey200.withValues(alpha: 0.3),
           borderRadius: AppRadius.medium,
         ),
         child: Text(
@@ -205,15 +198,15 @@ class _SessionSummarySection extends StatelessWidget {
       );
     }
 
-    if (summary == null) {
+    if (payment == null) {
       return Container(
         padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
-          color: AppColors.grey200.withOpacity(0.3),
+          color: AppColors.grey200.withValues(alpha: 0.3),
           borderRadius: AppRadius.medium,
         ),
         child: Text(
-          'Session summary not available yet',
+          'Payment details not available',
           style: AppTextStyle.text14Regular.copyWith(color: AppColors.grey400),
         ),
       );
@@ -223,81 +216,121 @@ class _SessionSummarySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Session Summary',
-          style: AppTextStyle.text16SemiBold.copyWith(
+          'Payment Details',
+          style: AppTextStyle.text18SemiBold.copyWith(
             color: AppColors.textPrimary,
           ),
         ),
         SizedBox(height: AppSpacing.md),
-
-        // Trainer Notes
-        if (session.booking?.trainerNotes != null &&
-            session.booking!.trainerNotes!.isNotEmpty) ...[
-          _NotesCard(
-            title: 'Trainer Notes',
-            notes: session.booking!.trainerNotes!,
-            icon: Icons.person_outline,
+        Container(
+          padding: EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: AppRadius.medium,
+            border: Border.all(color: AppColors.grey100),
           ),
-          SizedBox(height: AppSpacing.md),
-        ],
-        // Client Notes
-        if (session.booking?.notes != null &&
-            session.booking!.notes!.isNotEmpty) ...[
-          _NotesCard(
-            title: 'Your Notes',
-            notes: session.booking!.notes!,
-            icon: Icons.note_outlined,
+          child: Column(
+            children: [
+              _PaymentDetailRow(
+                label: 'Session Amount',
+                value: '\$${payment.amount.toStringAsFixed(2)}',
+              ),
+              SizedBox(height: AppSpacing.sm),
+              _PaymentDetailRow(
+                label: 'Platform Fee',
+                value: '\$${payment.platformFee.toStringAsFixed(2)}',
+                isSubText: true,
+              ),
+              SizedBox(height: AppSpacing.sm),
+              _PaymentDetailRow(
+                label: 'VAT Amount',
+                value: '\$${payment.vatAmount.toStringAsFixed(2)}',
+                isSubText: true,
+              ),
+              SizedBox(height: AppSpacing.md),
+              const Divider(color: AppColors.grey100),
+              SizedBox(height: AppSpacing.md),
+              _PaymentDetailRow(
+                label: 'Total Paid',
+                value:
+                    '\$${(payment.amount + payment.platformFee + payment.vatAmount).toStringAsFixed(2)}',
+                isTotal: true,
+              ),
+              SizedBox(height: AppSpacing.md),
+              const Divider(color: AppColors.grey100),
+              SizedBox(height: AppSpacing.md),
+              _PaymentDetailRow(
+                label: 'Status',
+                value: payment.paymentStatus.toUpperCase(),
+                valueColor: payment.paymentStatus == 'paid'
+                    ? Colors.green
+                    : Colors.orange,
+              ),
+              SizedBox(height: AppSpacing.sm),
+              _PaymentDetailRow(
+                label: 'Payment Method',
+                value: payment.provider.toUpperCase(),
+              ),
+              SizedBox(height: AppSpacing.sm),
+              _PaymentDetailRow(
+                label: 'Transaction ID',
+                value: payment.stripeChargeId.isNotEmpty
+                    ? payment.stripeChargeId
+                    : payment.providerPaymentId,
+                isSmall: true,
+              ),
+            ],
           ),
-        ],
+        ),
       ],
     );
   }
 }
 
-class _NotesCard extends StatelessWidget {
-  const _NotesCard({
-    required this.title,
-    required this.notes,
-    required this.icon,
+class _PaymentDetailRow extends StatelessWidget {
+  const _PaymentDetailRow({
+    required this.label,
+    required this.value,
+    this.isSubText = false,
+    this.isTotal = false,
+    this.isSmall = false,
+    this.valueColor,
   });
 
-  final String title;
-  final String notes;
-  final IconData icon;
+  final String label;
+  final String value;
+  final bool isSubText;
+  final bool isTotal;
+  final bool isSmall;
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: AppRadius.medium,
-        border: Border.all(color: AppColors.grey200, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 18.sp, color: AppColors.primary),
-              SizedBox(width: AppSpacing.xs),
-              Text(
-                title,
-                style: AppTextStyle.text14SemiBold.copyWith(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: isTotal
+              ? AppTextStyle.text16SemiBold.copyWith(
                   color: AppColors.textPrimary,
+                )
+              : AppTextStyle.text14Regular.copyWith(
+                  color: isSubText ? AppColors.grey400 : AppColors.textPrimary,
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: AppSpacing.sm),
-          Text(
-            notes,
-            style: AppTextStyle.text14Regular.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-        ],
-      ),
+        ),
+        Text(
+          value,
+          style: isTotal
+              ? AppTextStyle.text16SemiBold.copyWith(
+                  color: valueColor ?? AppColors.textPrimary,
+                )
+              : AppTextStyle.text14Medium.copyWith(
+                  color: valueColor ?? AppColors.textPrimary,
+                  fontSize: isSmall ? 12.sp : 14.sp,
+                ),
+        ),
+      ],
     );
   }
 }
@@ -541,5 +574,102 @@ class _ActionButton extends StatelessWidget {
           borderRadius: 12.r,
         );
     }
+  }
+}
+
+class _NotesSection extends StatelessWidget {
+  const _NotesSection({required this.session});
+
+  final SessionData session;
+
+  @override
+  Widget build(BuildContext context) {
+    if ((session.booking?.trainerNotes == null ||
+            session.booking!.trainerNotes!.isEmpty) &&
+        (session.booking?.notes == null || session.booking!.notes!.isEmpty)) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(height: AppSpacing.xl),
+        Text(
+          'Session Notes',
+          style: AppTextStyle.text18SemiBold.copyWith(
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: AppSpacing.md),
+
+        // Trainer Notes
+        if (session.booking?.trainerNotes != null &&
+            session.booking!.trainerNotes!.isNotEmpty) ...[
+          _NotesCard(
+            title: 'Trainer Notes',
+            notes: session.booking!.trainerNotes!,
+            icon: Icons.person_outline,
+          ),
+          SizedBox(height: AppSpacing.md),
+        ],
+        // Client Notes
+        if (session.booking?.notes != null &&
+            session.booking!.notes!.isNotEmpty) ...[
+          _NotesCard(
+            title: 'Your Notes',
+            notes: session.booking!.notes!,
+            icon: Icons.note_outlined,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _NotesCard extends StatelessWidget {
+  const _NotesCard({
+    required this.title,
+    required this.notes,
+    required this.icon,
+  });
+
+  final String title;
+  final String notes;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: AppRadius.medium,
+        border: Border.all(color: AppColors.grey200, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18.sp, color: AppColors.primary),
+              SizedBox(width: AppSpacing.xs),
+              Text(
+                title,
+                style: AppTextStyle.text14SemiBold.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: AppSpacing.sm),
+          Text(
+            notes,
+            style: AppTextStyle.text14Regular.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -1,10 +1,10 @@
 class Endpoints {
   // TODO: Update baseUrl with actual API base URL
   static const String baseUrl =
-      'https://focus-fusion-api.applore.in/api/mobile'; // dev
-  // 'http://localhost:4000/api/mobile';
-  // 'https://gmrwk6wb-4000.inc1.devtunnels.ms/api/mobile'; //gourav dev
-  //   'https://sl5n9v1k-4000.inc1.devtunnels.ms/api/mobile'; //sahil dev
+      //   'https://focus-fusion-api.applore.in/api/mobile'; // dev
+      //   'http://localhost:4000/api/mobile';
+      'https://martha-insightful-genevie.ngrok-free.dev/api/mobile'; //gourav dev
+  //   'https://3p68r138-4000.inc1.devtunnels.ms/api/mobile'; //sahil dev
 
   static const String uploadFile = '/upload';
 
@@ -31,6 +31,10 @@ class Endpoints {
   static const String unlinkTrainer = '/trainer/unlink';
   static const String getTrainerProfile = '/trainer';
   static const String bookSession = '/bookings';
+  static const String initiatePayment = '/bookings/payment/initiate';
+  static const String confirmPayment = '/bookings/payment/confirm';
+  static String getBookingByPaymentIntent(String paymentIntentId) =>
+      '/bookings/payment/intent?paymentIntentId=$paymentIntentId';
 
   // Booking endpoints
   static const String getClientBookings = '/bookings';
@@ -39,6 +43,12 @@ class Endpoints {
   static String rateSession(String bookingId) => '/bookings/$bookingId/rate';
   static String cancelBooking(String bookingId) =>
       '/bookings/$bookingId/cancel';
+  static String getBookingPayment(String bookingId) =>
+      '/bookings/$bookingId/payment';
+
+  // System Settings endpoints
+  static const String systemSettings = '/system-settings';
+  static const String feeSettings = '/system-settings/fees';
 
   // Notification endpoints
   static const String fcmToken = '/notifications/fcm-token';
@@ -47,4 +57,9 @@ class Endpoints {
   // Support endpoints
   static const String getFaqs = '/support/faqs';
   static const String createTicket = '/support/tickets';
+
+  // Subscription endpoints
+  static String getSubscriptionOffers(String trainerId) =>
+      '/subscriptions/offers/$trainerId';
+  static const String subscriptionCheckout = '/subscriptions/checkout-sheet';
 }

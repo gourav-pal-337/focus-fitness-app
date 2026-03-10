@@ -10,6 +10,7 @@ import '../provider/trainer_profile_provider.dart';
 import '../utils/date_time_utils.dart';
 import 'trainer_profile_header.dart';
 import 'trainer_info_section.dart';
+import 'payment_breakdown_widget.dart';
 
 class BookingConfirmationView extends StatelessWidget {
   const BookingConfirmationView({
@@ -81,11 +82,7 @@ class _SessionDateTimeDisplay extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.access_time,
-            size: 20.sp,
-            color: AppColors.textPrimary,
-          ),
+          Icon(Icons.access_time, size: 20.sp, color: AppColors.textPrimary),
           SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -142,8 +139,8 @@ class _SessionTypeSelector extends StatelessWidget {
                     isSelected: sessionType == SessionType.online,
                     onTap: () {
                       context.read<TrainerProfileProvider>().setSessionType(
-                            SessionType.online,
-                          );
+                        SessionType.online,
+                      );
                     },
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(12.r),
@@ -157,8 +154,8 @@ class _SessionTypeSelector extends StatelessWidget {
                     isSelected: sessionType == SessionType.physical,
                     onTap: () {
                       context.read<TrainerProfileProvider>().setSessionType(
-                            SessionType.physical,
-                          );
+                        SessionType.physical,
+                      );
                     },
                     borderRadius: BorderRadius.only(
                       topRight: Radius.circular(12.r),
@@ -214,77 +211,16 @@ class _SessionTypeButton extends StatelessWidget {
 class _PaymentInfoSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    const price = 100.00;
-    const tax = 0.00;
-    final total = price + tax;
+    final provider = context.watch<TrainerProfileProvider>();
+    final sessionPlan = provider.selectedSessionPlan;
+
+    if (sessionPlan == null) {
+      return const SizedBox.shrink();
+    }
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding.left),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Payment Info',
-            style: AppTextStyle.text20SemiBold.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: AppSpacing.md),
-          _PaymentRow(
-            label: 'Price',
-            value: '\$${price.toStringAsFixed(2)}',
-          ),
-          SizedBox(height: AppSpacing.sm),
-          _PaymentRow(
-            label: 'Tax',
-            value: '\$${tax.toStringAsFixed(2)}',
-          ),
-          SizedBox(height: AppSpacing.md),
-          Text(
-            'Total',
-            style: AppTextStyle.text20SemiBold.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: AppSpacing.sm),
-          _PaymentRow(
-            label: 'Total Price',
-            value: '\$${total.toStringAsFixed(2)}',
-          ),
-        ],
-      ),
+      child: PaymentBreakdownWidget(sessionPrice: sessionPlan.feeAmount),
     );
   }
 }
-
-class _PaymentRow extends StatelessWidget {
-  const _PaymentRow({
-    required this.label,
-    required this.value,
-  });
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: AppTextStyle.text16Regular.copyWith(
-            color: AppColors.grey400,
-          ),
-        ),
-        Text(
-          value,
-          style: AppTextStyle.text16Regular.copyWith(
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ],
-    );
-  }
-}
-

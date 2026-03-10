@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -9,102 +11,117 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/buttons/custom_bottom.dart';
 import '../../../core/widgets/custom_app_bar.dart';
 import '../provider/payment_method_provider.dart';
+import '../provider/system_settings_provider.dart';
+import '../widgets/payment_verification_sheet.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../subscriptions/data/repository/subscription_repository.dart';
+import '../../authentication/data/repository/auth_repository.dart'
+    show ResultExtension;
 
 class PaymentMethodScreen extends StatelessWidget {
   const PaymentMethodScreen({
     super.key,
     this.amount = 100.00,
+    this.baseAmount = 100.00,
     this.trainerId = '',
     this.sessionPlanId = '',
     this.dateId = '',
     this.timeSlot = '',
     this.durationMinutes = 60,
     this.availableDates = const [],
+    this.isSubscription = false,
+    this.planType = '',
+    this.trainerName = '',
+    this.sessionDate = '',
+    this.sessionTime = '',
+    this.sessionStartTime = '',
   });
 
   final double amount;
+  final double baseAmount;
   final String trainerId;
   final String sessionPlanId;
   final String dateId;
   final String timeSlot;
   final int durationMinutes;
   final List<Map<String, dynamic>> availableDates;
+  final bool isSubscription;
+  final String planType;
+
+  // Additional booking details
+  final String trainerName;
+  final String sessionDate;
+  final String sessionTime;
+  final String sessionStartTime;
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => PaymentMethodProvider(),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: Column(
-            children: [
-              const CustomAppBar(
-                title: 'Payment Method',
-               
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.screenPadding.left,
-                    vertical: AppSpacing.lg,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _PaymentOption(
-                        title: 'Paypal',
-                        subtitle: 'email@website.com',
-                        paymentType: PaymentType.paypal,
-                        trainerId: trainerId,
-                        sessionPlanId: sessionPlanId,
-                        dateId: dateId,
-                        timeSlot: timeSlot,
-                        durationMinutes: durationMinutes,
-                        availableDates: availableDates,
-                        amount: amount,
-                      ),
-                      SizedBox(height: AppSpacing.md),
-                      _PaymentOption(
-                        title: 'Apple Pay',
-                        subtitle: 'email@website.com',
-                        paymentType: PaymentType.applePay,
-                        trainerId: trainerId,
-                        sessionPlanId: sessionPlanId,
-                        dateId: dateId,
-                        timeSlot: timeSlot,
-                        durationMinutes: durationMinutes,
-                        availableDates: availableDates,
-                        amount: amount,
-                      ),
-                      SizedBox(height: AppSpacing.md),
-                      _PaymentOption(
-                        title: 'Credit Card',
-                        subtitle: '1234 **** **** 1234',
-                        paymentType: PaymentType.creditCard,
-                        trainerId: trainerId,
-                        sessionPlanId: sessionPlanId,
-                        dateId: dateId,
-                        timeSlot: timeSlot,
-                        durationMinutes: durationMinutes,
-                        availableDates: availableDates,
-                        amount: amount,
-                      ),
-                    ],
-                  ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const CustomAppBar(title: 'Payment Method'),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: AppSpacing.screenPadding.left,
+                  vertical: AppSpacing.lg,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _PaymentOption(
+                      title: 'Paypal',
+                      subtitle: 'email@website.com',
+                      paymentType: PaymentType.paypal,
+                      trainerId: trainerId,
+                      sessionPlanId: sessionPlanId,
+                      dateId: dateId,
+                      timeSlot: timeSlot,
+                      durationMinutes: durationMinutes,
+                      availableDates: availableDates,
+                      amount: amount,
+                      isSubscription: isSubscription,
+                      planType: planType,
+                    ),
+                    _PaymentOption(
+                      title: 'Stripe',
+                      subtitle: 'Credit Card / Digital Wallet',
+                      paymentType: PaymentType
+                          .creditCard, // Use creditCard internally for Stripe
+                      trainerId: trainerId,
+                      sessionPlanId: sessionPlanId,
+                      dateId: dateId,
+                      timeSlot: timeSlot,
+                      durationMinutes: durationMinutes,
+                      availableDates: availableDates,
+                      amount: amount,
+                      isSubscription: isSubscription,
+                      planType: planType,
+                    ),
+                  ],
                 ),
               ),
-              _PayButton(
-                amount: amount,
-                trainerId: trainerId,
-                sessionPlanId: sessionPlanId,
-                dateId: dateId,
-                timeSlot: timeSlot,
-                durationMinutes: durationMinutes,
-                availableDates: availableDates,
-              ),
-            ],
-          ),
+            ),
+            _PayButton(
+              amount: amount,
+              baseAmount: baseAmount,
+              trainerId: trainerId,
+              sessionPlanId: sessionPlanId,
+              dateId: dateId,
+              timeSlot: timeSlot,
+              durationMinutes: durationMinutes,
+              availableDates: availableDates,
+              isSubscription: isSubscription,
+              planType: planType,
+              trainerName: trainerName,
+              sessionDate: sessionDate,
+              sessionTime: sessionTime,
+              sessionStartTime: sessionStartTime,
+            ),
+          ],
         ),
       ),
     );
@@ -123,6 +140,8 @@ class _PaymentOption extends StatelessWidget {
     required this.durationMinutes,
     required this.availableDates,
     required this.amount,
+    required this.isSubscription,
+    required this.planType,
   });
 
   final String title;
@@ -135,6 +154,8 @@ class _PaymentOption extends StatelessWidget {
   final int durationMinutes;
   final List<Map<String, dynamic>> availableDates;
   final double amount;
+  final bool isSubscription;
+  final String planType;
 
   @override
   Widget build(BuildContext context) {
@@ -143,43 +164,8 @@ class _PaymentOption extends StatelessWidget {
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () async {
+      onTap: () {
         provider.selectPaymentType(paymentType);
-        
-        // Call booking API when payment method is selected
-        if (trainerId.isNotEmpty && sessionPlanId.isNotEmpty && dateId.isNotEmpty && timeSlot.isNotEmpty) {
-          final success = await provider.bookSession(
-            trainerId: trainerId,
-            sessionPlanId: sessionPlanId,
-            dateId: dateId,
-            timeSlot: timeSlot,
-            durationMinutes: durationMinutes,
-            availableDatesData: availableDates,
-          );
-          
-          if (success && context.mounted) {
-            // Navigate to transaction successful screen
-            final paymentMethod = _getPaymentMethodName(paymentType);
-            final cardNumber = _getCardNumber(paymentType);
-            context.push(
-              '/transaction-successful?amount=${amount.toStringAsFixed(2)}&paymentMethod=${Uri.encodeComponent(paymentMethod)}&cardNumber=${Uri.encodeComponent(cardNumber)}',
-            );
-          } else if (context.mounted && provider.bookingError != null) {
-            // Show error message
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  provider.bookingError ?? 'Failed to book session',
-                  style: AppTextStyle.text16Regular.copyWith(
-                    color: AppColors.background,
-                  ),
-                ),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          }
-        }
       },
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
@@ -214,7 +200,17 @@ class _PaymentOption extends StatelessWidget {
             // ),
             Padding(
               padding: EdgeInsets.only(top: 4.h),
-              child: isSelected ? Icon(Icons.radio_button_checked_rounded, color: AppColors.primary, size: 20.sp) : Icon(Icons.circle_outlined, color: AppColors.grey300, size: 20.sp),
+              child: isSelected
+                  ? Icon(
+                      Icons.radio_button_checked_rounded,
+                      color: AppColors.primary,
+                      size: 20.sp,
+                    )
+                  : Icon(
+                      Icons.circle_outlined,
+                      color: AppColors.grey300,
+                      size: 20.sp,
+                    ),
             ),
             SizedBox(width: AppSpacing.sm),
             Expanded(
@@ -243,52 +239,62 @@ class _PaymentOption extends StatelessWidget {
       ),
     );
   }
-
-  String _getPaymentMethodName(PaymentType type) {
-    switch (type) {
-      case PaymentType.paypal:
-        return 'Paypal';
-      case PaymentType.applePay:
-        return 'Apple Pay';
-      case PaymentType.creditCard:
-        return 'Standard Charted Card';
-    }
-  }
-
-  String _getCardNumber(PaymentType type) {
-    switch (type) {
-      case PaymentType.creditCard:
-        return '1234 5678 2345';
-      case PaymentType.paypal:
-      case PaymentType.applePay:
-        return 'email@website.com';
-    }
-  }
 }
 
 class _PayButton extends StatelessWidget {
   const _PayButton({
     required this.amount,
+    required this.baseAmount,
     required this.trainerId,
     required this.sessionPlanId,
     required this.dateId,
     required this.timeSlot,
     required this.durationMinutes,
     required this.availableDates,
+    required this.isSubscription,
+    required this.planType,
+    required this.trainerName,
+    required this.sessionDate,
+    required this.sessionTime,
+    required this.sessionStartTime,
   });
 
   final double amount;
+  final double baseAmount;
   final String trainerId;
   final String sessionPlanId;
   final String dateId;
   final String timeSlot;
   final int durationMinutes;
   final List<Map<String, dynamic>> availableDates;
+  final bool isSubscription;
+  final String planType;
+  final String trainerName;
+  final String sessionDate;
+  final String sessionTime;
+  final String sessionStartTime;
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PaymentMethodProvider>();
+    final settingsProvider = context.watch<SystemSettingsProvider>();
     final selectedPaymentType = provider.selectedPaymentType;
+
+    final settings = settingsProvider.feeSettings;
+
+    // Recalculate components to ensure accuracy and get the latest
+    double serviceFee = 0;
+    double vatAmount = 0;
+    double totalChargedAmount = amount;
+
+    if (settings != null) {
+      serviceFee = settings.platformFeeType == 'fixed'
+          ? settings.platformFee
+          : (baseAmount * (settings.platformFee / 100));
+
+      vatAmount = baseAmount * (settings.vatTaxPercent / 100);
+      totalChargedAmount = baseAmount + serviceFee + vatAmount;
+    }
 
     String getPaymentMethodName(PaymentType? type) {
       switch (type) {
@@ -297,16 +303,16 @@ class _PayButton extends StatelessWidget {
         case PaymentType.applePay:
           return 'Apple Pay';
         case PaymentType.creditCard:
-          return 'Standard Charted Card';
+          return 'Stripe';
         case null:
-          return 'Standard Charted Card';
+          return 'Stripe';
       }
     }
 
     String getCardNumber(PaymentType? type) {
       switch (type) {
         case PaymentType.creditCard:
-          return '1234 5678 2345';
+          return 'Credit Card / Digital Wallet';
         case PaymentType.paypal:
         case PaymentType.applePay:
         case null:
@@ -334,7 +340,7 @@ class _PayButton extends StatelessWidget {
       child: CustomButton(
         text: provider.isBooking
             ? 'Booking...'
-            : 'Pay \$${amount.toStringAsFixed(2)}',
+            : 'Pay \$${totalChargedAmount.toStringAsFixed(2)}',
         size: ButtonSize.large,
         width: double.infinity,
         height: 52.h,
@@ -346,32 +352,233 @@ class _PayButton extends StatelessWidget {
         borderRadius: 12.r,
         isEnabled: !provider.isBooking,
         onPressed: provider.isBooking
-            ? null
+            ? () {
+                print("tap tap...");
+              }
             : () async {
+                print("tap tap tap...");
+
+                if (isSubscription) {
+                  if (trainerId.isEmpty || planType.isEmpty) return;
+
+                  final subscriptionRepo = SubscriptionRepository();
+                  final providerString =
+                      selectedPaymentType == PaymentType.creditCard
+                      ? 'stripe'
+                      : 'paypal';
+                  final result = await subscriptionRepo.checkoutSubscription(
+                    trainerId,
+                    planType,
+                    provider: providerString,
+                  );
+
+                  if (!context.mounted) return;
+
+                  result.when(
+                    success: (response) async {
+                      if (selectedPaymentType == PaymentType.creditCard) {
+                        Stripe.publishableKey =
+                            "pk_test_51T5N9X38afHUCI9lYRWGMYeJU4z9Y31rfNJJuoFB8N59qYZ72O9OZagxLJTQtgTXCiDmbkxgXB334LH7vcjZqyKP00fGNUhH0v";
+                        await Stripe.instance.applySettings();
+                        // This means Stripe
+                        if (response.clientSecret != null &&
+                            response.clientSecret!.isNotEmpty) {
+                          try {
+                            log(
+                              "paymentSheerParameters : ${response.clientSecret}. customerId :: ${response.customerId}. ephemeralKey : ${response.ephemeralKey}",
+                            );
+                            await Stripe.instance.initPaymentSheet(
+                              paymentSheetParameters:
+                                  SetupPaymentSheetParameters(
+                                    paymentIntentClientSecret:
+                                        response.clientSecret,
+                                    customerId: response.customerId,
+                                    customerEphemeralKeySecret:
+                                        response.ephemeralKey,
+                                    merchantDisplayName: 'Focus Fitness',
+                                  ),
+                            );
+                            await Stripe.instance.presentPaymentSheet();
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Subscription Successful!'),
+                              ),
+                            );
+                          } on StripeException catch (e) {
+                            log("error while makeing payment 2: $e");
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Payment Canceled/Failed: ${e.error.localizedMessage}',
+                                ),
+                              ),
+                            );
+                          } catch (e) {
+                            log("error while makeing payment : $e");
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('An error occurred: $e')),
+                            );
+                          }
+                        } else if (response.checkoutUrl != null &&
+                            response.checkoutUrl!.isNotEmpty) {
+                          final uri = Uri.parse(response.checkoutUrl!);
+                          if (await canLaunchUrl(uri))
+                            await launchUrl(
+                              uri,
+                              mode: LaunchMode.externalApplication,
+                            );
+                        }
+                      } else {
+                        // Paypal
+                        if (response.checkoutUrl != null &&
+                            response.checkoutUrl!.isNotEmpty) {
+                          final uri = Uri.parse(response.checkoutUrl!);
+                          if (await canLaunchUrl(uri))
+                            await launchUrl(
+                              uri,
+                              mode: LaunchMode.externalApplication,
+                            );
+                        }
+                      }
+                    },
+                    failure: (message, code) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text(message)));
+                    },
+                  );
+                  return;
+                }
+                print(
+                  "trainer id : ${trainerId.isNotEmpty}  sessopnplan : ${sessionPlanId} dateId : ${dateId.isNotEmpty} timeslot : ${timeSlot.isNotEmpty}",
+                );
                 // Call booking API when Pay button is clicked
-                if (trainerId.isNotEmpty && sessionPlanId.isNotEmpty && dateId.isNotEmpty && timeSlot.isNotEmpty) {
-                  final success = await provider.bookSession(
+                if (trainerId.isNotEmpty &&
+                    sessionPlanId.isNotEmpty &&
+                    dateId.isNotEmpty &&
+                    timeSlot.isNotEmpty) {
+                  final providerString =
+                      selectedPaymentType == PaymentType.creditCard
+                      ? 'stripe'
+                      : 'paypal';
+
+                  final initiateResponse = await provider.initiatePayment(
                     trainerId: trainerId,
                     sessionPlanId: sessionPlanId,
                     dateId: dateId,
                     timeSlot: timeSlot,
                     durationMinutes: durationMinutes,
                     availableDatesData: availableDates,
+                    provider: providerString,
+                    serviceFee: serviceFee,
+                    vatAmount: vatAmount,
+                    totalAmount: totalChargedAmount,
+                    platformFeeValue: settings?.platformFee,
+                    platformFeeType: settings?.platformFeeType,
+                    vatTaxPercent: settings?.vatTaxPercent,
                   );
-                  
-                  if (success && context.mounted) {
-                    // Navigate to transaction successful screen
-                    final paymentMethod = getPaymentMethodName(selectedPaymentType);
-                    final cardNumber = getCardNumber(selectedPaymentType);
-                    context.push(
-                      '/transaction-successful?amount=${amount.toStringAsFixed(2)}&paymentMethod=${Uri.encodeComponent(paymentMethod)}&cardNumber=${Uri.encodeComponent(cardNumber)}',
-                    );
+
+                  log(
+                    "initiateResponse : ${initiateResponse?.paymentIntentId} ",
+                  );
+
+                  if (initiateResponse != null && initiateResponse.success) {
+                    bool paymentCompleted = false;
+
+                    if (selectedPaymentType == PaymentType.creditCard) {
+                      Stripe.publishableKey =
+                          "pk_test_51T5N9X38afHUCI9lYRWGMYeJU4z9Y31rfNJJuoFB8N59qYZ72O9OZagxLJTQtgTXCiDmbkxgXB334LH7vcjZqyKP00fGNUhH0v";
+                      await Stripe.instance.applySettings();
+                      if (initiateResponse.clientSecret != null &&
+                          initiateResponse.clientSecret!.isNotEmpty) {
+                        try {
+                          await Stripe.instance.initPaymentSheet(
+                            paymentSheetParameters: SetupPaymentSheetParameters(
+                              paymentIntentClientSecret:
+                                  initiateResponse.clientSecret,
+                              customerId: initiateResponse.customerId,
+                              customerEphemeralKeySecret:
+                                  initiateResponse.ephemeralKey,
+                              merchantDisplayName: 'Focus Fitness',
+                            ),
+                          );
+                          await Stripe.instance.presentPaymentSheet();
+                          paymentCompleted = true;
+                        } on StripeException catch (e) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Payment Canceled/Failed: ${e.error.localizedMessage}',
+                              ),
+                            ),
+                          );
+                          return;
+                        } catch (e) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('An error occurred: $e')),
+                          );
+                          return;
+                        }
+                      }
+                    } else {
+                      // Paypal
+                      if (initiateResponse.checkoutUrl != null &&
+                          initiateResponse.checkoutUrl!.isNotEmpty) {
+                        final uri = Uri.parse(initiateResponse.checkoutUrl!);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.inAppWebView);
+                          // We assume they completed the PayPal flow when they close the webview
+                          paymentCompleted = true;
+                        }
+                      }
+                    }
+
+                    if (paymentCompleted && context.mounted) {
+                      final intentId =
+                          initiateResponse.paymentIntentId ??
+                          initiateResponse.orderId ??
+                          '';
+
+                      final paymentMethod = getPaymentMethodName(
+                        selectedPaymentType,
+                      );
+                      final cardNumber = getCardNumber(selectedPaymentType);
+
+                      _showVerifyingSheet(
+                        context,
+                        intentId: intentId,
+                        onSuccess: (bookingData) {
+                          if (!context.mounted) return;
+                          context.push(
+                            '/transaction-successful?amount=${totalChargedAmount.toStringAsFixed(2)}&paymentMethod=${Uri.encodeComponent(paymentMethod)}&cardNumber=${Uri.encodeComponent(cardNumber)}&trainerName=${Uri.encodeComponent(trainerName)}&sessionDate=${Uri.encodeComponent(sessionDate)}&sessionTime=${Uri.encodeComponent(sessionTime)}&sessionStartTime=${Uri.encodeComponent(sessionStartTime)}&bookingId=${bookingData['_id'] ?? trainerId}',
+                          );
+                        },
+                        onError: (error) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                error,
+                                style: AppTextStyle.text16Regular.copyWith(
+                                  color: AppColors.background,
+                                ),
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        },
+                      );
+                    }
                   } else if (context.mounted && provider.bookingError != null) {
                     // Show error message
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          provider.bookingError ?? 'Failed to book session',
+                          provider.bookingError ?? 'Failed to initiate payment',
                           style: AppTextStyle.text16Regular.copyWith(
                             color: AppColors.background,
                           ),
@@ -386,5 +593,31 @@ class _PayButton extends StatelessWidget {
       ),
     );
   }
-}
 
+  void _showVerifyingSheet(
+    BuildContext context, {
+    required String intentId,
+    required Function(Map<String, dynamic> bookingData) onSuccess,
+    required Function(String error) onError,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return PaymentVerificationSheet(
+          intentId: intentId,
+          onSuccess: (data) {
+            Navigator.pop(context);
+            onSuccess(data);
+          },
+          onError: (error) {
+            Navigator.pop(context);
+            onError(error);
+          },
+        );
+      },
+    );
+  }
+}

@@ -14,6 +14,7 @@ import '../../../routes/app_router.dart';
 import '../provider/account_details_provider.dart';
 import '../provider/edit_profile_details_provider.dart';
 import '../ui/edit_profile_details_screen.dart';
+import '../../trainer/ui/admin_settings_screen.dart';
 import '../widgets/logout_confirmation_dialog.dart';
 
 class SupportSettingsSection extends StatelessWidget {
@@ -113,6 +114,35 @@ class SupportSettingsSection extends StatelessWidget {
                 onTap: onLanguagePreferencesTap,
               ),
               Divider(color: AppColors.grey200, thickness: 1, height: 0),
+              Consumer<UserProvider>(
+                builder: (context, userProvider, child) {
+                  if (userProvider.user?.role == 'ADMIN') {
+                    return Column(
+                      children: [
+                        _SettingsMenuItem(
+                          icon: Icons.admin_panel_settings_outlined,
+                          label: 'Admin Settings',
+                          onTap: () {
+                            // Import of AdminSettingsScreen might be needed if not using Named Routes
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const AdminSettingsScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        Divider(
+                          color: AppColors.grey200,
+                          thickness: 1,
+                          height: 0,
+                        ),
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
               _SettingsMenuItem(
                 icon: Icons.logout,
                 label: 'Logout',

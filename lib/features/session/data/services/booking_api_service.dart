@@ -5,6 +5,7 @@ import '../../../../core/network/api_hitter.dart';
 import '../../../../features/authentication/data/exceptions/api_exception.dart';
 import '../models/get_bookings_response_model.dart';
 import '../models/session_summary_response_model.dart';
+import '../models/booking_payment_response_model.dart';
 
 /// API service for booking operations
 class BookingApiService {
@@ -187,6 +188,50 @@ class BookingApiService {
 
       if (response.status) {
         return true;
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              responseData['error'] as String? ??
+              responseData['message'] as String? ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage,
+            statusCode: response.response?.statusCode,
+          );
+        }
+
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Get payment details for a specific booking
+  Future<BookingPaymentResponseModel> getBookingPayment(
+    String bookingId,
+  ) async {
+    try {
+      final endpoint = Endpoints.getBookingPayment(bookingId);
+      debugPrint(
+        'BookingApiService: Calling getBookingPayment with endpoint: $endpoint',
+      );
+      final response = await _apiHitter.getApiResponse(endpoint);
+      debugPrint('BookingApiService: Response status: ${response.status}');
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        return BookingPaymentResponseModel.fromJson(responseData);
       } else {
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {

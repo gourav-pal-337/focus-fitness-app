@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../provider/subscription_provider.dart';
 import 'subscription_plan_card.dart';
@@ -13,48 +14,41 @@ class SubscriptionPlanCards extends StatelessWidget {
     final provider = context.watch<SubscriptionProvider>();
     final selectedPlan = provider.selectedPlan;
 
+    if (provider.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (provider.offers.isEmpty) {
+      return const Center(child: Text("No subscription offers available"));
+    }
+
     return Row(
-      children: [
-        Expanded(
-          child: SubscriptionPlanCard(
-            name: 'Standard',
-            title: 'Weekly',
-            price: '\$9.99',
-            plan: SubscriptionPlan.weekly,
-            isSelected: selectedPlan == SubscriptionPlan.weekly,
-            onTap: () {
-              context.read<SubscriptionProvider>().selectPlan(SubscriptionPlan.weekly);
-            },
+      children: provider.offers.asMap().entries.map((entry) {
+        final index = entry.key;
+        final offer = entry.value;
+        final isLast = index == provider.offers.length - 1;
+
+        // Define some UI tweaks based on interval or planType
+        // For example, if it's "yearly", we might call it "Premium"
+        String name = offer.interval == "year" ? "Premium" : "Popular";
+        if (offer.interval == "week") name = "Standard";
+
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(right: isLast ? 0 : AppSpacing.sm),
+            child: SubscriptionPlanCard(
+              name: name,
+              title: offer.title,
+              price: '${AppConstants.currencySymbol}${offer.amount}',
+              plan: offer,
+              isSelected: selectedPlan?.planType == offer.planType,
+              onTap: () {
+                context.read<SubscriptionProvider>().selectPlan(offer);
+              },
+            ),
           ),
-        ),
-        SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: SubscriptionPlanCard(
-            name: 'Popular',
-            title: 'Monthly',
-            price: '\$34.99',
-            plan: SubscriptionPlan.monthly,
-            isSelected: selectedPlan == SubscriptionPlan.monthly,
-            onTap: () {
-              context.read<SubscriptionProvider>().selectPlan(SubscriptionPlan.monthly);
-            },
-          ),
-        ),
-        SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: SubscriptionPlanCard(
-            name: 'Premium',
-            title: 'Annual',
-            price: '\$349.99',
-            plan: SubscriptionPlan.annual,
-            isSelected: selectedPlan == SubscriptionPlan.annual,
-            onTap: () {
-              context.read<SubscriptionProvider>().selectPlan(SubscriptionPlan.annual);
-            },
-          ),
-        ),
-      ],
+        );
+      }).toList(),
     );
   }
 }
-

@@ -57,6 +57,7 @@ dependencies:
   sign_in_with_apple: ^6.1.4
   firebase_auth: ^6.1.4
   canopas_country_picker: ^0.0.10
+  flutter_stripe: ^12.3.0
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import '../data/models/session_summary_response_model.dart';
+import '../data/models/booking_payment_response_model.dart';
+
 import '../data/repository/booking_repository.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
@@ -9,17 +10,17 @@ class SessionDetailsProvider extends ChangeNotifier {
 
   int _rating = 0;
   String _feedback = '';
-  SessionSummary? _summary;
-  bool _isLoadingSummary = false;
-  String? _summaryError;
+  BookingPayment? _payment;
+  bool _isLoadingPayment = false;
+  String? _paymentError;
 
   int get rating => _rating;
   String get feedback => _feedback;
   bool get hasFeedback => _feedback.trim().isNotEmpty;
-  SessionSummary? get summary => _summary;
-  bool get isLoadingSummary => _isLoadingSummary;
-  String? get summaryError => _summaryError;
-  bool get hasSummary => _summary != null;
+  BookingPayment? get payment => _payment;
+  bool get isLoadingPayment => _isLoadingPayment;
+  String? get paymentError => _paymentError;
+  bool get hasPayment => _payment != null;
 
   void setRating(int rating) {
     _rating = rating;
@@ -31,63 +32,42 @@ class SessionDetailsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Fetch session summary for a booking
-  Future<void> fetchSessionSummary(String? bookingId) async {
+  /// Fetch payment details for a booking
+  Future<void> fetchBookingPayment(String? bookingId) async {
     debugPrint(
-      'SessionDetailsProvider: fetchSessionSummary called with bookingId: $bookingId',
+      'SessionDetailsProvider: fetchBookingPayment called with bookingId: $bookingId',
     );
 
     if (bookingId == null || bookingId.isEmpty) {
       debugPrint('SessionDetailsProvider: Booking ID is null or empty');
-      _summaryError = 'Booking ID is required';
+      _paymentError = 'Booking ID is required';
       notifyListeners();
       return;
     }
 
-    debugPrint(
-      'SessionDetailsProvider: Starting to fetch summary for bookingId: $bookingId',
-    );
-    _isLoadingSummary = true;
-    _summaryError = null;
+    _isLoadingPayment = true;
+    _paymentError = null;
     notifyListeners();
 
     try {
-      debugPrint(
-        'SessionDetailsProvider: Calling repository.getSessionSummary',
-      );
-      final result = await _repository.getSessionSummary(bookingId);
-      debugPrint('SessionDetailsProvider: Repository call completed');
+      final result = await _repository.getBookingPayment(bookingId);
 
       await result.when(
         success: (response) async {
-          debugPrint(
-            'SessionDetailsProvider: Success - Summary received: ${response.summary != null}',
-          );
-          _summary = response.summary;
-          _isLoadingSummary = false;
-          _summaryError = null;
+          _payment = response.payment;
+          _isLoadingPayment = false;
+          _paymentError = null;
           notifyListeners();
         },
         failure: (message, code) {
-          debugPrint(
-            'SessionDetailsProvider: Failure - Code: $code, Message: $message',
-          );
-          _isLoadingSummary = false;
-          // Handle 404 gracefully - summary might not exist yet
-          if (code == 404) {
-            _summaryError = null; // Don't show error for missing summary
-            _summary = null;
-          } else {
-            _summaryError = message;
-          }
+          _isLoadingPayment = false;
+          _paymentError = message;
           notifyListeners();
         },
       );
-    } catch (e, stackTrace) {
-      debugPrint('SessionDetailsProvider: Exception - $e');
-      debugPrint('SessionDetailsProvider: StackTrace - $stackTrace');
-      _isLoadingSummary = false;
-      _summaryError = e.toString().replaceAll('Exception: ', '');
+    } catch (e) {
+      _isLoadingPayment = false;
+      _paymentError = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
     }
   }
@@ -114,7 +94,7 @@ class SessionDetailsProvider extends ChangeNotifier {
         feedback: _feedback,
       );
 
-      return result.when(
+      return await result.when(
         success: (success) async {
           _isSubmittingFeedback = false;
           notifyListeners();
@@ -151,11 +131,9 @@ class SessionDetailsProvider extends ChangeNotifier {
         reason: reason,
       );
 
-      return result.when(
+      return await result.when(
         success: (success) async {
           _isCancelling = false;
-          // Refresh summary if needed, or invalidate previous state if we want to reflect changes immediately
-          // For now, assume navigation handles leaving the screen or state update happens elsewhere
           notifyListeners();
           return success;
         },

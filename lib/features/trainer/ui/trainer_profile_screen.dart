@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_fitness/features/home/widgets/trainer_summary_section.dart';
 import 'package:focus_fitness/features/trainer/data/models/trainer_referral_response_model.dart';
+import 'package:focus_fitness/routes/app_router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
+import '../widgets/payment_breakdown_widget.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
@@ -12,11 +15,11 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/buttons/custom_bottom.dart';
 import '../../../core/widgets/date_time_bar.dart';
 import '../provider/trainer_profile_provider.dart';
+import '../provider/system_settings_provider.dart';
 import '../utils/date_time_utils.dart';
 import '../widgets/trainer_profile_header.dart';
 import '../widgets/trainer_info_section.dart';
 import '../widgets/trainer_stats_row.dart';
-import '../widgets/know_more_section.dart';
 import '../widgets/date_selector.dart';
 import '../widgets/time_slot_selector.dart';
 
@@ -166,13 +169,22 @@ class _BookingContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<TrainerProfileProvider>();
+    final sessionPlan = provider.selectedSessionPlan;
+
     return Column(
       children: [
         _SessionDateTimeDisplay(),
         SizedBox(height: AppSpacing.xl),
         _SessionTypeSelector(),
         SizedBox(height: AppSpacing.xl),
-        _PaymentInfoSection(),
+        if (sessionPlan != null)
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenPadding.left,
+            ),
+            child: PaymentBreakdownWidget(sessionPrice: sessionPlan.feeAmount),
+          ),
       ],
     );
   }
@@ -298,79 +310,11 @@ class _SessionTypeButton extends StatelessWidget {
   }
 }
 
-class _PaymentInfoSection extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<TrainerProfileProvider>();
-    final sessionPlan = provider.selectedSessionPlan;
-
-    final price = sessionPlan?.feeAmount ?? 100.00;
-    const tax = 0.00;
-    final total = price + tax;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding.left),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Payment Info',
-            style: AppTextStyle.text16SemiBold.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: AppSpacing.xs),
-          _PaymentRow(label: 'Price', value: '\$${price.toStringAsFixed(2)}'),
-          SizedBox(height: AppSpacing.xs),
-          _PaymentRow(label: 'Tax', value: '\$${tax.toStringAsFixed(2)}'),
-          SizedBox(height: AppSpacing.xs),
-          Text(
-            'Total',
-            style: AppTextStyle.text20SemiBold.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: AppSpacing.xs),
-          _PaymentRow(
-            label: 'Total Price',
-            value: '\$${total.toStringAsFixed(2)}',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PaymentRow extends StatelessWidget {
-  const _PaymentRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: AppTextStyle.text16Regular.copyWith(color: AppColors.grey400),
-        ),
-        Text(
-          value,
-          style: AppTextStyle.text16SemiBold.copyWith(
-            color: AppColors.textPrimary,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _BookSessionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<TrainerProfileProvider>();
+    final settingsProvider = context.watch<SystemSettingsProvider>();
     final showBookingConfirmation = provider.showBookingConfirmation;
     final canBook = provider.canBookSession;
 
@@ -409,58 +353,51 @@ class _BookSessionButton extends StatelessWidget {
         isEnabled: (showBookingConfirmation || canBook) && !provider.isBooking,
         onPressed: showBookingConfirmation
             ? () async {
-                final provider = context.read<TrainerProfileProvider>();
-                final success = await provider.bookSession();
+                final sessionPlan = provider.selectedSessionPlan;
+                final baseAmount = sessionPlan?.feeAmount ?? 100.00;
+                final totalAmount = settingsProvider.calculateTotalAmount(
+                  baseAmount,
+                );
+                final trainerId = provider.trainer?.id ?? '';
+                final sessionPlanId = sessionPlan?.id ?? '';
+                final dateId = provider.selectedDate ?? '';
+                final timeSlot = provider.selectedTimeSlot ?? '';
+                final durationMinutes = sessionPlan?.durationMinutes ?? 60;
 
-                if (success && context.mounted) {
-                  final sessionPlan = provider.selectedSessionPlan;
-                  final totalAmount = sessionPlan?.feeAmount ?? 100.00;
-                  final trainerId = provider.trainer?.id;
-                  const paymentMethod = 'Apple Pay';
-                  const cardNumber = 'email@website.com';
-
-                  // Calculate session details
-                  final trainerName =
-                      provider.trainer?.fullName ??
-                      provider.trainer?.fullName ??
-                      'Trainer';
-                  final selectedDateId = provider.selectedDate!;
-                  final selectedTimeSlot = provider.selectedTimeSlot!;
-
-                  final sessionDate = DateTimeUtils.formatDateId(
-                    selectedDateId,
-                    provider.availableDates,
-                  );
-
-                  // Calculate ISO start time
-                  final timestamps = DateTimeUtils.convertToIsoTimestamps(
-                    dateId: selectedDateId,
-                    timeSlot: selectedTimeSlot,
-                    availableDates: provider.availableDates,
-                    durationMinutes: sessionPlan?.durationMinutes ?? 60,
-                  );
-
-                  final sessionStartTime = timestamps['startTime']!;
-
-                  context.push(
-                    '/transaction-successful?amount=${totalAmount.toStringAsFixed(2)}&paymentMethod=${Uri.encodeComponent(paymentMethod)}&cardNumber=${Uri.encodeComponent(cardNumber)}&trainerName=${Uri.encodeComponent(trainerName)}&sessionDate=${Uri.encodeComponent(sessionDate)}&sessionTime=${Uri.encodeComponent(selectedTimeSlot)}&sessionStartTime=${Uri.encodeComponent(sessionStartTime)}&bookingId=$trainerId}',
-                  );
-                } else if (context.mounted && provider.bookingError != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        provider.bookingError!,
-                        style: AppTextStyle.text14Regular.copyWith(
-                          color: Colors.white,
-                        ),
-                      ),
-                      backgroundColor: Colors.red,
+                final uri = Uri(
+                  path: PaymentMethodRoute.path,
+                  queryParameters: {
+                    if (trainerId.isNotEmpty) 'trainerId': trainerId,
+                    if (sessionPlanId.isNotEmpty)
+                      'sessionPlanId': sessionPlanId,
+                    if (dateId.isNotEmpty) 'dateId': dateId,
+                    if (timeSlot.isNotEmpty) 'timeSlot': timeSlot,
+                    'amount': totalAmount.toStringAsFixed(2),
+                    'baseAmount': baseAmount.toStringAsFixed(2),
+                    'durationMinutes': durationMinutes.toString(),
+                    'trainerName': provider.trainer?.fullName ?? 'Trainer',
+                    'sessionDate': DateTimeUtils.formatDateId(
+                      dateId,
+                      provider.availableDates,
                     ),
-                  );
-                }
+                    'sessionTime': timeSlot,
+                    'sessionStartTime':
+                        DateTimeUtils.convertToIsoTimestamps(
+                          dateId: dateId,
+                          timeSlot: timeSlot,
+                          availableDates: provider.availableDates,
+                          durationMinutes: durationMinutes,
+                        )['startTime'] ??
+                        '',
+                  },
+                ).toString();
+
+                context.push(uri);
               }
             : canBook
             ? () {
+                // Fetch settings when entering booking view to ensure total is calculated correctly
+                context.read<SystemSettingsProvider>().fetchFeeSettings();
                 context.read<TrainerProfileProvider>().showBookingView();
               }
             : null,

@@ -4,16 +4,13 @@ import '../data/repository/trainer_repository.dart';
 import '../utils/date_time_utils.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
+import '../data/models/payment_booking_models.dart';
 
-enum PaymentType {
-  paypal,
-  applePay,
-  creditCard,
-}
+enum PaymentType { paypal, applePay, creditCard }
 
 class PaymentMethodProvider extends ChangeNotifier {
   final TrainerRepository _repository = TrainerRepository();
-  
+
   PaymentType _selectedPaymentType = PaymentType.paypal;
   bool _isBooking = false;
   String? _bookingError;
@@ -97,9 +94,168 @@ class PaymentMethodProvider extends ChangeNotifier {
     }
   }
 
+  /// Initiate payment for a session booking
+  Future<InitiatePaymentResponseModel?> initiatePayment({
+    required String trainerId,
+    required String sessionPlanId,
+    required String dateId,
+    required String timeSlot,
+    required int durationMinutes,
+    required List<Map<String, dynamic>> availableDatesData,
+    required String provider,
+    double? serviceFee,
+    double? vatAmount,
+    double? totalAmount,
+    double? platformFeeValue,
+    String? platformFeeType,
+    double? vatTaxPercent,
+    String? notes,
+  }) async {
+    _isBooking = true;
+    _bookingError = null;
+    notifyListeners();
+
+    try {
+      // Convert availableDatesData back to DateInfo list
+      final availableDates = availableDatesData.map((data) {
+        final dateTime = DateTime.parse(data['dateId'] as String);
+        final dayStr = data['day'] as String?;
+        return DateInfo(
+          date: dateTime.day.toString(),
+          day: dayStr ?? _getDayAbbreviation(dateTime.weekday),
+          dateTime: dateTime,
+          dateId: data['dateId'] as String,
+          sessionPlanId: data['sessionPlanId'] as String,
+        );
+      }).toList();
+
+      // Convert date and time slot to ISO timestamps
+      final timestamps = DateTimeUtils.convertToIsoTimestamps(
+        dateId: dateId,
+        timeSlot: timeSlot,
+        availableDates: availableDates,
+        durationMinutes: durationMinutes,
+      );
+
+      // Create request model
+      final request = InitiatePaymentRequestModel(
+        trainerId: trainerId,
+        sessionPlanId: sessionPlanId,
+        startTime: timestamps['startTime']!,
+        endTime: timestamps['endTime']!,
+        provider: provider,
+        timezone: 'UTC',
+        notes: notes,
+        serviceFee: serviceFee,
+        vatAmount: vatAmount,
+        totalAmount: totalAmount,
+        platformFeeValue: platformFeeValue,
+        platformFeeType: platformFeeType,
+        vatTaxPercent: vatTaxPercent,
+      );
+
+      final result = await _repository.initiateSessionPayment(request);
+
+      return await result.when(
+        success: (response) async {
+          _isBooking = false;
+          _bookingError = null;
+          notifyListeners();
+          return response;
+        },
+        failure: (message, code) {
+          _isBooking = false;
+          _bookingError = message;
+          notifyListeners();
+          return null;
+        },
+      );
+    } catch (e) {
+      _isBooking = false;
+      _bookingError = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return null;
+    }
+  }
+
+  /// Confirm payment for a session booking
+  Future<ConfirmPaymentResponseModel?> confirmPayment({
+    required String paymentId,
+    required String provider,
+    String? providerPaymentId,
+    String? providerOrderId,
+  }) async {
+    _isBooking = true;
+    _bookingError = null;
+    notifyListeners();
+
+    try {
+      final request = ConfirmPaymentRequestModel(
+        paymentId: paymentId,
+        provider: provider,
+        providerPaymentId: providerPaymentId,
+        providerOrderId: providerOrderId,
+      );
+
+      final result = await _repository.confirmSessionPayment(request);
+
+      return await result.when(
+        success: (response) async {
+          _isBooking = false;
+          _bookingError = null;
+          notifyListeners();
+          return response;
+        },
+        failure: (message, code) {
+          _isBooking = false;
+          _bookingError = message;
+          notifyListeners();
+          return null;
+        },
+      );
+    } catch (e) {
+      _isBooking = false;
+      _bookingError = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return null;
+    }
+  }
+
+  /// Verify payment status via payment intent ID
+  Future<Map<String, dynamic>?> verifyPaymentStatus(
+    String paymentIntentId,
+  ) async {
+    _isBooking = true;
+    _bookingError = null;
+    notifyListeners();
+
+    try {
+      final result = await _repository.verifyPaymentStatus(paymentIntentId);
+
+      return await result.when(
+        success: (response) async {
+          _isBooking = false;
+          _bookingError = null;
+          notifyListeners();
+          return response;
+        },
+        failure: (message, code) {
+          _isBooking = false;
+          _bookingError = message;
+          notifyListeners();
+          return null;
+        },
+      );
+    } catch (e) {
+      _isBooking = false;
+      _bookingError = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return null;
+    }
+  }
+
   String _getDayAbbreviation(int weekday) {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return days[weekday - 1];
   }
 }
-

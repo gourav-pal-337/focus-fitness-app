@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../provider/subscription_provider.dart';
+import '../data/models/subscription_offers_model.dart';
 
 class SubscriptionPlanCard extends StatelessWidget {
   const SubscriptionPlanCard({
@@ -21,7 +22,7 @@ class SubscriptionPlanCard extends StatelessWidget {
   final String name;
   final String title;
   final String price;
-  final SubscriptionPlan plan;
+  final SubscriptionOfferModel plan;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -84,22 +85,30 @@ class SubscriptionPlanCard extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  if (isSelected) ...[
-                    SizedBox(height: AppSpacing.sm),
-                    Container(
-                      width: 18.w,
-                      height: 18.w,
-                      decoration: BoxDecoration(
-                        color: AppColors.textPrimary,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.check,
-                        size: 14.sp,
-                        color: AppColors.background,
-                      ),
+                  SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${AppConstants.currencySymbol}${plan.effectivePerSession.toStringAsFixed(2)}/session',
+                    style: AppTextStyle.text10Regular.copyWith(
+                      color: AppColors.grey400,
                     ),
-                  ],
+                    textAlign: TextAlign.center,
+                  ),
+                  // if (isSelected) ...[
+                  //   SizedBox(height: AppSpacing.sm),
+                  //   Container(
+                  //     width: 18.w,
+                  //     height: 18.w,
+                  //     decoration: BoxDecoration(
+                  //       color: AppColors.textPrimary,
+                  //       shape: BoxShape.circle,
+                  //     ),
+                  //     child: Icon(
+                  //       Icons.check,
+                  //       size: 14.sp,
+                  //       color: AppColors.background,
+                  //     ),
+                  //   ),
+                  // ],
                 ],
               ),
             ),
@@ -109,4 +118,3 @@ class SubscriptionPlanCard extends StatelessWidget {
     );
   }
 }
-

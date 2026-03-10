@@ -578,6 +578,11 @@ abstract class PaymentMethodRoute {
           ? double.tryParse(amountParam) ?? 100.00
           : 100.00;
 
+      final baseAmountParam = state.uri.queryParameters['baseAmount'];
+      final baseAmount = baseAmountParam != null
+          ? double.tryParse(baseAmountParam) ?? amount
+          : amount;
+
       // Booking data
       final trainerId = state.uri.queryParameters['trainerId'] ?? '';
       final sessionPlanId = state.uri.queryParameters['sessionPlanId'] ?? '';
@@ -607,14 +612,31 @@ abstract class PaymentMethodRoute {
         }
       }
 
+      final isSubscriptionStr = state.uri.queryParameters['isSubscription'];
+      final isSubscription = isSubscriptionStr == 'true';
+      final planType = state.uri.queryParameters['planType'] ?? '';
+
+      final trainerName = state.uri.queryParameters['trainerName'] ?? '';
+      final sessionDate = state.uri.queryParameters['sessionDate'] ?? '';
+      final sessionTime = state.uri.queryParameters['sessionTime'] ?? '';
+      final sessionStartTime =
+          state.uri.queryParameters['sessionStartTime'] ?? '';
+
       return PaymentMethodScreen(
         amount: amount,
+        baseAmount: baseAmount,
         trainerId: trainerId,
         sessionPlanId: sessionPlanId,
         dateId: dateId,
         timeSlot: timeSlot,
         durationMinutes: durationMinutes,
         availableDates: availableDates,
+        isSubscription: isSubscription,
+        planType: planType,
+        trainerName: trainerName,
+        sessionDate: sessionDate,
+        sessionTime: sessionTime,
+        sessionStartTime: sessionStartTime,
       );
     },
   );

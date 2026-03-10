@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:focus_fitness/core/provider/session_popup_provider.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
 import 'package:focus_fitness/core/service/local_storage_service.dart';
@@ -10,11 +11,13 @@ import 'package:focus_fitness/features/authentication/provider/auth_provider.dar
 import 'package:focus_fitness/features/authentication/provider/forgot_password_provider.dart';
 import 'package:focus_fitness/features/profile/provider/account_details_provider.dart';
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
-import 'package:focus_fitness/features/session/provider/session_details_provider.dart';
+
 import 'package:focus_fitness/features/session/provider/session_history_provider.dart';
 
 import 'package:focus_fitness/features/trainer/provider/linked_trainer_provider.dart';
+import 'package:focus_fitness/features/trainer/provider/payment_method_provider.dart';
 import 'package:focus_fitness/features/trainer/provider/trainer_profile_provider.dart';
+import 'package:focus_fitness/features/trainer/provider/system_settings_provider.dart';
 import 'package:focus_fitness/firebase_options.dart';
 import 'package:provider/provider.dart';
 
@@ -32,6 +35,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // TODO: Add your actual Stripe publishable key here
+  Stripe.publishableKey = 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY';
+
   await LocalStorageService.init();
   InternetConnectivityService.init();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -108,6 +115,12 @@ class AppBootstrap extends StatelessWidget {
             ),
             ChangeNotifierProvider<SessionHistoryProvider>(
               create: (_) => SessionHistoryProvider(),
+            ),
+            ChangeNotifierProvider<SystemSettingsProvider>(
+              create: (_) => SystemSettingsProvider(),
+            ),
+            ChangeNotifierProvider<PaymentMethodProvider>(
+              create: (_) => PaymentMethodProvider(),
             ),
           ],
           child: const App(),

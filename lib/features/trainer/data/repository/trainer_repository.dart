@@ -9,6 +9,7 @@ import '../models/linked_trainer_response_model.dart';
 import '../models/trainer_referral_response_model.dart';
 import '../models/trainer_profile_response_model.dart';
 import '../models/unlink_trainer_response_model.dart';
+import '../models/payment_booking_models.dart';
 import '../services/trainer_api_service.dart';
 
 /// Repository for trainer operations
@@ -150,6 +151,71 @@ class TrainerRepository {
       }
 
       final response = await _apiService.bookSession(request);
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  /// Initiate payment for a session booking
+  Future<Result<InitiatePaymentResponseModel>> initiateSessionPayment(
+    InitiatePaymentRequestModel request,
+  ) async {
+    try {
+      // Validate required fields
+      if (request.trainerId.trim().isEmpty) {
+        return Failure('Trainer ID is required.', code: 400);
+      }
+      if (request.sessionPlanId.trim().isEmpty) {
+        return Failure('Session plan ID is required.', code: 400);
+      }
+      if (request.startTime.trim().isEmpty) {
+        return Failure('Start time is required.', code: 400);
+      }
+      if (request.endTime.trim().isEmpty) {
+        return Failure('End time is required.', code: 400);
+      }
+
+      final response = await _apiService.initiateSessionPayment(request);
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  /// Confirm payment for a session booking
+  Future<Result<ConfirmPaymentResponseModel>> confirmSessionPayment(
+    ConfirmPaymentRequestModel request,
+  ) async {
+    try {
+      // Validate required fields
+      if (request.paymentId.trim().isEmpty) {
+        return Failure('Payment ID is required.', code: 400);
+      }
+
+      final response = await _apiService.confirmSessionPayment(request);
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  /// Verify payment status and get booking details
+  Future<Result<Map<String, dynamic>>> verifyPaymentStatus(
+    String paymentIntentId,
+  ) async {
+    try {
+      if (paymentIntentId.trim().isEmpty) {
+        return Failure('Payment Intent ID is required.', code: 400);
+      }
+
+      final response = await _apiService.verifyPaymentStatus(paymentIntentId);
       return Success(response);
     } on ApiException catch (e) {
       return Failure(e.message, code: e.statusCode ?? 500);

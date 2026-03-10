@@ -3,6 +3,8 @@ import '../../../../features/authentication/data/repository/auth_repository.dart
     show Result, Success, Failure;
 import '../models/get_bookings_response_model.dart';
 import '../models/session_summary_response_model.dart';
+import '../models/booking_payment_response_model.dart';
+
 import '../services/booking_api_service.dart';
 
 /// Repository for booking operations
@@ -73,6 +75,20 @@ class BookingRepository {
         bookingId: bookingId,
         reason: reason,
       );
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  /// Get payment details for a specific booking
+  Future<Result<BookingPaymentResponseModel>> getBookingPayment(
+    String bookingId,
+  ) async {
+    try {
+      final response = await _apiService.getBookingPayment(bookingId);
       return Success(response);
     } on ApiException catch (e) {
       return Failure(e.message, code: e.statusCode ?? 500);

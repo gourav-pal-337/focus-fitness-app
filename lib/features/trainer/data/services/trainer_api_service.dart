@@ -9,6 +9,7 @@ import '../models/linked_trainer_response_model.dart';
 import '../models/trainer_referral_response_model.dart';
 import '../models/trainer_profile_response_model.dart';
 import '../models/unlink_trainer_response_model.dart';
+import '../models/payment_booking_models.dart';
 
 /// API service for trainer operations
 class TrainerApiService {
@@ -321,6 +322,139 @@ class TrainerApiService {
           message: response.msg.isNotEmpty
               ? response.msg
               : 'Failed to book session',
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Initiate payment for a booking
+  Future<InitiatePaymentResponseModel> initiateSessionPayment(
+    InitiatePaymentRequestModel request,
+  ) async {
+    try {
+      final response = await _apiHitter.getPostApiResponse(
+        Endpoints.initiatePayment,
+        data: request.toJson(),
+      );
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        return InitiatePaymentResponseModel.fromJson(responseData);
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              (responseData['error'] as String?) ??
+              (responseData['message'] as String?) ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage.isNotEmpty
+                ? errorMessage
+                : 'Failed to initiate payment',
+            statusCode: response.response?.statusCode,
+          );
+        }
+        throw ApiException(
+          message: response.msg.isNotEmpty
+              ? response.msg
+              : 'Failed to initiate payment',
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Confirm payment for a booking
+  Future<ConfirmPaymentResponseModel> confirmSessionPayment(
+    ConfirmPaymentRequestModel request,
+  ) async {
+    try {
+      final response = await _apiHitter.getPostApiResponse(
+        Endpoints.confirmPayment,
+        data: request.toJson(),
+      );
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        return ConfirmPaymentResponseModel.fromJson(responseData);
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              (responseData['error'] as String?) ??
+              (responseData['message'] as String?) ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage.isNotEmpty
+                ? errorMessage
+                : 'Failed to confirm payment',
+            statusCode: response.response?.statusCode,
+          );
+        }
+        throw ApiException(
+          message: response.msg.isNotEmpty
+              ? response.msg
+              : 'Failed to confirm payment',
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Verify payment status and get booking details by payment intent ID
+  Future<Map<String, dynamic>> verifyPaymentStatus(
+    String paymentIntentId,
+  ) async {
+    try {
+      final response = await _apiHitter.getApiResponse(
+        Endpoints.getBookingByPaymentIntent(paymentIntentId),
+      );
+
+      if (response.status && response.response != null) {
+        return response.response!.data as Map<String, dynamic>;
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              (responseData['error'] as String?) ??
+              (responseData['message'] as String?) ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage.isNotEmpty
+                ? errorMessage
+                : 'Failed to verify payment status',
+            statusCode: response.response?.statusCode,
+          );
+        }
+        throw ApiException(
+          message: response.msg.isNotEmpty
+              ? response.msg
+              : 'Failed to verify payment status',
           statusCode: response.response?.statusCode,
         );
       }
