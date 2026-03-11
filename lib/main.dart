@@ -11,6 +11,7 @@ import 'package:focus_fitness/features/authentication/provider/auth_provider.dar
 import 'package:focus_fitness/features/authentication/provider/forgot_password_provider.dart';
 import 'package:focus_fitness/features/profile/provider/account_details_provider.dart';
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
+import 'package:focus_fitness/features/session/provider/session_details_provider.dart';
 
 import 'package:focus_fitness/features/session/provider/session_history_provider.dart';
 
@@ -121,6 +122,9 @@ class AppBootstrap extends StatelessWidget {
             ),
             ChangeNotifierProvider<PaymentMethodProvider>(
               create: (_) => PaymentMethodProvider(),
+            ),
+            ChangeNotifierProvider<SessionDetailsProvider>(
+              create: (_) => SessionDetailsProvider(),
             ),
           ],
           child: const App(),

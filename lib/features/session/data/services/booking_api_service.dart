@@ -6,6 +6,7 @@ import '../../../../features/authentication/data/exceptions/api_exception.dart';
 import '../models/get_bookings_response_model.dart';
 import '../models/session_summary_response_model.dart';
 import '../models/booking_payment_response_model.dart';
+import '../models/reschedule_models.dart';
 
 /// API service for booking operations
 class BookingApiService {
@@ -246,6 +247,99 @@ class BookingApiService {
           );
         }
 
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Get reschedule availability for a specific booking
+  Future<RescheduleAvailabilityResponseModel> getRescheduleAvailability({
+    required String bookingId,
+    required String from,
+    required String to,
+  }) async {
+    try {
+      final endpoint = Endpoints.rescheduleAvailability(bookingId);
+      final queryParams = {'from': from, 'to': to};
+
+      debugPrint('BookingApiService: Calling rescheduleAvailability');
+      final response = await _apiHitter.getApiResponse(
+        endpoint,
+        queryParameters: queryParams,
+      );
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        return RescheduleAvailabilityResponseModel.fromJson(responseData);
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              responseData['error'] as String? ??
+              responseData['message'] as String? ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage,
+            statusCode: response.response?.statusCode,
+          );
+        }
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Reschedule a booking
+  Future<RescheduleResponseModel> rescheduleBooking({
+    required String bookingId,
+    required RescheduleRequestModel request,
+  }) async {
+    try {
+      final endpoint = Endpoints.rescheduleBooking(bookingId);
+      final data = request.toJson();
+
+      debugPrint('BookingApiService: Calling rescheduleBooking');
+      final response = await _apiHitter.getPatchApiResponse(
+        endpoint,
+        data: data,
+      );
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        return RescheduleResponseModel.fromJson(responseData);
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              responseData['error'] as String? ??
+              responseData['message'] as String? ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage,
+            statusCode: response.response?.statusCode,
+          );
+        }
         throw ApiException(
           message: response.msg,
           statusCode: response.response?.statusCode,

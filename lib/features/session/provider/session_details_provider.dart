@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../data/models/booking_payment_response_model.dart';
+import '../data/models/reschedule_models.dart';
 
 import '../data/repository/booking_repository.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
@@ -147,6 +148,118 @@ class SessionDetailsProvider extends ChangeNotifier {
     } catch (e) {
       _isCancelling = false;
       debugPrint('SessionDetailsProvider: Cancel Session exception: $e');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Reschedule related state
+  List<DayAvailability> _availability = [];
+  bool _isLoadingAvailability = false;
+  String? _availabilityError;
+  bool _isRescheduling = false;
+
+  List<DayAvailability> get availability => _availability;
+  bool get isLoadingAvailability => _isLoadingAvailability;
+  String? get availabilityError => _availabilityError;
+  bool get isRescheduling => _isRescheduling;
+
+  /// Fetch reschedule availability
+  Future<void> fetchRescheduleAvailability(String bookingId) async {
+    _isLoadingAvailability = true;
+    _availabilityError = null;
+    notifyListeners();
+
+    try {
+      final now = DateTime.now();
+      final from = now.toIso8601String().split('T').first;
+      final to = now
+          .add(const Duration(days: 14))
+          .toIso8601String()
+          .split('T')
+          .first;
+
+      final result = await _repository.getRescheduleAvailability(
+        bookingId: bookingId,
+        from: from,
+        to: to,
+      );
+
+      await result.when(
+        success: (response) async {
+          // Group flat slots by date
+          final Map<String, List<RescheduleSlot>> grouped = {};
+          for (final slot in response.availableSlots) {
+            if (!grouped.containsKey(slot.date)) {
+              grouped[slot.date] = [];
+            }
+            grouped[slot.date]!.add(slot);
+          }
+
+          // Convert to List<DayAvailability>
+          _availability = grouped.entries
+              .map((e) => DayAvailability(date: e.key, availableSlots: e.value))
+              .toList();
+
+          // Sort by date just in case
+          _availability.sort((a, b) => a.date.compareTo(b.date));
+
+          _isLoadingAvailability = false;
+          notifyListeners();
+        },
+        failure: (message, code) {
+          _isLoadingAvailability = false;
+          _availabilityError = message;
+          notifyListeners();
+        },
+      );
+    } catch (e) {
+      _isLoadingAvailability = false;
+      _availabilityError = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+    }
+  }
+
+  /// Reschedule a booking
+  Future<bool> rescheduleBooking({
+    required String bookingId,
+    required String startTime,
+    required String endTime,
+    String? reason,
+  }) async {
+    _isRescheduling = true;
+    notifyListeners();
+
+    try {
+      final request = RescheduleRequestModel(
+        startTime: startTime,
+        endTime: endTime,
+        reason: reason,
+      );
+
+      final result = await _repository.rescheduleBooking(
+        bookingId: bookingId,
+        request: request,
+      );
+
+      return await result.when(
+        success: (response) async {
+          _isRescheduling = false;
+          notifyListeners();
+          return response.success;
+        },
+        failure: (message, code) {
+          _isRescheduling = false;
+          debugPrint(
+            'SessionDetailsProvider: Reschedule Booking failed: $message',
+          );
+          notifyListeners();
+          return false;
+        },
+      );
+    } catch (e) {
+      _isRescheduling = false;
+      debugPrint('SessionDetailsProvider: Reschedule Booking exception: $e');
       notifyListeners();
       return false;
     }

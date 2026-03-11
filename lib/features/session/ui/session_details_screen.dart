@@ -16,8 +16,7 @@ import '../../../../routes/app_router.dart';
 import '../provider/session_details_provider.dart';
 import '../widgets/session_card.dart' show SessionData, SessionStatus;
 import '../widgets/session_status_badge.dart';
-import '../widgets/cancel_session_dialog.dart';
-import '../widgets/session_cancelled_dialog.dart';
+import '../widgets/reschedule_bottom_sheet.dart';
 
 class SessionDetailsScreen extends StatefulWidget {
   const SessionDetailsScreen({super.key, required this.session});
@@ -233,7 +232,7 @@ class _PaymentDetailsSection extends StatelessWidget {
             children: [
               _PaymentDetailRow(
                 label: 'Session Amount',
-                value: '\$${payment.amount.toStringAsFixed(2)}',
+                value: '\$${payment.sessionFee.toStringAsFixed(2)}',
               ),
               SizedBox(height: AppSpacing.sm),
               _PaymentDetailRow(
@@ -252,8 +251,7 @@ class _PaymentDetailsSection extends StatelessWidget {
               SizedBox(height: AppSpacing.md),
               _PaymentDetailRow(
                 label: 'Total Paid',
-                value:
-                    '\$${(payment.amount + payment.platformFee + payment.vatAmount).toStringAsFixed(2)}',
+                value: '\$${payment.totalAmount.toStringAsFixed(2)}',
                 isTotal: true,
               ),
               SizedBox(height: AppSpacing.md),
@@ -460,6 +458,10 @@ class _ActionButton extends StatelessWidget {
     // context.pop();
   }
 
+  void _showRescheduleBottomSheet(BuildContext context, SessionData session) {
+    RescheduleBottomSheet.show(context, session);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -479,52 +481,75 @@ class _ActionButton extends StatelessWidget {
   }
 
   Widget _buildButton(BuildContext context) {
-    final providerH = context.read<SessionHistoryProvider>();
+    // final providerH = context.read<SessionHistoryProvider>();
     switch (session.status) {
       case SessionStatus.upcoming:
         return Consumer<SessionDetailsProvider>(
           builder: (context, provider, _) {
-            final isCancelling = provider.isCancelling;
-            return CustomButton(
-              text: isCancelling ? 'Canceling...' : 'Cancel Session',
-              type: ButtonType.filled,
-              isLoading:
-                  isCancelling ||
-                  provider.isSubmittingFeedback ||
-                  providerH.isLoading,
-              onPressed: () {
-                CancelSessionDialog.show(
-                  context: context,
-                  trainerName: session.trainerName,
-                  onConfirm: () async {
-                    if (session.bookingId != null) {
-                      if (context.mounted) {
-                        SessionCancelledDialog.show(
-                          context: context,
-                          onOk: () async {
-                            await provider.cancelSession(session.bookingId!);
-                            // await provider.fe;
-                            await context
-                                .read<SessionHistoryProvider>()
-                                .fetchBookings();
-                            context
-                              ..pop() // Close dialog
-                              ..pop()
-                              ..pop(); // Close screen
-                          },
-                        );
-                      }
-                    } else {
-                      context
-                          .pop(); // Close dialog if no booking ID (shouldn't happen)
-                    }
-                  },
-                );
-              },
+            // final isCancelling = provider.isCancelling;
+            // return CustomButton(
+            //   text: isCancelling ? 'Canceling...' : 'Cancel Session',
+            //   type: ButtonType.filled,
+            //   isLoading:
+            //       isCancelling ||
+            //       provider.isSubmittingFeedback ||
+            //       providerH.isLoading,
+            //   onPressed: () {
+            //     CancelSessionDialog.show(
+            //       context: context,
+            //       trainerName: session.trainerName,
+            //       onConfirm: () async {
+            //         if (session.bookingId != null) {
+            //           if (context.mounted) {
+            //             SessionCancelledDialog.show(
+            //               context: context,
+            //               onOk: () async {
+            //                 await provider.cancelSession(session.bookingId!);
+            //                 // await provider.fe;
+            //                 await context
+            //                     .read<SessionHistoryProvider>()
+            //                     .fetchBookings();
+            //                 context
+            //                   ..pop() // Close dialog
+            //                   ..pop()
+            //                   ..pop(); // Close screen
+            //               },
+            //             );
+            //           }
+            //         } else {
+            //           context
+            //               .pop(); // Close dialog if no booking ID (shouldn't happen)
+            //         }
+            //       },
+            //     );
+            //   },
+            //   width: double.infinity,
+            //   backgroundColor: AppColors.primary,
+            //   textColor: AppColors.background,
+            //   borderRadius: 12.r,
+            // );
+
+            return Container(
               width: double.infinity,
-              backgroundColor: AppColors.primary,
-              textColor: AppColors.background,
-              borderRadius: 12.r,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.3),
+                  width: 1.5,
+                ),
+                color: AppColors.primary.withValues(alpha: 0.05),
+              ),
+              child: CustomButton(
+                text: 'Reschedule Session',
+                type: ButtonType.text,
+                onPressed: () {
+                  if (session.bookingId != null) {
+                    _showRescheduleBottomSheet(context, session);
+                  }
+                },
+                textColor: AppColors.primary,
+                width: double.infinity,
+              ),
             );
           },
         );

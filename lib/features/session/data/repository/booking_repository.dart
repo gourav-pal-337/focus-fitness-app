@@ -4,6 +4,7 @@ import '../../../../features/authentication/data/repository/auth_repository.dart
 import '../models/get_bookings_response_model.dart';
 import '../models/session_summary_response_model.dart';
 import '../models/booking_payment_response_model.dart';
+import '../models/reschedule_models.dart';
 
 import '../services/booking_api_service.dart';
 
@@ -89,6 +90,45 @@ class BookingRepository {
   ) async {
     try {
       final response = await _apiService.getBookingPayment(bookingId);
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  /// Get reschedule availability for a specific booking
+  Future<Result<RescheduleAvailabilityResponseModel>>
+  getRescheduleAvailability({
+    required String bookingId,
+    required String from,
+    required String to,
+  }) async {
+    try {
+      final response = await _apiService.getRescheduleAvailability(
+        bookingId: bookingId,
+        from: from,
+        to: to,
+      );
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  /// Reschedule a booking
+  Future<Result<RescheduleResponseModel>> rescheduleBooking({
+    required String bookingId,
+    required RescheduleRequestModel request,
+  }) async {
+    try {
+      final response = await _apiService.rescheduleBooking(
+        bookingId: bookingId,
+        request: request,
+      );
       return Success(response);
     } on ApiException catch (e) {
       return Failure(e.message, code: e.statusCode ?? 500);

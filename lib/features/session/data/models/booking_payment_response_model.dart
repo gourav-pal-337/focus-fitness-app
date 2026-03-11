@@ -24,6 +24,7 @@ class BookingPayment {
     required this.sessionPlanId,
     required this.clientName,
     required this.amount,
+    required this.sessionFee,
     required this.currency,
     required this.platformFee,
     required this.vatAmount,
@@ -51,6 +52,7 @@ class BookingPayment {
   final String sessionPlanId;
   final String clientName;
   final double amount;
+  final double sessionFee;
   final String currency;
   final double platformFee;
   final double vatAmount;
@@ -79,6 +81,7 @@ class BookingPayment {
       sessionPlanId: json['sessionPlanId'] as String? ?? '',
       clientName: json['clientName'] as String? ?? '',
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
+      sessionFee: (json['sessionFee'] as num?)?.toDouble() ?? 0.0,
       currency: json['currency'] as String? ?? '',
       platformFee: (json['platformFee'] as num?)?.toDouble() ?? 0.0,
       vatAmount: (json['vatAmount'] as num?)?.toDouble() ?? 0.0,

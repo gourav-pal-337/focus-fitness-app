@@ -45,6 +45,10 @@ class Endpoints {
       '/bookings/$bookingId/cancel';
   static String getBookingPayment(String bookingId) =>
       '/bookings/$bookingId/payment';
+  static String rescheduleAvailability(String bookingId) =>
+      '/bookings/$bookingId/reschedule-availability';
+  static String rescheduleBooking(String bookingId) =>
+      '/bookings/$bookingId/reschedule';
 
   // System Settings endpoints
   static const String systemSettings = '/system-settings';
