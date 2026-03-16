@@ -71,9 +71,9 @@ class DateTimeUtils {
     // This allows showing future dates from the API
     final effectiveStartDate = startDate;
     
-    // Generate dates up to endDate or 7 days, whichever comes first
+    // Generate dates up to endDate
     final maxDays = endDate.difference(effectiveStartDate).inDays;
-    final daysToShow = maxDays > 7 ? 7 : (maxDays < 0 ? 0 : maxDays + 1);
+    final daysToShow = maxDays < 0 ? 0 : maxDays + 1;
     
     for (int i = 0; i < daysToShow; i++) {
       final currentDate = effectiveStartDate.add(Duration(days: i));
