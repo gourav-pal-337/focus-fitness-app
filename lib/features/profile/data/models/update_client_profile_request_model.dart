@@ -17,6 +17,8 @@ class UpdateClientProfileRequestModel {
     this.gender,
     this.phone,
     this.countryCode,
+    this.isTfaEnabled,
+    this.tfaVerified,
   });
 
   final String? fullName;
@@ -36,6 +38,8 @@ class UpdateClientProfileRequestModel {
   final String? phone;
   final String? countryCode;
   final String? email;
+  final bool? tfaVerified;
+  final bool? isTfaEnabled;
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
@@ -96,6 +100,8 @@ class UpdateClientProfileRequestModel {
       'phoneCountry',
       countryCode?.trim().isEmpty == true ? null : countryCode?.trim(),
     );
+    addIfNotNull('tfaVerified', tfaVerified);
+    addIfNotNull('isTfaEnabled', isTfaEnabled);
 
     return data;
   }

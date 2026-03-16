@@ -425,13 +425,14 @@ class TrainerApiService {
     }
   }
 
-  /// Verify payment status and get booking details by payment intent ID
+  /// Verify payment status and get booking details by payment intent ID or order ID
   Future<Map<String, dynamic>> verifyPaymentStatus(
-    String paymentIntentId,
-  ) async {
+    String id, {
+    bool isPaypal = false,
+  }) async {
     try {
       final response = await _apiHitter.getApiResponse(
-        Endpoints.getBookingByPaymentIntent(paymentIntentId),
+        Endpoints.getBookingByPaymentIntent(id),
       );
 
       if (response.status && response.response != null) {

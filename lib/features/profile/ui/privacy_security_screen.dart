@@ -18,10 +18,7 @@ class PrivacySecurityScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const CustomAppBar(
-              title: 'Privacy & Security',
-              centerTitle: true,
-            ),
+            const CustomAppBar(title: 'Privacy & Security', centerTitle: true),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -33,7 +30,37 @@ class PrivacySecurityScreen extends StatelessWidget {
                         context.push(TwoFactorAuthenticationRoute.path);
                       },
                     ),
-                    Divider(
+                    Divider(color: AppColors.grey200, thickness: 1, height: 0),
+                    PrivacySecurityOption(
+                      label: 'Privacy Policy',
+                      onTap: () {
+                        context.pushNamed(
+                          LegalRoute.name,
+                          queryParameters: {
+                            'type': 'privacy_policy',
+                            'title': 'Privacy Policy',
+                          },
+                        );
+                      },
+                    ),
+                    const Divider(
+                      color: AppColors.grey200,
+                      thickness: 1,
+                      height: 0,
+                    ),
+                    PrivacySecurityOption(
+                      label: 'Terms of Use',
+                      onTap: () {
+                        context.pushNamed(
+                          LegalRoute.name,
+                          queryParameters: {
+                            'type': 'terms_of_use',
+                            'title': 'Terms of Use',
+                          },
+                        );
+                      },
+                    ),
+                    const Divider(
                       color: AppColors.grey200,
                       thickness: 1,
                       height: 0,
@@ -45,11 +72,7 @@ class PrivacySecurityScreen extends StatelessWidget {
                         context.push(DeleteAccountRoute.path);
                       },
                     ),
-                    Divider(
-                      color: AppColors.grey200,
-                      thickness: 1,
-                      height: 0,
-                    ),
+                    Divider(color: AppColors.grey200, thickness: 1, height: 0),
                     SizedBox(height: AppSpacing.xl),
                   ],
                 ),
@@ -61,4 +84,3 @@ class PrivacySecurityScreen extends StatelessWidget {
     );
   }
 }
-

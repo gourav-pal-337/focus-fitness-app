@@ -125,6 +125,51 @@ class AuthRepository {
       return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
+
+  /// Send TFA OTP
+  Future<Result<bool>> sendTfaOtp(String userId, String phone, String phoneCountry) async {
+    try {
+      final response = await _apiService.sendTfaOtp(userId, phone, phoneCountry);
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  /// Verify TFA OTP
+  Future<Result<LoginResponseModel>> verifyTfaOtp(
+    String userId,
+    String phone,
+    String phoneCountry,
+    String otp,
+  ) async {
+    try {
+      final response = await _apiService.verifyTfaOtp(
+        userId,
+        phone,
+        phoneCountry,
+        otp,
+      );
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+  /// Disable TFA
+  Future<Result<bool>> disableTfa() async {
+    try {
+      final response = await _apiService.disableTfa();
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
 }
 
 /// Extension for Result type pattern matching

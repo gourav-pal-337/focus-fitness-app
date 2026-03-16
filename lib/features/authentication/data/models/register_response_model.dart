@@ -58,6 +58,7 @@ class UserModel {
     this.profilePhoto,
     this.email,
     this.phone,
+    this.phoneCountry,
     this.linkedTrainerId,
     this.dob,
     this.gender,
@@ -69,6 +70,8 @@ class UserModel {
     this.termsAcceptedAt,
     required this.createdAt,
     required this.updatedAt,
+    this.isTfaEnabled,
+    this.tfaVerified,
   });
 
   final String id;
@@ -79,6 +82,7 @@ class UserModel {
   final String? profilePhoto;
   final String? email;
   final String? phone;
+  final String? phoneCountry;
   final String? linkedTrainerId;
   final bool? isTrainerLinked;
   final bool emailVerified;
@@ -88,6 +92,8 @@ class UserModel {
   final String? termsAcceptedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final bool? isTfaEnabled;
+  final bool? tfaVerified;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
@@ -99,6 +105,7 @@ class UserModel {
       profilePhoto: json['profilePhoto'] as String?,
       email: json['email'] as String?,
       phone: json['phone'] as String?,
+      phoneCountry: json['phoneCountry'] as String?,
       linkedTrainerId: json['linkedTrainerId'] as String?,
       isTrainerLinked: json['isLinked'] as bool? ?? false,
       emailVerified: json['emailVerified'] as bool? ?? false,
@@ -114,6 +121,8 @@ class UserModel {
       updatedAt: DateTime.parse(
         json['updatedAt'] as String? ?? DateTime.now().toIso8601String(),
       ),
+      isTfaEnabled: json['isTfaEnabled'] as bool? ?? false,
+      tfaVerified: json['tfaVerified'] as bool? ?? false,
     );
   }
 
@@ -125,6 +134,7 @@ class UserModel {
       'profilePhoto': profilePhoto,
       'email': email,
       'phone': phone,
+      'phoneCountry': phoneCountry,
       'linkedTrainerId': linkedTrainerId,
       'isLinked': isTrainerLinked,
       'emailVerified': emailVerified,
@@ -134,6 +144,8 @@ class UserModel {
       'termsAcceptedAt': termsAcceptedAt,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
+      'isTfaEnabled': isTfaEnabled,
+      'tfaVerified': tfaVerified,
     };
   }
 }

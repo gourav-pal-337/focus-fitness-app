@@ -148,8 +148,118 @@ class AuthProvider extends ChangeNotifier {
 
       await result.when(
         success: (response) async {
+          if (response.tfaRequired) {
+            _handleTfaRequired(response);
+          } else {
+            _loginResponse = response;
+            await _storeLoginTokens(response);
+            _setAuthState(AuthState.loginSuccess);
+          }
+        },
+        failure: (message, code) {
+          _errorMessage = message;
+          _errorCode = code;
+          _setAuthState(AuthState.error);
+        },
+      );
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _errorCode = 500;
+      _setAuthState(AuthState.error);
+    }
+  }
+
+  // 2FA State
+  bool _tfaRequired = false;
+  String? _pendingTfaUserId;
+  String? _maskedPhone;
+  String? _pendingTfaPhone;
+  String? _pendingTfaPhoneCountry;
+
+  bool get tfaRequired => _tfaRequired;
+  String? get pendingTfaUserId => _pendingTfaUserId;
+  String? get maskedPhone => _maskedPhone;
+  String? get pendingTfaPhone => _pendingTfaPhone;
+  String? get pendingTfaPhoneCountry => _pendingTfaPhoneCountry;
+
+  void updateTfaPhone(String value, {String? country}) {
+    _pendingTfaPhone = value;
+    if (country != null) {
+      _pendingTfaPhoneCountry = country;
+    }
+    notifyListeners();
+  }
+
+  void _handleTfaRequired(LoginResponseModel response) {
+    _tfaRequired = true;
+    _pendingTfaUserId = response.userId;
+    _maskedPhone = response.maskedPhone;
+    if (response.phoneCountry != null && response.phoneCountry!.isNotEmpty) {
+      _countryCode = response.phoneCountry!;
+      _pendingTfaPhoneCountry = response.phoneCountry!;
+    }
+    _setAuthState(AuthState.idle);
+  }
+
+  /// Send TFA OTP
+  Future<bool> sendTfaOtp(String phone, String phoneCountry) async {
+    if (_pendingTfaUserId == null) return false;
+
+    _setAuthState(AuthState.loading);
+    _errorMessage = '';
+    _pendingTfaPhone = phone;
+    _pendingTfaPhoneCountry = phoneCountry;
+
+    try {
+      final result = await _repository.sendTfaOtp(
+        _pendingTfaUserId!,
+        phone,
+        phoneCountry,
+      );
+
+      return result.when(
+        success: (success) async {
+          _setAuthState(AuthState.idle);
+          return true;
+        },
+        failure: (message, code) {
+          _errorMessage = message;
+          _errorCode = code;
+          _setAuthState(AuthState.error);
+          return false;
+        },
+      );
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _setAuthState(AuthState.error);
+      return false;
+    }
+  }
+
+  /// Verify TFA OTP
+  Future<void> verifyTfaOtp(String otp) async {
+    if (_pendingTfaUserId == null || _pendingTfaPhone == null) return;
+
+    _setAuthState(AuthState.loading);
+    _errorMessage = '';
+    _errorCode = null;
+
+    try {
+      final result = await _repository.verifyTfaOtp(
+        _pendingTfaUserId!,
+        _pendingTfaPhone!,
+        _pendingTfaPhoneCountry ?? '',
+        otp,
+      );
+
+      await result.when(
+        success: (response) async {
           _loginResponse = response;
           await _storeLoginTokens(response);
+          _tfaRequired = false;
+          _pendingTfaUserId = null;
+          _pendingTfaPhone = null;
+          _pendingTfaPhoneCountry = null;
           _setAuthState(AuthState.loginSuccess);
         },
         failure: (message, code) {
@@ -438,18 +548,20 @@ class AuthProvider extends ChangeNotifier {
     _setAuthState(AuthState.loading);
     _errorMessage = '';
     _errorCode = null;
+    _tfaRequired = false;
 
     try {
       final result = await _repository.loginWithEmail(request);
 
       await result.when(
         success: (response) async {
-          _loginResponse = response;
-
-          // Store tokens in secure storage
-          await _storeLoginTokens(response);
-
-          _setAuthState(AuthState.loginSuccess);
+          if (response.tfaRequired) {
+            _handleTfaRequired(response);
+          } else {
+            _loginResponse = response;
+            await _storeLoginTokens(response);
+            _setAuthState(AuthState.loginSuccess);
+          }
         },
         failure: (message, code) {
           _errorMessage = message;
@@ -503,25 +615,10 @@ class AuthProvider extends ChangeNotifier {
     _authMethod = AuthMethod.google;
     _setAuthState(AuthState.loading);
     _errorMessage = '';
+    _tfaRequired = false;
 
     try {
       final credential = await _socialAuthService.signInWithGoogle();
-      log("credential email: ${credential?.user?.email}");
-      log("credential displayName: ${credential?.user?.displayName}");
-      log("credential photoURL: ${credential?.user?.photoURL}");
-      log("credential emailVerified: ${credential?.user?.emailVerified}");
-      log("credential metadata: ${credential?.user?.metadata}");
-      log(
-        "credential lastSignInTime: ${credential?.user?.metadata.lastSignInTime}",
-      );
-      log(
-        "credential creationTime: ${credential?.user?.metadata.creationTime}",
-      );
-      log(
-        "credential refreshToken: ${credential?.user?.metadata.lastSignInTime}",
-      );
-      log("credential idToken: ${credential?.user?.metadata.lastSignInTime}");
-      log("credential: ${credential?.user?.uid}");
       if (credential != null && credential.user != null) {
         final token = await credential.user!.getIdToken();
         if (token != null) {
@@ -537,9 +634,13 @@ class AuthProvider extends ChangeNotifier {
 
           await result.when(
             success: (response) async {
-              _loginResponse = response;
-              await _storeLoginTokens(response);
-              _setAuthState(AuthState.loginSuccess);
+              if (response.tfaRequired) {
+                _handleTfaRequired(response);
+              } else {
+                _loginResponse = response;
+                await _storeLoginTokens(response);
+                _setAuthState(AuthState.loginSuccess);
+              }
             },
             failure: (message, code) {
               _errorMessage = message;
@@ -570,27 +671,10 @@ class AuthProvider extends ChangeNotifier {
     _authMethod = AuthMethod.apple;
     _setAuthState(AuthState.loading);
     _errorMessage = '';
+    _tfaRequired = false;
 
     try {
       final credential = await _socialAuthService.signInWithApple();
-
-      log("credential email: ${credential?.user?.email}");
-      log("credential displayName: ${credential?.user?.displayName}");
-      log("credential photoURL: ${credential?.user?.photoURL}");
-      log("credential emailVerified: ${credential?.user?.emailVerified}");
-      log("credential metadata: ${credential?.user?.metadata}");
-      log(
-        "credential lastSignInTime: ${credential?.user?.metadata.lastSignInTime}",
-      );
-      log(
-        "credential creationTime: ${credential?.user?.metadata.creationTime}",
-      );
-      log(
-        "credential refreshToken: ${credential?.user?.metadata.lastSignInTime}",
-      );
-      log("credential idToken: ${credential?.user?.metadata.lastSignInTime}");
-      log("credential: ${credential?.user?.uid}");
-
       if (credential != null && credential.user != null) {
         final token = await credential.user!.getIdToken();
         if (token != null) {
@@ -606,9 +690,13 @@ class AuthProvider extends ChangeNotifier {
 
           await result.when(
             success: (response) async {
-              _loginResponse = response;
-              await _storeLoginTokens(response);
-              _setAuthState(AuthState.loginSuccess);
+              if (response.tfaRequired) {
+                _handleTfaRequired(response);
+              } else {
+                _loginResponse = response;
+                await _storeLoginTokens(response);
+                _setAuthState(AuthState.loginSuccess);
+              }
             },
             failure: (message, code) {
               _errorMessage = message;
@@ -705,6 +793,11 @@ class AuthProvider extends ChangeNotifier {
     clearOtp();
     clearEmailCode();
     resetAuthState();
+    _tfaRequired = false;
+    _pendingTfaUserId = null;
+    _maskedPhone = null;
+    _pendingTfaPhone = null;
+    _pendingTfaPhoneCountry = null;
     notifyListeners();
   }
 

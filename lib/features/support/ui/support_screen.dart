@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:focus_fitness/features/dashboard/provider/dashboard_provider.dart';
 import 'package:focus_fitness/features/support/widgets/contact_support_bottom_sheet.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -79,7 +76,7 @@ class SupportScreen extends StatelessWidget {
                             context.push(ContactSupportRoute.path);
                           },
                           onTrackTicketStatusTap: () {
-                            context.push(TicketDetailsRoute.path);
+                            context.push(TrackTicketRoute.path);
                           },
                         );
 

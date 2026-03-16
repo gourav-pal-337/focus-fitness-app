@@ -25,6 +25,8 @@ class TicketModel {
   final String? priority;
   final List<String>? attachments;
   final String? createdAt;
+  final String? lastActivityAt;
+  final String? updatedAt;
 
   TicketModel({
     this.id,
@@ -35,20 +37,36 @@ class TicketModel {
     this.priority,
     this.attachments,
     this.createdAt,
+    this.lastActivityAt,
+    this.updatedAt,
   });
 
   factory TicketModel.fromJson(Map<String, dynamic> json) {
+    List<String>? parsedAttachments;
+    if (json['attachments'] != null && json['attachments'] is List) {
+      parsedAttachments = (json['attachments'] as List)
+          .map((attachment) {
+            if (attachment is String) return attachment;
+            if (attachment is Map && attachment['url'] != null) {
+              return attachment['url'].toString();
+            }
+            return '';
+          })
+          .where((url) => url.isNotEmpty)
+          .toList();
+    }
+
     return TicketModel(
-      id: json['id'],
-      title: json['title'],
+      id: json['_id'] ?? json['id'],
+      title: json['subject'] ?? json['title'],
       description: json['description'],
       status: json['status'],
       category: json['category'],
       priority: json['priority'],
-      attachments: json['attachments'] != null
-          ? List<String>.from(json['attachments'])
-          : null,
+      attachments: parsedAttachments,
       createdAt: json['createdAt'],
+      lastActivityAt: json['lastActivityAt'],
+      updatedAt: json['updatedAt'],
     );
   }
 }

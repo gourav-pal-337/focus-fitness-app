@@ -55,7 +55,6 @@ class UserApiService {
     try {
       final response = await _apiHitter.getPostApiResponse(
         Endpoints.fcmToken,
-
         data: {'token': token, 'platform': platform},
       );
 

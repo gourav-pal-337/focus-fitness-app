@@ -142,13 +142,18 @@ class AuthOtpVerificationScreen extends StatelessWidget {
                       );
                       return;
                     }
-                    await provider.verifyOtp(
-                      purpose: isLogin ? 'login' : 'signup',
-                      fullname: provider.name,
-                    );
-                    if (provider.isLoginSuccess) {}
-                    if (context.mounted) {
-                      if (provider.isLoginSuccess) {
+    await provider.verifyOtp(
+      purpose: isLogin ? 'login' : 'signup',
+      fullname: provider.name,
+    );
+
+    if (provider.tfaRequired && context.mounted) {
+      context.push(TfaPhoneVerificationRoute.path);
+      return;
+    }
+
+    if (context.mounted) {
+      if (provider.isLoginSuccess) {
                         context.go(HomeRoute.path);
                       } else if (provider.isError) {
                         ScaffoldMessenger.of(context).showSnackBar(

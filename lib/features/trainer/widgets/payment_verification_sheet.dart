@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -8,12 +9,14 @@ import '../provider/payment_method_provider.dart';
 
 class PaymentVerificationSheet extends StatefulWidget {
   final String intentId;
+  final bool isPaypal;
   final Function(Map<String, dynamic> bookingData) onSuccess;
   final Function(String error) onError;
 
   const PaymentVerificationSheet({
     super.key,
     required this.intentId,
+    this.isPaypal = false,
     required this.onSuccess,
     required this.onError,
   });
@@ -35,28 +38,60 @@ class _PaymentVerificationSheetState extends State<PaymentVerificationSheet> {
   }
 
   Future<void> _verifyPayment() async {
-    await Future.delayed(const Duration(seconds: 2));
-    final provider = context.read<PaymentMethodProvider>();
-    final result = await provider.verifyPaymentStatus(widget.intentId);
+    // await Future.delayed(const Duration(seconds: 3));
+    int attempts = 0;
+    const int maxRetries = 3;
+    const Duration delay = Duration(seconds: 3);
 
-    if (!mounted) return;
+    while (attempts < maxRetries) {
+      attempts++;
+      log('PaymentVerification: Attempt $attempts of $maxRetries');
 
-    if (result != null && result['success'] == true) {
-      final bookingData = result['booking'] as Map<String, dynamic>?;
-      if (bookingData != null) {
-        final paymentStatus = bookingData['paymentStatus'] as String?;
-        if (paymentStatus == "paid") {
-          widget.onSuccess(bookingData);
-        } else {
-          widget.onError(
-            'Payment status: $paymentStatus. Please contact support.',
-          );
+      await Future.delayed(delay);
+      if (!mounted) return;
+
+      final provider = context.read<PaymentMethodProvider>();
+      final result = await provider.verifyPaymentStatus(
+        widget.intentId,
+        isPaypal: widget.isPaypal,
+      );
+
+      if (!mounted) return;
+
+      if (result != null && result['success'] == true) {
+        final bookingData = result['booking'] as Map<String, dynamic>?;
+        if (bookingData != null) {
+          final paymentStatus = bookingData['paymentStatus'] as String?;
+          if (paymentStatus == "paid") {
+            log('PaymentVerification: Payment confirmed as paid.');
+            widget.onSuccess(bookingData);
+            return;
+          } else {
+            log('PaymentVerification: Status is $paymentStatus, retrying...');
+          }
         }
       } else {
-        widget.onError('Booking data not found');
+        log(
+          'PaymentVerification: API call failed or returned success=false, retrying...',
+        );
       }
-    } else {
-      widget.onError(provider.bookingError ?? 'Failed to verify payment');
+
+      // If this was the last attempt and we still aren't "paid"
+      if (attempts >= maxRetries) {
+        if (result != null && result['success'] == true) {
+          final bookingData = result['booking'] as Map<String, dynamic>?;
+          final paymentStatus =
+              bookingData?['paymentStatus'] as String? ?? 'unpaid';
+          widget.onError(
+            'Payment status: $paymentStatus. Please contact support if you were charged.',
+          );
+        } else {
+          widget.onError(
+            provider.bookingError ??
+                'Failed to verify payment after $maxRetries attempts',
+          );
+        }
+      }
     }
   }
 

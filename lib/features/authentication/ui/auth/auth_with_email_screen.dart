@@ -66,7 +66,10 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
     );
 
     await authProvider.loginWithEmail(request);
-
+    if (authProvider.tfaRequired && mounted) {
+      context.push(TfaPhoneVerificationRoute.path);
+      return;
+    }
     if (authProvider.isLoginSuccess && mounted) {
       await userProvider.fetchUserDetails();
       // Check if email verification is required
@@ -151,6 +154,10 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
   }
 
   Future<void> _handleSocialAuthResult(AuthProvider authProvider) async {
+    if (authProvider.tfaRequired && mounted) {
+      context.push(TfaPhoneVerificationRoute.path);
+      return;
+    }
     if (authProvider.isLoginSuccess && mounted) {
       // Assuming social login provides enough info to skip profile setup for now
       // or fetches user details if backend is linked

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../../../features/authentication/data/exceptions/api_exception.dart';
 import '../../../../features/authentication/data/models/get_user_response_model.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
@@ -24,6 +26,7 @@ class UserRepository {
     required String token,
     required String platform,
   }) async {
+    debugPrint("FCM Token check: $token");
     try {
       final success = await _apiService.updateFcmToken(
         token: token,

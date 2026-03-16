@@ -236,11 +236,14 @@ class ApiHitter {
             path.contains('/auth/register');
 
         if (!isAuthRequest) {
-          final errorMessage =
-              (e.response?.data['error'] ??
-                      e.response?.data['msg'] ??
-                      'Something went wrong')
-                  .toString();
+          String errorMessage = 'Something went wrong';
+          if (e.response?.data is Map<String, dynamic>) {
+            errorMessage =
+                (e.response?.data['error'] ??
+                        e.response?.data['msg'] ??
+                        'Something went wrong')
+                    .toString();
+          }
           debugPrint(errorMessage);
 
           LocalStorageService.clearAll();
@@ -270,10 +273,14 @@ class ApiHitter {
   }
 
   ApiResponse apiData(Response<dynamic> response) {
+    String message = 'Success';
+    if (response.data is Map<String, dynamic>) {
+      message = (response.data as Map<String, dynamic>)['message'] ?? 'Success';
+    }
     return ApiResponse(
       response.statusCode == 200 || response.statusCode == 201,
       response: response,
-      msg: response.data['message'] ?? 'Success',
+      msg: message,
     );
   }
 

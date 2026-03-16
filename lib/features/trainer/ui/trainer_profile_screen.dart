@@ -5,9 +5,7 @@ import 'package:focus_fitness/features/trainer/data/models/trainer_referral_resp
 import 'package:focus_fitness/routes/app_router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-
 import '../widgets/payment_breakdown_widget.dart';
-
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -237,34 +235,35 @@ class _SessionTypeSelector extends StatelessWidget {
               children: [
                 Expanded(
                   child: _SessionTypeButton(
-                    label: 'Online',
+                    label: 'Online Mode',
                     isSelected: sessionType == SessionType.online,
                     onTap: () {
                       context.read<TrainerProfileProvider>().setSessionType(
                         SessionType.online,
                       );
                     },
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12.r),
-                      bottomLeft: Radius.circular(12.r),
-                    ),
+                    borderRadius: BorderRadius.circular(5.r),
+                    // .only(
+                    //   topLeft: Radius.circular(12.r),
+                    //   bottomLeft: Radius.circular(12.r),
+                    // ),
                   ),
                 ),
-                Expanded(
-                  child: _SessionTypeButton(
-                    label: 'Physical',
-                    isSelected: sessionType == SessionType.physical,
-                    onTap: () {
-                      context.read<TrainerProfileProvider>().setSessionType(
-                        SessionType.physical,
-                      );
-                    },
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(12.r),
-                      bottomRight: Radius.circular(12.r),
-                    ),
-                  ),
-                ),
+                // Expanded(
+                //   child: _SessionTypeButton(
+                //     label: 'Physical',
+                //     isSelected: sessionType == SessionType.physical,
+                //     onTap: () {
+                //       context.read<TrainerProfileProvider>().setSessionType(
+                //         SessionType.physical,
+                //       );
+                //     },
+                //     borderRadius: BorderRadius.only(
+                //       topRight: Radius.circular(12.r),
+                //       bottomRight: Radius.circular(12.r),
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),

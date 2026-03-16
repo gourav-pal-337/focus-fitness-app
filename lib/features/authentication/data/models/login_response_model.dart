@@ -11,6 +11,10 @@ class LoginResponseModel {
     this.accessToken,
     this.refreshToken,
     this.emailVerificationRequired = false,
+    this.tfaRequired = false,
+    this.userId,
+    this.maskedPhone,
+    this.phoneCountry,
   });
 
   final bool success;
@@ -21,6 +25,10 @@ class LoginResponseModel {
   final String? accessToken;
   final String? refreshToken;
   final bool emailVerificationRequired;
+  final bool tfaRequired;
+  final String? userId;
+  final String? maskedPhone;
+  final String? phoneCountry;
 
   factory LoginResponseModel.fromJson(Map<String, dynamic> json) {
     return LoginResponseModel(
@@ -37,7 +45,10 @@ class LoginResponseModel {
       refreshToken: json['refreshToken'] as String?,
       emailVerificationRequired:
           json['emailVerificationRequired'] as bool? ?? false,
+      tfaRequired: json['tfaRequired'] as bool? ?? false,
+      userId: json['userId'] as String?,
+      maskedPhone: json['maskedPhone'] as String?,
+      phoneCountry: json['phoneCountry'] as String?,
     );
   }
 }
-

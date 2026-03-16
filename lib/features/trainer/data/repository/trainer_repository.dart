@@ -208,14 +208,18 @@ class TrainerRepository {
 
   /// Verify payment status and get booking details
   Future<Result<Map<String, dynamic>>> verifyPaymentStatus(
-    String paymentIntentId,
-  ) async {
+    String id, {
+    bool isPaypal = false,
+  }) async {
     try {
-      if (paymentIntentId.trim().isEmpty) {
-        return Failure('Payment Intent ID is required.', code: 400);
+      if (id.trim().isEmpty) {
+        return Failure('ID is required.', code: 400);
       }
 
-      final response = await _apiService.verifyPaymentStatus(paymentIntentId);
+      final response = await _apiService.verifyPaymentStatus(
+        id,
+        isPaypal: isPaypal,
+      );
       return Success(response);
     } on ApiException catch (e) {
       return Failure(e.message, code: e.statusCode ?? 500);

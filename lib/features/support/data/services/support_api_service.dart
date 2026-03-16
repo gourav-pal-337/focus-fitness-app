@@ -56,7 +56,7 @@ class SupportApiService {
   }) async {
     try {
       final map = {
-        'title': title,
+        'subject': title,
         'description': description,
         'category': category.toLowerCase(),
         'priority': priority.toLowerCase(),
@@ -94,6 +94,41 @@ class SupportApiService {
           );
         }
 
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  Future<List<TicketModel>> getTickets({
+    String? status,
+    String? category,
+  }) async {
+    try {
+      final queryParameters = <String, dynamic>{};
+      if (status != null) queryParameters['status'] = status;
+      if (category != null) queryParameters['category'] = category;
+
+      final response = await _apiHitter.getApiResponse(
+        Endpoints.getTickets,
+        queryParameters: queryParameters,
+      );
+
+      if (response.status && response.response != null) {
+        final List<dynamic> responseData = response.response!.data;
+        return responseData
+            .map((json) => TicketModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+      } else {
         throw ApiException(
           message: response.msg,
           statusCode: response.response?.statusCode,

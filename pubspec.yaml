@@ -58,6 +58,7 @@ dependencies:
   firebase_auth: ^6.1.4
   canopas_country_picker: ^0.0.10
   flutter_stripe: ^12.3.0
+  webview_flutter: ^4.13.1
 
 dev_dependencies:
   flutter_test:

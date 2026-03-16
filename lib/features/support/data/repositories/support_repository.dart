@@ -27,4 +27,11 @@ class SupportRepository {
     );
     return response.ticket;
   }
+
+  Future<List<TicketModel>> getTickets({
+    String? status,
+    String? category,
+  }) async {
+    return _apiService.getTickets(status: status, category: category);
+  }
 }

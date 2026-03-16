@@ -17,6 +17,9 @@ class Endpoints {
   static const String verifyOtp = '/auth/verify-otp';
   static const String forgotPassword = '/auth/password/forgot';
   static const String resetPassword = '/auth/password/reset';
+  static const String sendTfaOtp = '/auth/tfa/send-otp';
+  static const String verifyTfa = '/auth/tfa/verify';
+  static const String disableTfa = '/auth/tfa';
 
   // Client profile endpoints
   static const String getClientProfile = '/client/profile';
@@ -61,9 +64,11 @@ class Endpoints {
   // Support endpoints
   static const String getFaqs = '/support/faqs';
   static const String createTicket = '/support/tickets';
+  static const String getTickets = '/support/tickets';
 
   // Subscription endpoints
   static String getSubscriptionOffers(String trainerId) =>
       '/subscriptions/offers/$trainerId';
   static const String subscriptionCheckout = '/subscriptions/checkout-sheet';
+  static String getPrivacy(String type) => '/public/privacy/$type';
 }

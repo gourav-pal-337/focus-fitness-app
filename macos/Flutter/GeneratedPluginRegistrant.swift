@@ -18,6 +18,7 @@ import sign_in_with_apple
 import smart_auth
 import url_launcher_macos
 import video_player_avfoundation
+import webview_flutter_wkwebview
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   ConnectivityPlusPlugin.register(with: registry.registrar(forPlugin: "ConnectivityPlusPlugin"))
@@ -33,4 +34,5 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   SmartAuthPlugin.register(with: registry.registrar(forPlugin: "SmartAuthPlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
   FVPVideoPlayerPlugin.register(with: registry.registrar(forPlugin: "FVPVideoPlayerPlugin"))
+  WebViewFlutterPlugin.register(with: registry.registrar(forPlugin: "WebViewFlutterPlugin"))
 }

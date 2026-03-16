@@ -11,6 +11,8 @@ import '../features/authentication/ui/auth/auth_mode.dart';
 import '../features/authentication/ui/auth/auth_with_email_screen.dart';
 import '../features/authentication/ui/auth/auth_with_phone_screen.dart';
 import '../features/authentication/ui/auth/auth_otp_verification_screen.dart';
+import '../features/authentication/ui/auth/tfa_phone_verification_screen.dart';
+import '../features/authentication/ui/auth/tfa_otp_verification_screen.dart';
 import '../features/authentication/ui/forgot_password/check_email_screen.dart';
 import '../features/authentication/ui/forgot_password/forgot_password_screen.dart';
 import '../features/authentication/ui/forgot_password/set_new_password_screen.dart';
@@ -39,13 +41,16 @@ import '../features/video_player/ui/video_player_screen.dart';
 import '../features/subscriptions/ui/subscriptions_screen.dart';
 import '../features/subscriptions/ui/past_subscriptions_screen.dart';
 import '../features/subscriptions/ui/subscription_details_screen.dart';
+import '../features/support/data/models/ticket_model.dart';
+import '../features/support/provider/support_provider.dart';
+import '../features/support/provider/track_ticket_provider.dart';
 import '../features/support/ui/support_screen.dart';
 import '../features/support/ui/contact_support_screen.dart';
 import '../features/support/ui/ticket_details_screen.dart';
 import '../features/support/ui/chat_support_screen.dart';
 import '../features/support/ui/ticket_success_screen.dart';
 import '../features/support/ui/faq_screen.dart';
-import '../features/support/provider/support_provider.dart';
+import '../features/support/ui/track_ticket_screen.dart';
 import '../features/profile/ui/profile_screen.dart';
 import '../features/profile/ui/edit_profile_details_screen.dart';
 import '../features/profile/provider/edit_profile_details_provider.dart';
@@ -59,6 +64,7 @@ import '../features/onboarding/provider/onboarding_provider.dart';
 import '../features/onboarding/ui/onboarding_screen.dart';
 import '../features/sample/ui/sample_screen.dart';
 import '../features/splash/ui/splash_screen.dart';
+import '../features/profile/ui/legal_screen.dart';
 
 abstract class AppRouter {
   static final GlobalKey<NavigatorState> _rootNavigatorKey =
@@ -77,6 +83,8 @@ abstract class AppRouter {
       SignupWithEmailRoute.route,
       LoginWithPhoneRoute.route,
       SignupWithPhoneRoute.route,
+      TfaPhoneVerificationRoute.route,
+      TfaOtpVerificationRoute.route,
       OtpVerificationRoute.route,
       ForgotPasswordRoute.route,
       CheckEmailRoute.route,
@@ -115,6 +123,8 @@ abstract class AppRouter {
       ChatSupportRoute.route,
       TicketSuccessRoute.route,
       FaqsRoute.route,
+      LegalRoute.route,
+      TrackTicketRoute.route,
     ],
   );
 }
@@ -236,6 +246,28 @@ abstract class SignupWithPhoneRoute {
     name: name,
     builder: (context, state) =>
         const AuthWithPhoneScreen(mode: AuthMode.signup),
+  );
+}
+
+abstract class TfaPhoneVerificationRoute {
+  static const String path = '/auth/tfa-phone';
+  static const String name = 'tfaPhoneVerification';
+
+  static final GoRoute route = GoRoute(
+    path: path,
+    name: name,
+    builder: (context, state) => const TfaPhoneVerificationScreen(),
+  );
+}
+
+abstract class TfaOtpVerificationRoute {
+  static const String path = '/auth/tfa-otp';
+  static const String name = 'tfaOtpVerification';
+
+  static final GoRoute route = GoRoute(
+    path: path,
+    name: name,
+    builder: (context, state) => const TfaOtpVerificationScreen(),
   );
 }
 
@@ -366,7 +398,10 @@ abstract class TicketDetailsRoute {
   static final GoRoute route = GoRoute(
     path: '/dashboard/ticket-details',
     name: name,
-    builder: (context, state) => const TicketDetailsScreen(),
+    builder: (context, state) {
+      final ticket = state.extra as TicketModel?;
+      return TicketDetailsScreen(ticket: ticket);
+    },
   );
 }
 
@@ -987,5 +1022,34 @@ abstract class FaqsRoute {
         child: const FaqScreen(),
       );
     },
+  );
+}
+
+abstract class LegalRoute {
+  static const String path = '/legal';
+  static const String name = 'legal';
+
+  static GoRoute get route => GoRoute(
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final type = state.uri.queryParameters['type'] ?? 'privacy_policy';
+      final title = state.uri.queryParameters['title'] ?? 'Privacy Policy';
+      return LegalScreen(type: type, title: title);
+    },
+  );
+}
+
+abstract class TrackTicketRoute {
+  static const String path = '/track-ticket';
+  static const String name = 'trackTicket';
+
+  static final GoRoute route = GoRoute(
+    path: path,
+    name: name,
+    builder: (context, state) => ChangeNotifierProvider(
+      create: (_) => TrackTicketProvider(),
+      child: const TrackTicketScreen(),
+    ),
   );
 }

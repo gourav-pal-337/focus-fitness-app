@@ -14,7 +14,7 @@ import '../provider/payment_method_provider.dart';
 import '../provider/system_settings_provider.dart';
 import '../widgets/payment_verification_sheet.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'paypal_webview_screen.dart';
 import '../../subscriptions/data/repository/subscription_repository.dart';
 import '../../authentication/data/repository/auth_repository.dart'
     show ResultExtension;
@@ -423,23 +423,55 @@ class _PayButton extends StatelessWidget {
                           }
                         } else if (response.checkoutUrl != null &&
                             response.checkoutUrl!.isNotEmpty) {
-                          final uri = Uri.parse(response.checkoutUrl!);
-                          if (await canLaunchUrl(uri))
-                            await launchUrl(
-                              uri,
-                              mode: LaunchMode.externalApplication,
+                          final result = await Navigator.push<bool>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PaypalWebViewScreen(
+                                checkoutUrl: response.checkoutUrl!,
+                              ),
+                            ),
+                          );
+
+                          if (result == true && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Subscription Successful!'),
+                              ),
                             );
+                          } else if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Payment Canceled/Failed'),
+                              ),
+                            );
+                          }
                         }
                       } else {
                         // Paypal
                         if (response.checkoutUrl != null &&
                             response.checkoutUrl!.isNotEmpty) {
-                          final uri = Uri.parse(response.checkoutUrl!);
-                          if (await canLaunchUrl(uri))
-                            await launchUrl(
-                              uri,
-                              mode: LaunchMode.externalApplication,
+                          final result = await Navigator.push<bool>(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PaypalWebViewScreen(
+                                checkoutUrl: response.checkoutUrl!,
+                              ),
+                            ),
+                          );
+
+                          if (result == true && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Subscription Successful!'),
+                              ),
                             );
+                          } else if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Payment Canceled/Failed'),
+                              ),
+                            );
+                          }
                         }
                       }
                     },
@@ -528,20 +560,25 @@ class _PayButton extends StatelessWidget {
                       // Paypal
                       if (initiateResponse.checkoutUrl != null &&
                           initiateResponse.checkoutUrl!.isNotEmpty) {
-                        final uri = Uri.parse(initiateResponse.checkoutUrl!);
-                        if (await canLaunchUrl(uri)) {
-                          await launchUrl(uri, mode: LaunchMode.inAppWebView);
-                          // We assume they completed the PayPal flow when they close the webview
+                        final result = await Navigator.push<bool>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PaypalWebViewScreen(
+                              checkoutUrl: initiateResponse.checkoutUrl!,
+                            ),
+                          ),
+                        );
+
+                        if (result == true) {
                           paymentCompleted = true;
                         }
                       }
                     }
 
                     if (paymentCompleted && context.mounted) {
-                      final intentId =
-                          initiateResponse.paymentIntentId ??
-                          initiateResponse.orderId ??
-                          '';
+                      final intentId = selectedPaymentType == PaymentType.paypal
+                          ? (initiateResponse.orderId ?? '')
+                          : (initiateResponse.paymentIntentId ?? '');
 
                       final paymentMethod = getPaymentMethodName(
                         selectedPaymentType,
@@ -551,6 +588,7 @@ class _PayButton extends StatelessWidget {
                       _showVerifyingSheet(
                         context,
                         intentId: intentId,
+                        isPaypal: selectedPaymentType == PaymentType.paypal,
                         onSuccess: (bookingData) {
                           if (!context.mounted) return;
                           context.push(
@@ -597,6 +635,7 @@ class _PayButton extends StatelessWidget {
   void _showVerifyingSheet(
     BuildContext context, {
     required String intentId,
+    bool isPaypal = false,
     required Function(Map<String, dynamic> bookingData) onSuccess,
     required Function(String error) onError,
   }) {
@@ -608,6 +647,7 @@ class _PayButton extends StatelessWidget {
       builder: (context) {
         return PaymentVerificationSheet(
           intentId: intentId,
+          isPaypal: isPaypal,
           onSuccess: (data) {
             Navigator.pop(context);
             onSuccess(data);

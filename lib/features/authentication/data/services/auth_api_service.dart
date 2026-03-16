@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_hitter.dart';
 import '../exceptions/api_exception.dart';
@@ -307,6 +309,113 @@ class AuthApiService {
         }
         throw ApiException(
           message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Send TFA OTP
+  Future<bool> sendTfaOtp(
+    String userId,
+    String phone,
+    String phoneCountry,
+  ) async {
+    try {
+      debugPrint('phoneCountryyyyy: $phoneCountry');
+      final response = await _apiHitter.getPostApiResponse(
+        Endpoints.sendTfaOtp,
+
+        data: {'userId': userId, 'phone': phone, 'phoneCountry': phoneCountry},
+      );
+
+      if (response.status) {
+        return true;
+      } else {
+        final responseData = response.response?.data;
+        final errorMessage = responseData is Map<String, dynamic>
+            ? responseData['message'] as String? ?? response.msg
+            : response.msg;
+        throw ApiException(
+          message: errorMessage,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Verify TFA OTP
+  Future<LoginResponseModel> verifyTfaOtp(
+    String userId,
+    String phone,
+    String phoneCountry,
+    String otp,
+  ) async {
+    try {
+      final response = await _apiHitter.getPostApiResponse(
+        Endpoints.verifyTfa,
+        data: {
+          'userId': userId,
+          'phone': phone,
+          'phoneCountry': phoneCountry,
+          'otp': otp,
+        },
+      );
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        return LoginResponseModel.fromJson(responseData);
+      } else {
+        final responseData = response.response?.data;
+        final errorMessage = responseData is Map<String, dynamic>
+            ? responseData['message'] as String? ?? response.msg
+            : response.msg;
+        throw ApiException(
+          message: errorMessage,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Disable TFA
+  Future<bool> disableTfa() async {
+    try {
+      final response = await _apiHitter.getPatchApiResponse(
+        Endpoints.disableTfa,
+        data: {'enable': false},
+      );
+
+      if (response.status) {
+        return true;
+      } else {
+        final responseData = response.response?.data;
+        final errorMessage = responseData is Map<String, dynamic>
+            ? responseData['message'] as String? ?? response.msg
+            : response.msg;
+        throw ApiException(
+          message: errorMessage,
           statusCode: response.response?.statusCode,
         );
       }

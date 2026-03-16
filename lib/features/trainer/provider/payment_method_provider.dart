@@ -221,16 +221,20 @@ class PaymentMethodProvider extends ChangeNotifier {
     }
   }
 
-  /// Verify payment status via payment intent ID
+  /// Verify payment status via payment intent ID or order ID
   Future<Map<String, dynamic>?> verifyPaymentStatus(
-    String paymentIntentId,
-  ) async {
+    String id, {
+    bool isPaypal = false,
+  }) async {
     _isBooking = true;
     _bookingError = null;
     notifyListeners();
 
     try {
-      final result = await _repository.verifyPaymentStatus(paymentIntentId);
+      final result = await _repository.verifyPaymentStatus(
+        id,
+        isPaypal: isPaypal,
+      );
 
       return await result.when(
         success: (response) async {
