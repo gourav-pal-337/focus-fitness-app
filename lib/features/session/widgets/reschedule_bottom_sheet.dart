@@ -11,6 +11,7 @@ import '../../../core/widgets/buttons/custom_bottom.dart';
 import '../data/models/reschedule_models.dart';
 import '../provider/session_details_provider.dart';
 import '../provider/session_history_provider.dart';
+import '../../trainer/utils/date_time_utils.dart';
 import 'session_card.dart';
 
 class RescheduleBottomSheet extends StatefulWidget {
@@ -142,20 +143,72 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
   }
 
   Widget _buildDiscoveryView(SessionDetailsProvider provider) {
-    // Get unique dates from availability
-    final dates = provider.availability.map((e) => e.date).toList();
+    final allDates = provider.availability.map((e) => e.date).toList();
+    final selectedMonth = provider.selectedMonth;
+    final uniqueMonths = provider.uniqueMonths;
+
+    // Filter dates by selected month
+    final dates = allDates.where((dateStr) {
+      final date = DateTime.parse(dateStr);
+      return DateTimeUtils.getMonthAbbreviation(date.month) == selectedMonth;
+    }).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Date Strip
+        // Month Selector & Header
         Padding(
-          padding: EdgeInsets.only(left: AppSpacing.screenPadding.left),
-          child: Text(
-            'Choose Date',
-            style: AppTextStyle.text20SemiBold.copyWith(
-              color: AppColors.textPrimary,
-            ),
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenPadding.left,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Choose Date',
+                style: AppTextStyle.text20SemiBold.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              // if (uniqueMonths.isNotEmpty)
+              DropdownButton<String>(
+                value: selectedMonth,
+                underline: const SizedBox.shrink(),
+                icon: Icon(
+                  Icons.keyboard_arrow_down,
+                  color: AppColors.grey400,
+                  size: 20.sp,
+                ),
+                borderRadius: BorderRadius.circular(10),
+                items: uniqueMonths.map((m) {
+                  return DropdownMenuItem(
+                    value: m,
+                    child: Text(
+                      m,
+                      style: AppTextStyle.text14SemiBold.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    provider.selectMonth(value);
+                    // Clear local selection if the new month doesn't contain the selected date
+                    if (_selectedDate != null) {
+                      final date = DateTime.parse(_selectedDate!);
+                      if (DateTimeUtils.getMonthAbbreviation(date.month) !=
+                          value) {
+                        setState(() {
+                          _selectedDate = null;
+                          _selectedSlot = null;
+                        });
+                      }
+                    }
+                  }
+                },
+              ),
+            ],
           ),
         ),
         SizedBox(height: AppSpacing.md),

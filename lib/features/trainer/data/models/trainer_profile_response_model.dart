@@ -35,6 +35,9 @@ class TrainerProfileInfo {
     this.avgRating,
     required this.ratingCount,
     required this.completedSessionsCount,
+    required this.clientCount,
+    required this.experience,
+    required this.expertiseAreas,
   });
 
   final String id;
@@ -44,6 +47,9 @@ class TrainerProfileInfo {
   final double? avgRating;
   final int ratingCount;
   final int completedSessionsCount;
+  final int clientCount;
+  final int experience;
+  final List<String> expertiseAreas;
 
   factory TrainerProfileInfo.fromJson(Map<String, dynamic> json) {
     return TrainerProfileInfo(
@@ -56,6 +62,11 @@ class TrainerProfileInfo {
           : null,
       ratingCount: json['ratingCount'] as int? ?? 0,
       completedSessionsCount: json['completedSessionsCount'] as int? ?? 0,
+      clientCount: json['clientCount'] as int? ?? 0,
+      experience: json['experience'] as int? ?? 0,
+      expertiseAreas: json['expertiseAreas'] != null
+          ? List<String>.from(json['expertiseAreas'] as List)
+          : [],
     );
   }
 }

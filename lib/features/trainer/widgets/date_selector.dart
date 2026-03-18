@@ -15,21 +15,66 @@ class DateSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<TrainerProfileProvider>();
     final availableDates = provider.availableDates;
+    final uniqueMonths = provider.uniqueMonths;
+    final selectedMonth = provider.selectedMonth;
 
     if (availableDates.isEmpty) {
       return const SizedBox.shrink();
     }
 
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final filteredDates = availableDates
+        .where((d) => d.month == selectedMonth)
+        .toList();
+    filteredDates.removeWhere((d) => d.dateTime.isBefore(today));
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: AppSpacing.screenPadding.left),
-          child: Text(
-            'Choose Date',
-            style: AppTextStyle.text20SemiBold.copyWith(
-              color: AppColors.textPrimary,
-            ),
+          padding: EdgeInsets.symmetric(
+            horizontal: AppSpacing.screenPadding.left,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Choose Date',
+                style: AppTextStyle.text20SemiBold.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              // if (uniqueMonths.isNotEmpty)
+              DropdownButton<String>(
+                value: selectedMonth,
+                underline: const SizedBox.shrink(),
+                icon: Icon(
+                  Icons.keyboard_arrow_down,
+                  color: AppColors.grey400,
+                  size: 20.sp,
+                ),
+
+                borderRadius: BorderRadius.circular(10),
+                items: uniqueMonths.map((m) {
+                  return DropdownMenuItem(
+                    value: m,
+                    child: Text(
+                      m,
+                      style: AppTextStyle.text14SemiBold.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    provider.selectMonth(value);
+                  }
+                },
+              ),
+            ],
           ),
         ),
         SizedBox(height: AppSpacing.md),
@@ -38,10 +83,11 @@ class DateSelector extends StatelessWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.only(left: AppSpacing.screenPadding.left),
-            itemCount: availableDates.length,
-            separatorBuilder: (context, index) => SizedBox(width: AppSpacing.sm),
+            itemCount: filteredDates.length,
+            separatorBuilder: (context, index) =>
+                SizedBox(width: AppSpacing.sm),
             itemBuilder: (context, index) {
-              final dateInfo = availableDates[index];
+              final dateInfo = filteredDates[index];
               return _DateCard(
                 date: dateInfo.date,
                 day: dateInfo.day,
@@ -95,13 +141,15 @@ class _DateCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: 4.h),
+
             Text(
-              day,
+              '$day',
               style: AppTextStyle.text14Regular.copyWith(
                 color: isSelected ? AppColors.background : AppColors.grey400,
               ),
             ),
-            SizedBox(height: AppSpacing.sm),
+            SizedBox(height: 8.h),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
@@ -111,7 +159,9 @@ class _DateCard extends StatelessWidget {
                   height: 4.w,
                   margin: EdgeInsets.symmetric(horizontal: 1.w),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.background : AppColors.grey400,
+                    color: isSelected
+                        ? AppColors.background
+                        : AppColors.grey400,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -123,5 +173,3 @@ class _DateCard extends StatelessWidget {
     );
   }
 }
-
-

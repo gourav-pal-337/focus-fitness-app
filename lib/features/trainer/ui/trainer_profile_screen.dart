@@ -92,7 +92,9 @@ class TrainerProfileScreen extends StatelessWidget {
 
                       return TrainerInfoSection(
                         name: trainer.fullName ?? "trainer",
-                        specialty: "HIIT & Cardio",
+                        specialty: trainer.expertiseAreas.isNotEmpty
+                            ? trainer.expertiseAreas.join(' & ')
+                            : "HIIT & Cardio",
                         rating: trainer.avgRating ?? 4.6,
                         imageUrl: trainer.profilePhoto ?? "",
                       );

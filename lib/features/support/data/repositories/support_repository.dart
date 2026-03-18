@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
+
 import '../models/ticket_model.dart';
 import '../models/faq_model.dart';
 import '../services/support_api_service.dart';
@@ -25,6 +27,8 @@ class SupportRepository {
       priority: priority,
       file: file,
     );
+
+    debugPrint('ticket 22: ${response.ticket}');
     return response.ticket;
   }
 

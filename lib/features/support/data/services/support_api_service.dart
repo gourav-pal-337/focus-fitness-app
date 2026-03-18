@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_hitter.dart';
@@ -76,6 +77,8 @@ class SupportApiService {
         Endpoints.createTicket,
         data: formData,
       );
+
+      debugPrint('ticket 33: ${response.response?.data}');
 
       if (response.status && response.response != null) {
         final responseData = response.response!.data as Map<String, dynamic>;

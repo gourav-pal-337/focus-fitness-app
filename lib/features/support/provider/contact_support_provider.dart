@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import '../../../../features/support/data/repositories/support_repository.dart';
+import '../data/models/ticket_model.dart';
 
 class ContactSupportProvider extends ChangeNotifier {
   final SupportRepository _repository = SupportRepository();
@@ -40,22 +41,22 @@ class ContactSupportProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> submitTicket() async {
+  Future<TicketModel?> submitTicket() async {
     _error = null;
     if (_issueType.isEmpty) {
       _error = 'Please select an issue type';
       notifyListeners();
-      return false;
+      return null;
     }
     if (_subject.isEmpty) {
       _error = 'Please enter a subject';
       notifyListeners();
-      return false;
+      return null;
     }
     if (_description.isEmpty) {
       _error = 'Please enter a description';
       notifyListeners();
-      return false;
+      return null;
     }
 
     _isLoading = true;
@@ -67,23 +68,24 @@ class ContactSupportProvider extends ChangeNotifier {
         file = File(_screenshotPath!);
       }
 
-      await _repository.createTicket(
+      final ticket = await _repository.createTicket(
         title: _subject,
         description: _description,
         category: _issueType,
-        priority:
-            'medium', // Default priority, can be enhanced if UI supports it
+        priority: 'medium',
         file: file,
       );
 
+      debugPrint('ticket 11: $ticket');
+
       _isLoading = false;
       notifyListeners();
-      return true;
+      return ticket;
     } catch (e) {
       _isLoading = false;
       _error = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
-      return false;
+      return null;
     }
   }
 }

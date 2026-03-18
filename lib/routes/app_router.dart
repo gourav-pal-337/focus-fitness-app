@@ -424,8 +424,8 @@ abstract class TicketSuccessRoute {
     path: '/dashboard/ticket-success',
     name: name,
     builder: (context, state) {
-      final ticketId = state.uri.queryParameters['ticketId'];
-      return TicketSuccessScreen(ticketId: ticketId);
+      final ticket = state.extra as TicketModel?;
+      return TicketSuccessScreen(ticket: ticket);
     },
   );
 }

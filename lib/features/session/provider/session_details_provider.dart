@@ -5,6 +5,7 @@ import '../data/models/reschedule_models.dart';
 import '../data/repository/booking_repository.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
+import '../../trainer/utils/date_time_utils.dart';
 
 class SessionDetailsProvider extends ChangeNotifier {
   final BookingRepository _repository = BookingRepository();
@@ -158,11 +159,26 @@ class SessionDetailsProvider extends ChangeNotifier {
   bool _isLoadingAvailability = false;
   String? _availabilityError;
   bool _isRescheduling = false;
+  String? _selectedMonth;
 
   List<DayAvailability> get availability => _availability;
   bool get isLoadingAvailability => _isLoadingAvailability;
   String? get availabilityError => _availabilityError;
   bool get isRescheduling => _isRescheduling;
+  String? get selectedMonth => _selectedMonth;
+
+  List<String> get uniqueMonths {
+    return _availability.map((day) {
+      final dateTime = DateTime.parse(day.date);
+      return DateTimeUtils.getMonthAbbreviation(dateTime.month);
+    }).toSet().toList();
+  }
+
+  void selectMonth(String month) {
+    if (_selectedMonth == month) return;
+    _selectedMonth = month;
+    notifyListeners();
+  }
 
   /// Fetch reschedule availability
   Future<void> fetchRescheduleAvailability(String bookingId) async {
@@ -203,6 +219,12 @@ class SessionDetailsProvider extends ChangeNotifier {
 
           // Sort by date just in case
           _availability.sort((a, b) => a.date.compareTo(b.date));
+
+          // Set initial selected month
+          if (_availability.isNotEmpty) {
+            final firstDate = DateTime.parse(_availability.first.date);
+            _selectedMonth = DateTimeUtils.getMonthAbbreviation(firstDate.month);
+          }
 
           _isLoadingAvailability = false;
           notifyListeners();

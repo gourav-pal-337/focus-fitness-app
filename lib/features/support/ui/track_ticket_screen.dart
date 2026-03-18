@@ -225,7 +225,7 @@ class _TrackTicketScreenState extends State<TrackTicketScreen> {
                   ),
                   SizedBox(height: AppSpacing.xs),
                   Text(
-                    'Ticket ID: \${ticket.id ?? "N/A"}',
+                    'Ticket ID: ${ticket.ticketId ?? "N/A"}',
                     style: AppTextStyle.text12Regular.copyWith(
                       color: AppColors.grey500,
                     ),

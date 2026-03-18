@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/custom_app_bar.dart';
+import '../../../core/widgets/buttons/custom_bottom.dart';
 import '../../../routes/app_router.dart';
 import '../data/models/ticket_model.dart';
 
@@ -33,12 +34,24 @@ class TicketDetailsScreen extends StatelessWidget {
                   children: [
                     _TicketInfoSection(ticket: ticket),
                     Divider(color: AppColors.grey200, thickness: 1, height: 0),
-                    _ChatSupportSection(),
-                    Divider(color: AppColors.grey200, thickness: 1, height: 0),
+                    // _ChatSupportSection(),
+                    // Divider(color: AppColors.grey200, thickness: 1, height: 0),
                   ],
                 ),
               ),
             ),
+            Padding(
+              padding: EdgeInsets.all(AppSpacing.screenPadding.left),
+              child: CustomButton(
+                text: 'Okay',
+                onPressed: () {
+                  context.go(HomeRoute.path);
+                },
+                width: double.infinity,
+                borderRadius: 12.r,
+              ),
+            ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
           ],
         ),
       ),
@@ -115,7 +128,7 @@ class _TicketInfoSection extends StatelessWidget {
                     ),
                     SizedBox(height: AppSpacing.xs),
                     Text(
-                      'Ticket ID: #\${ticket?.id ?? "N/A"}',
+                      'Ticket ID: #${ticket?.id ?? "N/A"}',
                       style: AppTextStyle.text12Regular.copyWith(
                         color: AppColors.grey400,
                       ),

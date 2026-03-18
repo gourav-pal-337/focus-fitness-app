@@ -1,27 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../provider/trainer_profile_provider.dart';
 
 class TrainerStatsRow extends StatelessWidget {
   const TrainerStatsRow({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<TrainerProfileProvider>();
+    final trainer = provider.trainer;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
         _StatItem(
-          value: '25',
+          value: trainer?.ratingCount.toString() ?? '0',
           label: 'Reviews',
         ),
         _StatItem(
-          value: '3',
+          value: '${trainer?.experience ?? 0}',
           label: 'Years exp.',
         ),
         _StatItem(
-          value: '32',
+          value: '${trainer?.clientCount ?? 0}',
           label: 'Clients',
         ),
       ],

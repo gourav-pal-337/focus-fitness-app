@@ -45,7 +45,8 @@ class PaymentMethodProvider extends ChangeNotifier {
         final dayStr = data['day'] as String?;
         return DateInfo(
           date: dateTime.day.toString(),
-          day: dayStr ?? _getDayAbbreviation(dateTime.weekday),
+          day: dayStr ?? DateTimeUtils.getDayAbbreviation(dateTime.weekday),
+          month: DateTimeUtils.getMonthAbbreviation(dateTime.month),
           dateTime: dateTime,
           dateId: data['dateId'] as String,
           sessionPlanId: data['sessionPlanId'] as String,
@@ -122,7 +123,8 @@ class PaymentMethodProvider extends ChangeNotifier {
         final dayStr = data['day'] as String?;
         return DateInfo(
           date: dateTime.day.toString(),
-          day: dayStr ?? _getDayAbbreviation(dateTime.weekday),
+          day: dayStr ?? DateTimeUtils.getDayAbbreviation(dateTime.weekday),
+          month: DateTimeUtils.getMonthAbbreviation(dateTime.month),
           dateTime: dateTime,
           dateId: data['dateId'] as String,
           sessionPlanId: data['sessionPlanId'] as String,
@@ -258,8 +260,5 @@ class PaymentMethodProvider extends ChangeNotifier {
     }
   }
 
-  String _getDayAbbreviation(int weekday) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[weekday - 1];
-  }
+
 }

@@ -78,10 +78,16 @@ class ContactSupportScreen extends StatelessWidget {
                               onPressed: provider.isLoading
                                   ? () {}
                                   : () async {
-                                      final success = await provider
+                                      final ticket = await provider
                                           .submitTicket();
-                                      if (success && context.mounted) {
-                                        context.push(TicketSuccessRoute.path);
+                                      debugPrint(
+                                        'ticket: $ticket , ismounter ${context.mounted}',
+                                      );
+                                      if (ticket != null && context.mounted) {
+                                        context.push(
+                                          TicketSuccessRoute.path,
+                                          extra: ticket,
+                                        );
                                       }
                                     },
                               textStyle: AppTextStyle.text16SemiBold.copyWith(

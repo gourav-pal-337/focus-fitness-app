@@ -55,10 +55,12 @@ class _DateSelectorState extends State<DateSelector> {
   }
 
   void _scrollToSelectedDate() {
-    final selectedIndex = dates.indexWhere((date) =>
-        date.day == widget.selectedDate.day &&
-        date.month == widget.selectedDate.month &&
-        date.year == widget.selectedDate.year);
+    final selectedIndex = dates.indexWhere(
+      (date) =>
+          date.day == widget.selectedDate.day &&
+          date.month == widget.selectedDate.month &&
+          date.year == widget.selectedDate.year,
+    );
 
     if (selectedIndex == -1 || !_scrollController.hasClients) return;
 
@@ -70,12 +72,16 @@ class _DateSelectorState extends State<DateSelector> {
 
     // Calculate approximate offset to center the selected item
     // Assume all previous items are base width (conservative estimate)
-    final approximateOffset = padding + (selectedIndex * (baseItemWidth + separatorWidth));
-    
+    final approximateOffset =
+        padding + (selectedIndex * (baseItemWidth + separatorWidth));
+
     // Center the selected item by adjusting for screen width
     final screenWidth = MediaQuery.of(context).size.width;
-    final targetOffset = (approximateOffset - (screenWidth / 2) + (baseItemWidth / 2))
-        .clamp(0.0, _scrollController.position.maxScrollExtent);
+    final targetOffset =
+        (approximateOffset - (screenWidth / 2) + (baseItemWidth / 2)).clamp(
+          0.0,
+          _scrollController.position.maxScrollExtent,
+        );
 
     _scrollController.animateTo(
       targetOffset,
@@ -92,15 +98,19 @@ class _DateSelectorState extends State<DateSelector> {
       child: ListView.separated(
         controller: _scrollController,
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding.left),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.screenPadding.left,
+        ),
         itemCount: dates.length,
         separatorBuilder: (context, index) => SizedBox(width: AppSpacing.sm),
         itemBuilder: (context, index) {
           final date = dates[index];
-          final isSelected = date.day == widget.selectedDate.day &&
+          final isSelected =
+              date.day == widget.selectedDate.day &&
               date.month == widget.selectedDate.month &&
               date.year == widget.selectedDate.year;
-          final isToday = date.day == today.day &&
+          final isToday =
+              date.day == today.day &&
               date.month == today.month &&
               date.year == today.year;
 
@@ -110,9 +120,7 @@ class _DateSelectorState extends State<DateSelector> {
               height: 32.h,
               alignment: Alignment.center,
               margin: EdgeInsets.only(right: AppSpacing.sm, top: AppSpacing.sm),
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
               decoration: BoxDecoration(
                 color: isSelected ? AppColors.textPrimary : Colors.transparent,
                 borderRadius: AppRadius.medium,
@@ -154,9 +162,8 @@ class _DateSelectorState extends State<DateSelector> {
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
     return months[date.month - 1];
   }
 }
-

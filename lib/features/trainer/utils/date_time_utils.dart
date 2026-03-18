@@ -5,6 +5,7 @@ class DateInfo {
   const DateInfo({
     required this.date,
     required this.day,
+    required this.month,
     required this.dateTime,
     required this.dateId,
     required this.sessionPlanId,
@@ -12,6 +13,7 @@ class DateInfo {
 
   final String date; // Day of month as string: '9', '10', etc.
   final String day; // Day abbreviation: 'Mon', 'Tue', etc.
+  final String month; // Month abbreviation: 'Jan', 'Feb', etc.
   final DateTime dateTime;
   final String dateId; // Unique identifier: '2026-01-10', etc.
   final String sessionPlanId; // ID of the session plan this date belongs to
@@ -20,10 +22,12 @@ class DateInfo {
 /// Utility class for parsing dates and time slots from session plans
 class DateTimeUtils {
   /// Parse available dates from all session plans and combine them
-  static List<DateInfo> parseAllAvailableDates(List<SessionPlanModel> sessionPlans) {
+  static List<DateInfo> parseAllAvailableDates(
+    List<SessionPlanModel> sessionPlans,
+  ) {
     final allDates = <DateInfo>[];
     final seenDateIds = <String>{};
-    
+
     for (final plan in sessionPlans) {
       final planDates = parseAvailableDates(plan);
       for (final dateInfo in planDates) {
@@ -34,10 +38,10 @@ class DateTimeUtils {
         }
       }
     }
-    
+
     // Sort dates chronologically
     allDates.sort((a, b) => a.dateTime.compareTo(b.dateTime));
-    
+
     return allDates;
   }
 
@@ -45,10 +49,10 @@ class DateTimeUtils {
   static List<DateInfo> parseAvailableDates(SessionPlanModel sessionPlan) {
     final dates = <DateInfo>[];
     final now = DateTime.now();
-    
+
     // Normalize to date only (remove time component)
     final today = DateTime(now.year, now.month, now.day);
-    
+
     // Use startDate if available, otherwise use today
     DateTime startDate;
     if (sessionPlan.startDate != null) {
@@ -57,7 +61,7 @@ class DateTimeUtils {
     } else {
       startDate = today;
     }
-    
+
     // Use endDate if available, otherwise use 7 days from start
     DateTime endDate;
     if (sessionPlan.endDate != null) {
@@ -66,38 +70,43 @@ class DateTimeUtils {
     } else {
       endDate = startDate.add(const Duration(days: 7));
     }
-    
+
     // Use startDate as-is (even if in future) - don't force to today
     // This allows showing future dates from the API
     final effectiveStartDate = startDate;
-    
+
     // Generate dates up to endDate
     final maxDays = endDate.difference(effectiveStartDate).inDays;
     final daysToShow = maxDays < 0 ? 0 : maxDays + 1;
-    
+
     for (int i = 0; i < daysToShow; i++) {
       final currentDate = effectiveStartDate.add(Duration(days: i));
       final dayOfMonth = currentDate.day;
-      final dayName = _getDayAbbreviation(currentDate.weekday);
+      final dayName = getDayAbbreviation(currentDate.weekday);
+      final monthName = getMonthAbbreviation(currentDate.month);
       // Create unique date ID: YYYY-MM-DD
-      final dateId = '${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}';
-      
-      dates.add(DateInfo(
-        date: dayOfMonth.toString(),
-        day: dayName,
-        dateTime: currentDate,
-        dateId: dateId,
-        sessionPlanId: sessionPlan.id,
-      ));
+      final dateId =
+          '${currentDate.year}-${currentDate.month.toString().padLeft(2, '0')}-${currentDate.day.toString().padLeft(2, '0')}';
+
+      dates.add(
+        DateInfo(
+          date: dayOfMonth.toString(),
+          day: dayName,
+          month: monthName,
+          dateTime: currentDate,
+          dateId: dateId,
+          sessionPlanId: sessionPlan.id,
+        ),
+      );
     }
-    
+
     return dates;
   }
 
   /// Parse available time slots based on session plan's timeSlots, timeStart/timeEnd, or durationMinutes
   static List<String> parseAvailableTimeSlots(SessionPlanModel sessionPlan) {
     final timeSlots = <String>[];
-    
+
     // Priority 1: Use timeSlots array if available
     if (sessionPlan.timeSlots != null && sessionPlan.timeSlots!.isNotEmpty) {
       for (final slot in sessionPlan.timeSlots!) {
@@ -108,82 +117,84 @@ class DateTimeUtils {
       }
       return timeSlots;
     }
-    
+
     // Priority 2: Use timeStart and timeEnd if available
     if (sessionPlan.timeStart != null && sessionPlan.timeEnd != null) {
       final startTime = sessionPlan.timeStart!;
       final endTime = sessionPlan.timeEnd!;
       final durationMinutes = sessionPlan.durationMinutes;
-      
+
       // Parse start and end times
       final startParts = startTime.split(':');
       final endParts = endTime.split(':');
-      
+
       if (startParts.length == 2 && endParts.length == 2) {
         final startHour = int.tryParse(startParts[0]) ?? 6;
         final startMinute = int.tryParse(startParts[1]) ?? 0;
         final endHour = int.tryParse(endParts[0]) ?? 22;
         final endMinute = int.tryParse(endParts[1]) ?? 0;
-        
+
         final startDateTime = DateTime(2024, 1, 1, startHour, startMinute);
         final endDateTime = DateTime(2024, 1, 1, endHour, endMinute);
-        
+
         // Generate time slots based on duration
         var currentTime = startDateTime;
-        while (currentTime.isBefore(endDateTime) || currentTime.isAtSameMomentAs(endDateTime)) {
+        while (currentTime.isBefore(endDateTime) ||
+            currentTime.isAtSameMomentAs(endDateTime)) {
           final nextTime = currentTime.add(Duration(minutes: durationMinutes));
-          
+
           // Check if next time slot fits within end time
           if (nextTime.isAfter(endDateTime)) {
             break;
           }
-          
+
           final formattedTime = _formatTimeFromDateTime(currentTime);
           if (formattedTime.isNotEmpty) {
             timeSlots.add(formattedTime);
           }
-          
+
           // Move to next slot based on duration
           currentTime = nextTime;
         }
       }
       return timeSlots;
     }
-    
+
     // Priority 3: Default time range if nothing specified
     final defaultStart = '06:00';
     final defaultEnd = '22:00';
     final durationMinutes = sessionPlan.durationMinutes;
-    
+
     final startParts = defaultStart.split(':');
     final endParts = defaultEnd.split(':');
-    
+
     if (startParts.length == 2 && endParts.length == 2) {
       final startHour = int.tryParse(startParts[0]) ?? 6;
       final startMinute = int.tryParse(startParts[1]) ?? 0;
       final endHour = int.tryParse(endParts[0]) ?? 22;
       final endMinute = int.tryParse(endParts[1]) ?? 0;
-      
+
       final startDateTime = DateTime(2024, 1, 1, startHour, startMinute);
       final endDateTime = DateTime(2024, 1, 1, endHour, endMinute);
-      
+
       var currentTime = startDateTime;
-      while (currentTime.isBefore(endDateTime) || currentTime.isAtSameMomentAs(endDateTime)) {
+      while (currentTime.isBefore(endDateTime) ||
+          currentTime.isAtSameMomentAs(endDateTime)) {
         final nextTime = currentTime.add(Duration(minutes: durationMinutes));
-        
+
         if (nextTime.isAfter(endDateTime)) {
           break;
         }
-        
+
         final formattedTime = _formatTimeFromDateTime(currentTime);
         if (formattedTime.isNotEmpty) {
           timeSlots.add(formattedTime);
         }
-        
+
         currentTime = nextTime;
       }
     }
-    
+
     return timeSlots;
   }
 
@@ -191,32 +202,50 @@ class DateTimeUtils {
   static String _formatTimeSlot(String timeString) {
     final parts = timeString.split(':');
     if (parts.length != 2) return '';
-    
+
     final hour = int.tryParse(parts[0]);
     final minute = int.tryParse(parts[1]);
-    
+
     if (hour == null || minute == null) return '';
-    
-    return _formatTime(hour, minute);
+
+    return formatTime(hour, minute);
   }
 
   /// Format time from DateTime
   static String _formatTimeFromDateTime(DateTime dateTime) {
-    return _formatTime(dateTime.hour, dateTime.minute);
+    return formatTime(dateTime.hour, dateTime.minute);
   }
 
   /// Format hour and minute to display format (e.g., 15, 9 -> "3:09 pm")
-  static String _formatTime(int hour, int minute) {
+  static String formatTime(int hour, int minute) {
     final period = hour >= 12 ? 'pm' : 'am';
     final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
     final displayMinute = minute.toString().padLeft(2, '0');
-    
+
     return '$displayHour:$displayMinute $period';
   }
 
-  static String _getDayAbbreviation(int weekday) {
+  static String getDayAbbreviation(int weekday) {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return days[weekday - 1];
+  }
+
+  static String getMonthAbbreviation(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return months[month - 1];
   }
 
   /// Format date ID to a readable date string (e.g., "Monday Jan 10, 2026")
@@ -228,12 +257,13 @@ class DateTimeUtils {
           : DateInfo(
               date: DateTime.now().day.toString(),
               day: 'Mon',
+              month: 'Jan',
               dateTime: DateTime.now(),
               dateId: dateId,
               sessionPlanId: '',
             ),
     );
-    
+
     final dateTime = dateInfo.dateTime;
     const months = [
       'Jan',
@@ -247,7 +277,7 @@ class DateTimeUtils {
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
     const weekdays = [
       'Monday',
@@ -256,9 +286,9 @@ class DateTimeUtils {
       'Thursday',
       'Friday',
       'Saturday',
-      'Sunday'
+      'Sunday',
     ];
-    
+
     return '${weekdays[dateTime.weekday - 1]} ${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
   }
 
@@ -274,7 +304,9 @@ class DateTimeUtils {
     required List<DateInfo> availableDates,
     required int durationMinutes,
   }) {
-    print("Converting to ISO Timestamps for dateId: $dateId, timeSlot: $timeSlot");
+    print(
+      "Converting to ISO Timestamps for dateId: $dateId, timeSlot: $timeSlot",
+    );
     // Find the date info
     final dateInfo = availableDates.firstWhere(
       (d) => d.dateId == dateId,
@@ -323,10 +355,6 @@ class DateTimeUtils {
     final startTime = startDateTime.toIso8601String();
     final endTime = endDateTime.toIso8601String();
 
-    return {
-      'startTime': startTime,
-      'endTime': endTime,
-    };
+    return {'startTime': startTime, 'endTime': endTime};
   }
 }
-

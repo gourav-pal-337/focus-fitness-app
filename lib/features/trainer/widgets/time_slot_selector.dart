@@ -39,7 +39,8 @@ class TimeSlotSelector extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             itemCount: availableTimeSlots.length,
             padding: EdgeInsets.only(left: AppSpacing.screenPadding.left),
-            separatorBuilder: (context, index) => SizedBox(width: AppSpacing.sm),
+            separatorBuilder: (context, index) =>
+                SizedBox(width: AppSpacing.sm),
             itemBuilder: (context, index) {
               final timeSlot = availableTimeSlots[index];
               return _TimeSlotButton(
@@ -93,5 +94,3 @@ class _TimeSlotButton extends StatelessWidget {
     );
   }
 }
-
-
