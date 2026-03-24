@@ -39,6 +39,25 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // New Separate Name Fields
+  String _forename = '';
+  String _surname = '';
+
+  String get forename => _forename;
+  String get surname => _surname;
+
+  void updateForename(String value) {
+    _forename = value;
+    _name = '$_forename $_surname'.trim();
+    notifyListeners();
+  }
+
+  void updateSurname(String value) {
+    _surname = value;
+    _name = '$_forename $_surname'.trim();
+    notifyListeners();
+  }
+
   // Mobile Number Entry
   String _countryCode = '+44';
   String _countryFlag = '🇬🇧';
@@ -576,8 +595,8 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Register user with email and password
-  Future<void> registerWithEmail(RegisterRequestModel request) async {
+  /// Register user with enhanced flow
+  Future<void> register(RegisterRequestModel request) async {
     _authMethod = AuthMethod.email;
     _setAuthState(AuthState.loading);
     _errorMessage = '';
@@ -589,10 +608,8 @@ class AuthProvider extends ChangeNotifier {
       await result.when(
         success: (response) async {
           _registerResponse = response;
-
-          // Store tokens in secure storage
-          await _storeRegisterTokens(response);
-
+          // Note: Production requirement sagt do NOT log user in immediately
+          // So we don't store tokens yet
           _setAuthState(AuthState.registerSuccess);
         },
         failure: (message, code) {
@@ -606,6 +623,116 @@ class AuthProvider extends ChangeNotifier {
       _errorCode = 500;
       _setAuthState(AuthState.error);
     }
+  }
+
+  Future<bool> sendEmailOtp(String email) async {
+    _setAuthState(AuthState.loading);
+    _errorMessage = '';
+
+    try {
+      final result = await _repository.sendEmailOtp(email);
+      return result.when(
+        success: (response) async {
+          _otpExpiresAt = response.expiresAt;
+          _setAuthState(AuthState.idle);
+          return true;
+        },
+        failure: (message, code) {
+          _errorMessage = message;
+          _errorCode = code;
+          _setAuthState(AuthState.error);
+          return false;
+        },
+      );
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _setAuthState(AuthState.error);
+      return false;
+    }
+  }
+
+  Future<void> verifyEmailOtp(String email, String otp) async {
+    _setAuthState(AuthState.loading);
+    _errorMessage = '';
+
+    try {
+      final result = await _repository.verifyEmailOtp(email, otp);
+      await result.when(
+        success: (response) async {
+          _loginResponse = response;
+          await _storeLoginTokens(response);
+          _setAuthState(AuthState.loginSuccess);
+        },
+        failure: (message, code) {
+          _errorMessage = message;
+          _errorCode = code;
+          _setAuthState(AuthState.error);
+        },
+      );
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _setAuthState(AuthState.error);
+    }
+  }
+
+  Future<bool> sendPhoneOtp(String countryCode, String phone) async {
+    _setAuthState(AuthState.loading);
+    _errorMessage = '';
+
+    try {
+      final result = await _repository.sendPhoneOtp(countryCode, phone);
+      return result.when(
+        success: (response) async {
+          _otpExpiresAt = response.expiresAt;
+          _setAuthState(AuthState.idle);
+          return true;
+        },
+        failure: (message, code) {
+          _errorMessage = message;
+          _errorCode = code;
+          _setAuthState(AuthState.error);
+          return false;
+        },
+      );
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _setAuthState(AuthState.error);
+      return false;
+    }
+  }
+
+  Future<void> verifyPhoneOtp(
+    String countryCode,
+    String phone,
+    String otp,
+  ) async {
+    _setAuthState(AuthState.loading);
+    _errorMessage = '';
+
+    try {
+      final result = await _repository.verifyPhoneOtp(countryCode, phone, otp);
+      await result.when(
+        success: (response) async {
+          _loginResponse = response;
+          await _storeLoginTokens(response);
+          _setAuthState(AuthState.loginSuccess);
+        },
+        failure: (message, code) {
+          _errorMessage = message;
+          _errorCode = code;
+          _setAuthState(AuthState.error);
+        },
+      );
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _setAuthState(AuthState.error);
+    }
+  }
+
+  /// Register user with email and password
+  @Deprecated('Use register instead')
+  Future<void> registerWithEmail(RegisterRequestModel request) async {
+    return register(request);
   }
 
   // Social Auth
@@ -742,29 +869,10 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  /// Store authentication tokens from register response
-  Future<void> _storeRegisterTokens(RegisterResponseModel response) async {
-    // Store access token (check multiple possible fields)
-    if (response.accessToken != null) {
-      await LocalStorageService.setToken(response.accessToken!);
-    } else if (response.token != null) {
-      await LocalStorageService.setToken(response.token!);
-    } else if (response.tokens?.accessToken != null) {
-      await LocalStorageService.setToken(response.tokens!.accessToken);
-    }
-
-    // Store refresh token if available
-    if (response.refreshToken != null) {
-      await LocalStorageService.setRefreshToken(response.refreshToken!);
-    } else if (response.tokens?.refreshToken != null) {
-      await LocalStorageService.setRefreshToken(response.tokens!.refreshToken);
-    }
-
-    // Store user ID if available
-    if (response.user?.id != null) {
-      await LocalStorageService.setUserId(response.user!.id);
-    }
-  }
+  // Deprecated - tokens now stored after OTP verification in verifyEmailOtp/verifyPhoneOtp
+  /*
+  Future<void> _storeRegisterTokens(RegisterResponseModel response) async { ... }
+  */
 
   void _setAuthState(AuthState newState) {
     _authState = newState;

@@ -53,75 +53,29 @@ class AccountDetailsScreen extends StatelessWidget {
                         builder: (context, provider, child) {
                           final fields = provider.fields;
                           return Column(
-                            children: [
-                              EditDetailRow(
-                                label: fields[0].label,
-                                value: provider.values[0],
-                                onChanged: (value) {
-                                  provider.updateValue(0, value);
-                                },
-                              ),
-                              Divider(
-                                color: AppColors.grey200,
-                                thickness: 1,
-                                height: 0,
-                              ),
-                              EditDetailRow(
-                                label: fields[1].label,
-                                value: provider.values[1],
-                                onChanged: (value) {
-                                  provider.updateValue(1, value);
-                                },
-                              ),
-                              Divider(
-                                color: AppColors.grey200,
-                                thickness: 1,
-                                height: 0,
-                              ),
-                              EditDetailRow(
-                                label: fields[2].label,
-                                value: provider.values[2],
-                                onChanged: (value) {
-                                  provider.updateValue(2, value);
-                                },
-                              ),
-                              Divider(
-                                color: AppColors.grey200,
-                                thickness: 1,
-                                height: 0,
-                              ),
-                              EditDetailRow(
-                                label: fields[3].label,
-                                value: provider.values[3],
-                                onChanged: (value) {
-                                  provider.updateValue(3, value);
-                                },
-                              ),
-                              Divider(
-                                color: AppColors.grey200,
-                                thickness: 1,
-                                height: 0,
-                              ),
-                              EditDetailRow(
-                                label: fields[4].label,
-                                value: provider.values[4],
-                                onChanged: (value) {
-                                  provider.updateValue(4, value);
-                                },
-                              ),
-                              Divider(
-                                color: AppColors.grey200,
-                                thickness: 1,
-                                height: 0,
-                              ),
-                              // _AccountPasswordRow(
-                              //   label: fields[5].label,
-                              //   value: provider.values[5],
-                              //   onChanged: (value) {
-                              //     provider.updateValue(5, value);
-                              //   },
-                              // ),
-                            ],
+                            children: fields.asMap().entries.map((entry) {
+                              final index = entry.key;
+                              final field = entry.value;
+                              final isLast = index == fields.length - 1;
+
+                              return Column(
+                                children: [
+                                  EditDetailRow(
+                                    label: field.label,
+                                    value: provider.values[index],
+                                    onChanged: (value) {
+                                      provider.updateValue(index, value);
+                                    },
+                                  ),
+                                  if (!isLast)
+                                    Divider(
+                                      color: AppColors.grey200,
+                                      thickness: 1,
+                                      height: 0,
+                                    ),
+                                ],
+                              );
+                            }).toList(),
                           );
                         },
                       ),

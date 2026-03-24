@@ -196,7 +196,10 @@ class EditProfileDetailsProvider extends ChangeNotifier {
       return (value == null || value.isEmpty) ? null : value;
     }
 
-    final fullName = _getValue('Name');
+    final forename = _getValue('Forename') ?? '';
+    final surname = _getValue('Surname') ?? '';
+    final fullName = '$forename $surname'.trim();
+
     final email = _getValue('Email');
     final phone = _getValue('Contact Number');
     final countryCode = _getCountryCode('Contact Number');
@@ -248,9 +251,9 @@ class EditProfileDetailsProvider extends ChangeNotifier {
         }
       }
     }
-
+    
     return UpdateClientProfileRequestModel(
-      fullName: fullName,
+      fullName: fullName.isEmpty ? null : fullName,
       dateOfBirth: dateOfBirth,
       gender: gender,
       phone: phone,

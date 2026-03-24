@@ -64,12 +64,21 @@ class AccountDetailsProvider extends ChangeNotifier {
         // If phone still contains the code, strip it
         phone = phone.substring(countryCode.length).trim();
       }
+      
+      final nameParts = (user.fullName ?? '').split(' ');
+      final forename = nameParts.first;
+      final surname = nameParts.length > 1 ? nameParts.skip(1).join(' ') : '';
 
       _fields = [
         AccountField(
-          label: 'Name',
-          value: user.fullName ?? '',
-          hintText: 'Enter your name',
+          label: 'Forename',
+          value: forename,
+          hintText: 'Enter your forename',
+        ),
+        AccountField(
+          label: 'Surname',
+          value: surname,
+          hintText: 'Enter your surname',
         ),
         AccountField(
           label: 'Email',
@@ -103,9 +112,14 @@ class AccountDetailsProvider extends ChangeNotifier {
       // Fallback or empty
       _fields = [
         const AccountField(
-          label: 'Name',
+          label: 'Forename',
           value: '',
-          hintText: 'Enter your name',
+          hintText: 'Enter your forename',
+        ),
+        const AccountField(
+          label: 'Surname',
+          value: '',
+          hintText: 'Enter your surname',
         ),
         const AccountField(
           label: 'Email',
@@ -156,9 +170,16 @@ class AccountDetailsProvider extends ChangeNotifier {
 
       _fields = [
         AccountField(
-          label: 'Name',
-          value: user?.fullName ?? '',
-          hintText: 'Enter your name',
+          label: 'Forename',
+          value: user?.fullName?.split(' ').first ?? '',
+          hintText: 'Enter your forename',
+        ),
+        AccountField(
+          label: 'Surname',
+          value: (user?.fullName?.split(' ').length ?? 0) > 1 
+            ? user!.fullName!.split(' ').skip(1).join(' ') 
+            : '',
+          hintText: 'Enter your surname',
         ),
         AccountField(
           label: 'Email',
@@ -235,11 +256,14 @@ class AccountDetailsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final name = _values[0];
-      final email = _values[1];
-      final gender = _values[2];
-      final dobStr = _values[3];
-      final phone = _values[4];
+      final forename = _values[0];
+      final surname = _values[1];
+      final email = _values[2];
+      final gender = _values[3];
+      final dobStr = _values[4];
+      final phone = _values[5];
+
+      final fullName = '$forename $surname'.trim();
 
       String? dateOfBirth;
       if (dobStr.isNotEmpty) {
@@ -275,7 +299,7 @@ class AccountDetailsProvider extends ChangeNotifier {
 
       // Note: Email and Phone are not being updated as they were removed from the request model
       final request = UpdateClientProfileRequestModel(
-        fullName: name,
+        fullName: fullName,
         dateOfBirth: dateOfBirth,
         gender: gender.isEmpty ? null : gender,
         phone: phone,

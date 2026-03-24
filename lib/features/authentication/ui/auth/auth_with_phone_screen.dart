@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/routes/app_router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -134,9 +135,14 @@ class _AuthWithPhoneScreenState extends State<AuthWithPhoneScreen> {
                     if (success && context.mounted) {
                       final phoneNumber = authProvider.phoneNumber;
                       final countryCode = authProvider.countryCode;
-                      final fullNumber = '$countryCode$phoneNumber';
                       await context.push(
-                        '/otp-verification/$fullNumber?mode=${widget.mode.name}',
+                        OtpVerificationRoute.path,
+                        extra: {
+                          'type': 'phone',
+                          'countryCode': countryCode,
+                          'identifier': phoneNumber,
+                          'mode': widget.mode,
+                        },
                       );
                       // Reset when coming back
                       if (context.mounted) {

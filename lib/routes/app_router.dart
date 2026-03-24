@@ -10,7 +10,9 @@ import '../features/authentication/ui/linktrainer/link_trainer_screen.dart';
 import '../features/authentication/ui/auth/auth_mode.dart';
 import '../features/authentication/ui/auth/auth_with_email_screen.dart';
 import '../features/authentication/ui/auth/auth_with_phone_screen.dart';
-import '../features/authentication/ui/auth/auth_otp_verification_screen.dart';
+import '../features/authentication/ui/register_screen.dart';
+import '../features/authentication/ui/verification_selection_screen.dart';
+import '../features/authentication/ui/otp_verification_screen.dart';
 import '../features/authentication/ui/auth/tfa_phone_verification_screen.dart';
 import '../features/authentication/ui/auth/tfa_otp_verification_screen.dart';
 import '../features/authentication/ui/forgot_password/check_email_screen.dart';
@@ -81,6 +83,7 @@ abstract class AppRouter {
       EnterNameRoute.route,
       LoginWithEmailRoute.route,
       SignupWithEmailRoute.route,
+      VerificationSelectionRoute.route,
       LoginWithPhoneRoute.route,
       SignupWithPhoneRoute.route,
       TfaPhoneVerificationRoute.route,
@@ -184,8 +187,28 @@ abstract class SignupWithEmailRoute {
   static final GoRoute route = GoRoute(
     path: path,
     name: name,
-    builder: (context, state) =>
-        const AuthWithEmailScreen(mode: AuthMode.signup),
+    builder: (context, state) => const RegisterScreen(),
+  );
+}
+
+abstract class VerificationSelectionRoute {
+  static const String path = '/verification-selection';
+  static const String name = 'verificationSelection';
+
+  static final GoRoute route = GoRoute(
+    path: path,
+    name: name,
+    builder: (context, state) {
+      final extra = state.extra as Map<String, dynamic>?;
+      final email = extra?['email'] ?? '';
+      final countryCode = extra?['countryCode'] ?? '';
+      final phone = extra?['phone'] ?? '';
+      return VerificationSelectionScreen(
+        email: email,
+        countryCode: countryCode,
+        phone: phone,
+      );
+    },
   );
 }
 
@@ -272,17 +295,25 @@ abstract class TfaOtpVerificationRoute {
 }
 
 abstract class OtpVerificationRoute {
-  static const String path = '/otp-verification/:mobileNumber';
+  static const String path = '/otp-verification';
   static const String name = 'otpVerification';
 
-  static GoRoute get route => GoRoute(
+  static final GoRoute route = GoRoute(
     path: path,
     name: name,
     builder: (context, state) {
-      final mobileNumber = state.pathParameters['mobileNumber'] ?? '';
-      final modeParam = state.uri.queryParameters['mode'] ?? 'signup';
-      final mode = modeParam == 'login' ? AuthMode.login : AuthMode.signup;
-      return AuthOtpVerificationScreen(mobileNumber: mobileNumber, mode: mode);
+      final extra = state.extra as Map<String, dynamic>?;
+      final type = extra?['type'] ?? 'email';
+      final countryCode = extra?['countryCode'];
+      final identifier = extra?['identifier'] ?? '';
+      final mode = extra?['mode'] as AuthMode? ?? AuthMode.signup;
+      
+      return OtpVerificationScreen(
+        type: type,
+        countryCode: countryCode,
+        identifier: identifier,
+        mode: mode,
+      );
     },
   );
 }

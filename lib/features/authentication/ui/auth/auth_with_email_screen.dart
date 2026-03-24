@@ -102,8 +102,12 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
     final userProvider = context.read<UserProvider>();
 
     final request = RegisterRequestModel(
+      forename: '',
+      surname: '',
       fullName: authProvider.name.trim(),
       email: _emailController.text.trim(),
+      countryCode: '', // Added as per instruction
+      phone: '',
       password: _passwordController.text.trim(),
       referralCode: authProvider.trainerId.isNotEmpty
           ? authProvider.trainerId

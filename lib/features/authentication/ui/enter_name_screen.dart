@@ -12,6 +12,7 @@ import '../../../routes/app_router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/widgets/buttons/custom_bottom.dart';
 import '../../authentication/provider/auth_provider.dart';
 
 class EnterNameScreen extends StatelessWidget {
@@ -53,14 +54,17 @@ class EnterNameScreen extends StatelessWidget {
                   ),
                   SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Please Enter Your Full Name',
+                    'Please enter your first and last name.',
                     style: AppTextStyle.text14Regular.copyWith(
                       color: AppColors.background.withOpacity(0.7),
                     ),
                   ),
                   SizedBox(height: AppSpacing.lg),
-                  const _NameField(),
+                  const _ForenameField(),
+                  SizedBox(height: AppSpacing.sm),
+                  const _SurnameField(),
                   SizedBox(height: AppSpacing.lg),
+                  const _ProceedButton(),
                 ],
               ),
             ),
@@ -71,16 +75,15 @@ class EnterNameScreen extends StatelessWidget {
   }
 }
 
-class _NameField extends StatelessWidget {
-  const _NameField();
+class _ForenameField extends StatelessWidget {
+  const _ForenameField();
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AuthProvider>();
-    final canProceed = provider.canProceedWithName;
 
     return AppTextFormField(
-      hintText: 'Name',
+      hintText: 'Forename',
       textStyle: AppTextStyle.text16Regular.copyWith(
         color: AppColors.background,
       ),
@@ -89,26 +92,59 @@ class _NameField extends StatelessWidget {
       ),
       enabledBorderColor: AppColors.background.withOpacity(0.7),
       focusedBorderColor: AppColors.primary,
-      onChanged: provider.updateName,
+      onChanged: provider.updateForename,
       prefixIcon: Icon(
         Icons.person_outline,
         color: AppColors.background,
         size: 20.sp,
       ),
-      suffixIcon: IconButton(
-        onPressed: canProceed
-            ? () {
-                context.push(SignupWithEmailRoute.path);
-              }
-            : null,
-        icon: Icon(
-          Icons.arrow_forward,
-          size: 20.sp,
-          color: canProceed
-              ? AppColors.primary
-              : AppColors.background.withOpacity(0.5),
-        ),
+    );
+  }
+}
+
+class _SurnameField extends StatelessWidget {
+  const _SurnameField();
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<AuthProvider>();
+
+    return AppTextFormField(
+      hintText: 'Surname',
+      textStyle: AppTextStyle.text16Regular.copyWith(
+        color: AppColors.background,
       ),
+      hintStyle: AppTextStyle.text16Regular.copyWith(
+        color: AppColors.background.withOpacity(0.7),
+      ),
+      enabledBorderColor: AppColors.background.withOpacity(0.7),
+      focusedBorderColor: AppColors.primary,
+      onChanged: provider.updateSurname,
+      prefixIcon: Icon(
+        Icons.person_outline,
+        color: AppColors.background,
+        size: 20.sp,
+      ),
+    );
+  }
+}
+
+class _ProceedButton extends StatelessWidget {
+  const _ProceedButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<AuthProvider>();
+    final canProceed = provider.forename.trim().isNotEmpty && 
+                      provider.surname.trim().isNotEmpty;
+
+    return CustomButton(
+      text: 'Continue',
+      width: double.infinity,
+      isEnabled: canProceed,
+      onPressed: () {
+        context.push(SignupWithEmailRoute.path);
+      },
     );
   }
 }

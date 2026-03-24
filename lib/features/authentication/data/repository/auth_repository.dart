@@ -113,6 +113,26 @@ class AuthRepository {
     }
   }
 
+  Future<Result<SendOtpResponseModel>> sendEmailOtp(String email) async {
+    return sendOtp(
+      SendOtpRequestModel(email: email, purpose: 'verification', role: 'client'),
+    );
+  }
+
+  Future<Result<SendOtpResponseModel>> sendPhoneOtp(
+    String countryCode,
+    String phone,
+  ) async {
+    return sendOtp(
+      SendOtpRequestModel(
+        countryCode: countryCode,
+        phone: phone,
+        purpose: 'verification',
+        role: 'client',
+      ),
+    );
+  }
+
   Future<Result<LoginResponseModel>> verifyOtp(
     VerifyOtpRequestModel request,
   ) async {
@@ -124,6 +144,36 @@ class AuthRepository {
     } catch (e) {
       return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
+  }
+
+  Future<Result<LoginResponseModel>> verifyEmailOtp(
+    String email,
+    String otp,
+  ) async {
+    return verifyOtp(
+      VerifyOtpRequestModel(
+        email: email,
+        code: otp,
+        purpose: 'verification',
+        role: 'client',
+      ),
+    );
+  }
+
+  Future<Result<LoginResponseModel>> verifyPhoneOtp(
+    String countryCode,
+    String phone,
+    String otp,
+  ) async {
+    return verifyOtp(
+      VerifyOtpRequestModel(
+        countryCode: countryCode,
+        phone: phone,
+        code: otp,
+        purpose: 'verification',
+        role: 'client',
+      ),
+    );
   }
 
   /// Send TFA OTP
