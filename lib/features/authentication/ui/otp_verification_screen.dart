@@ -59,6 +59,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     }
 
     if (authProvider.isLoginSuccess && mounted) {
+      // If we have a pending register request, call it after verification
+      if (authProvider.pendingRegisterRequest != null) {
+        await authProvider.register(authProvider.pendingRegisterRequest!);
+        if (!authProvider.isRegisterSuccess && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.errorMessage),
+              backgroundColor: AppColors.primary,
+            ),
+          );
+          return;
+        }
+        authProvider.setPendingRegisterRequest(null);
+      }
+
       await userProvider.fetchUserDetails();
 
       if (widget.mode == AuthMode.login) {

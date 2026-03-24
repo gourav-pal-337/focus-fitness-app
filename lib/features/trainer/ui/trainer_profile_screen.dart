@@ -21,140 +21,172 @@ import '../widgets/trainer_stats_row.dart';
 import '../widgets/date_selector.dart';
 import '../widgets/time_slot_selector.dart';
 
-class TrainerProfileScreen extends StatelessWidget {
-  const TrainerProfileScreen({super.key, required this.trainerInfo});
+class TrainerProfileScreen extends StatefulWidget {
+  const TrainerProfileScreen({
+    super.key,
+    required this.trainerInfo,
+    this.scrollToBooking = false,
+  });
 
   final TrainerInfo? trainerInfo;
+  final bool scrollToBooking;
+
+  @override
+  State<TrainerProfileScreen> createState() => _TrainerProfileScreenState();
+}
+
+class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.scrollToBooking) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Increased delay and repeated check for content initialization
+        Future.delayed(const Duration(milliseconds: 1000), () {
+          if (mounted && _scrollController.hasClients) {
+            _scrollController.animateTo(
+              _scrollController.position.maxScrollExtent,
+              duration: const Duration(milliseconds: 1200),
+              curve: Curves.easeInOut,
+            );
+          }
+        });
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) =>
-          TrainerProfileProvider()..fetchTrainerProfile(trainerInfo!.id),
-      child: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, result) {
-          // print('didPop: $didPop, result: $result');
-          // final trainerProv = Provider.of<TrainerProfileProvider>(
-          //   context,
-          //   listen: false,
-          // );
-          // if (trainerProv.showBookingConfirmation) {
-          //   trainerProv.hideBookingView();
-          //   return;
-          // }
-          // context.pop(result);
-        },
-        child: Scaffold(
-          backgroundColor: AppColors.background,
-          body: CustomScrollView(
-            slivers: [
-              SliverList(
-                delegate: SliverChildListDelegate([
-                  TrainerProfileHeader(
-                    trainerImageUrl: trainerInfo?.profilePhoto,
-                  ),
-                  SizedBox(height: 50.h),
-                  Consumer<TrainerProfileProvider>(
-                    builder: (context, provider, _) {
-                      if (provider.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
+          TrainerProfileProvider()..fetchTrainerProfile(widget.trainerInfo!.id),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            SliverList(
+              delegate: SliverChildListDelegate([
+                TrainerProfileHeader(
+                  trainerImageUrl: widget.trainerInfo?.profilePhoto,
+                ),
+                SizedBox(height: 50.h),
+                Consumer<TrainerProfileProvider>(
+                  builder: (context, provider, _) {
+                    if (provider.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                      if (provider.error != null) {
-                        return Center(
-                          child: Text(
-                            provider.error!,
-                            style: AppTextStyle.text14Regular.copyWith(
-                              color: AppColors.grey400,
-                            ),
+                    if (provider.error != null) {
+                      return Center(
+                        child: Text(
+                          provider.error!,
+                          style: AppTextStyle.text14Regular.copyWith(
+                            color: AppColors.grey400,
                           ),
-                        );
-                      }
-                      //                       const TrainerProfileScreen({
-                      //   super.key,
-                      //   required this.trainerId,
-                      //   this.trainerName = 'James Gustavsson',
-                      //   this.trainerSpecialty = 'HIIT & Cardio',
-                      //   this.trainerRating = 4.6,
-                      //   this.trainerImageUrl,
-                      // });
+                        ),
+                      );
+                    }
+                    //                       const TrainerProfileScreen({
+                    //   super.key,
+                    //   required this.trainerId,
+                    //   this.trainerName = 'James Gustavsson',
+                    //   this.trainerSpecialty = 'HIIT & Cardio',
+                    //   this.trainerRating = 4.6,
+                    //   this.trainerImageUrl,
+                    // });
 
-                      final trainer = provider.trainer;
-                      if (trainer == null) {
-                        return TrainerInfoSection(
-                          name: trainerInfo?.fullName ?? "trainer",
-                          specialty: "HIIT & Cardio",
-                          rating: 4.6,
-                          imageUrl: trainerInfo?.profilePhoto ?? "",
-                        );
-                      }
-
+                    final trainer = provider.trainer;
+                    if (trainer == null) {
                       return TrainerInfoSection(
-                        name: trainer.fullName ?? "trainer",
-                        specialty: trainer.expertiseAreas.isNotEmpty
-                            ? trainer.expertiseAreas.join(' & ')
-                            : "HIIT & Cardio",
-                        rating: trainer.avgRating ?? 4.6,
-                        imageUrl: trainer.profilePhoto ?? "",
+                        name: widget.trainerInfo?.fullName ?? "trainer",
+                        specialty: "HIIT & Cardio",
+                        rating: 4.6,
+                        imageUrl: widget.trainerInfo?.profilePhoto ?? "",
                       );
-                    },
-                  ),
-                  SizedBox(height: AppSpacing.xl),
-                  Consumer<TrainerProfileProvider>(
-                    builder: (context, provider, _) {
-                      return AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300),
-                        transitionBuilder:
-                            (Widget child, Animation<double> animation) {
-                              return SlideTransition(
-                                position:
-                                    Tween<Offset>(
-                                      begin: const Offset(1.0, 0.0),
-                                      end: Offset.zero,
-                                    ).animate(
-                                      CurvedAnimation(
-                                        parent: animation,
-                                        curve: Curves.easeInOut,
-                                      ),
+                    }
+
+                    return TrainerInfoSection(
+                      name: trainer.fullName ?? "trainer",
+                      specialty: trainer.expertiseAreas.isNotEmpty
+                          ? trainer.expertiseAreas.join(' & ')
+                          : "HIIT & Cardio",
+                      rating: trainer.avgRating ?? 4.6,
+                      imageUrl: trainer.profilePhoto ?? "",
+                    );
+                  },
+                ),
+                SizedBox(height: AppSpacing.xl),
+                Consumer<TrainerProfileProvider>(
+                  builder: (context, provider, _) {
+                    return AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      transitionBuilder:
+                          (Widget child, Animation<double> animation) {
+                            return SlideTransition(
+                              position:
+                                  Tween<Offset>(
+                                    begin: const Offset(1.0, 0.0),
+                                    end: Offset.zero,
+                                  ).animate(
+                                    CurvedAnimation(
+                                      parent: animation,
+                                      curve: Curves.easeInOut,
                                     ),
-                                child: child,
-                              );
-                            },
-                        child: provider.showBookingConfirmation
-                            ? _BookingContent(key: const ValueKey('booking'))
-                            : _ProfileContent(key: const ValueKey('profile')),
-                      );
-                    },
-                  ),
-                  SizedBox(height: AppSpacing.xl),
-                ]),
-              ),
-            ],
-          ),
-          bottomNavigationBar: _BookSessionButton(),
+                                  ),
+                              child: child,
+                            );
+                          },
+                      child: provider.showBookingConfirmation
+                          ? _BookingContent(key: const ValueKey('booking'))
+                          : _ProfileContent(
+                              key: const ValueKey('profile'),
+                              hideSummary: widget.scrollToBooking,
+                            ),
+                    );
+                  },
+                ),
+                SizedBox(height: AppSpacing.xl),
+              ]),
+            ),
+          ],
         ),
+        bottomNavigationBar: _BookSessionButton(),
       ),
     );
   }
 }
 
 class _ProfileContent extends StatelessWidget {
-  const _ProfileContent({super.key});
+  const _ProfileContent({super.key, this.hideSummary = false});
+
+  final bool hideSummary;
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(
+      '[TrainerProfileScreen] _ProfileContent: hideSummary=$hideSummary',
+    );
     return Column(
       children: [
         const TrainerStatsRow(),
-        SizedBox(height: AppSpacing.xl),
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenPadding.left,
-          ).copyWith(right: 10),
-          child: const TrainerSummarySection(),
-          // const KnowMoreSection(),
-        ),
+        if (!hideSummary) ...[
+          SizedBox(height: AppSpacing.xl),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.screenPadding.left,
+            ).copyWith(right: 10),
+            child: const TrainerSummarySection(),
+          ),
+        ],
         SizedBox(height: AppSpacing.xl),
         const DateSelector(),
         SizedBox(height: AppSpacing.xl),

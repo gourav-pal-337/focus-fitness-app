@@ -64,9 +64,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       password: _passwordController.text.trim(),
     );
 
-    await authProvider.register(request);
+    authProvider.setPendingRegisterRequest(request);
 
-    if (authProvider.isRegisterSuccess && mounted) {
+    if (mounted) {
       // Pass email/phone for verification screen
       context.push(
         VerificationSelectionRoute.path,
@@ -75,13 +75,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           'countryCode': _countryCode,
           'phone': phoneNumber,
         },
-      );
-    } else if (authProvider.isError && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(authProvider.errorMessage),
-          backgroundColor: AppColors.primary,
-        ),
       );
     }
   }

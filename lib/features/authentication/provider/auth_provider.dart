@@ -542,6 +542,7 @@ class AuthProvider extends ChangeNotifier {
   AuthMethod _authMethod = AuthMethod.email;
   LoginResponseModel? _loginResponse;
   RegisterResponseModel? _registerResponse;
+  RegisterRequestModel? _pendingRegisterRequest;
   String _errorMessage = '';
   int? _errorCode;
 
@@ -549,8 +550,14 @@ class AuthProvider extends ChangeNotifier {
   AuthMethod get authMethod => _authMethod;
   LoginResponseModel? get loginResponse => _loginResponse;
   RegisterResponseModel? get registerResponse => _registerResponse;
+  RegisterRequestModel? get pendingRegisterRequest => _pendingRegisterRequest;
   String get errorMessage => _errorMessage;
   int? get errorCode => _errorCode;
+
+  void setPendingRegisterRequest(RegisterRequestModel? request) {
+    _pendingRegisterRequest = request;
+    notifyListeners();
+  }
 
   bool get isLoading => _authState == AuthState.loading;
   bool get isLoginSuccess => _authState == AuthState.loginSuccess;
@@ -608,8 +615,10 @@ class AuthProvider extends ChangeNotifier {
       await result.when(
         success: (response) async {
           _registerResponse = response;
-          // Note: Production requirement sagt do NOT log user in immediately
-          // So we don't store tokens yet
+          // Since we're now registering AFTER verification, it's safe to store tokens
+          if (response.accessToken != null || response.tokens?.accessToken != null || response.token != null) {
+            await _storeRegisterTokens(response);
+          }
           _setAuthState(AuthState.registerSuccess);
         },
         failure: (message, code) {
@@ -869,10 +878,29 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  // Deprecated - tokens now stored after OTP verification in verifyEmailOtp/verifyPhoneOtp
-  /*
-  Future<void> _storeRegisterTokens(RegisterResponseModel response) async { ... }
-  */
+  /// Store authentication tokens from register response
+  Future<void> _storeRegisterTokens(RegisterResponseModel response) async {
+    // Store access token
+    if (response.accessToken != null) {
+      await LocalStorageService.setToken(response.accessToken!);
+    } else if (response.token != null) {
+      await LocalStorageService.setToken(response.token!);
+    } else if (response.tokens?.accessToken != null) {
+      await LocalStorageService.setToken(response.tokens!.accessToken);
+    }
+
+    // Store refresh token
+    if (response.refreshToken != null) {
+      await LocalStorageService.setRefreshToken(response.refreshToken!);
+    } else if (response.tokens?.refreshToken != null) {
+      await LocalStorageService.setRefreshToken(response.tokens!.refreshToken);
+    }
+
+    // Store user ID
+    if (response.user?.id != null) {
+      await LocalStorageService.setUserId(response.user!.id);
+    }
+  }
 
   void _setAuthState(AuthState newState) {
     _authState = newState;

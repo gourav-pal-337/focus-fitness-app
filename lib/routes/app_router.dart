@@ -625,8 +625,13 @@ abstract class TrainerProfileRoute {
     path: path,
     name: name,
     builder: (context, state) {
-      final trainerInfo = state.extra as TrainerInfo;
-      return TrainerProfileScreen(trainerInfo: trainerInfo);
+      final trainerInfo = state.extra as TrainerInfo?;
+      final scrollToBooking =
+          state.uri.queryParameters['scrollToBooking'] == 'true';
+      return TrainerProfileScreen(
+        trainerInfo: trainerInfo,
+        scrollToBooking: scrollToBooking,
+      );
     },
   );
 }

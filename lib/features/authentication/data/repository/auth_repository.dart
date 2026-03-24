@@ -125,8 +125,7 @@ class AuthRepository {
   ) async {
     return sendOtp(
       SendOtpRequestModel(
-        countryCode: countryCode,
-        phone: phone,
+        phone: '$countryCode$phone',
         purpose: 'verification',
         role: 'client',
       ),
@@ -167,8 +166,7 @@ class AuthRepository {
   ) async {
     return verifyOtp(
       VerifyOtpRequestModel(
-        countryCode: countryCode,
-        phone: phone,
+        phone: '$countryCode$phone',
         code: otp,
         purpose: 'verification',
         role: 'client',

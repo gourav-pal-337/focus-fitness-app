@@ -143,7 +143,12 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
   }
 
   Widget _buildDiscoveryView(SessionDetailsProvider provider) {
-    final allDates = provider.availability.map((e) => e.date).toList();
+    final sessionPlanId = widget.session.booking?.sessionPlanId;
+    final filteredAvailability = provider.availability.where((day) {
+      return day.availableSlots.any((slot) => slot.planId == sessionPlanId);
+    }).toList();
+
+    final allDates = filteredAvailability.map((e) => e.date).toList();
     final selectedMonth = provider.selectedMonth;
     final uniqueMonths = provider.uniqueMonths;
 
@@ -322,10 +327,15 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
       orElse: () => DayAvailability(date: '', availableSlots: []),
     );
 
-    if (dayAvailability.availableSlots.isEmpty) {
+    final sessionPlanId = widget.session.booking?.sessionPlanId;
+    final filteredSlots = dayAvailability.availableSlots.where((slot) {
+      return slot.planId == sessionPlanId;
+    }).toList();
+
+    if (filteredSlots.isEmpty) {
       return Center(
         child: Text(
-          'No slots available for this date',
+          'No slots available for this session plan',
           style: AppTextStyle.text14Regular.copyWith(color: AppColors.grey400),
         ),
       );
@@ -334,10 +344,10 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
     return ListView.separated(
       padding: EdgeInsets.only(left: AppSpacing.screenPadding.left),
       scrollDirection: Axis.horizontal,
-      itemCount: dayAvailability.availableSlots.length,
+      itemCount: filteredSlots.length,
       separatorBuilder: (context, index) => SizedBox(width: AppSpacing.sm),
       itemBuilder: (context, index) {
-        final slot = dayAvailability.availableSlots[index];
+        final slot = filteredSlots[index];
         final startTime = DateTime.parse(slot.startTime);
         final timeStr = DateFormat('hh:mm a').format(startTime);
         final isSelected = _selectedSlot == slot;
