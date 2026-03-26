@@ -297,4 +297,46 @@ class LocalStorageService {
       return null;
     }
   }
+
+  static const String _workoutCachePrefix = 'workout_cache_';
+  static const String _workoutCacheDatesKey = 'workout_cache_dates';
+
+  static Future<String?> getWorkoutCache(String dateKey) async {
+    return await _prefsInstance.getString('$_workoutCachePrefix$dateKey');
+  }
+
+  static Future<void> setWorkoutCache(String dateKey, String jsonValue) async {
+    await _prefsInstance.setString('$_workoutCachePrefix$dateKey', jsonValue);
+  }
+
+  static Future<List<String>> getWorkoutCacheDates() async {
+    try {
+      final csv = await _prefsInstance.getString(_workoutCacheDatesKey);
+      if (csv == null || csv.trim().isEmpty) return [];
+      return csv
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
+    } catch (e) {
+      log(e.toString());
+      return [];
+    }
+  }
+
+  static Future<void> addWorkoutCacheDate(String dateKey) async {
+    try {
+      final existingDates = await getWorkoutCacheDates();
+      if (existingDates.contains(dateKey)) return;
+      existingDates.add(dateKey);
+      // Keep insertion order but cap size to avoid unbounded growth.
+      final limited = existingDates.reversed.take(30).toList().reversed.toList();
+      await _prefsInstance.setString(
+        _workoutCacheDatesKey,
+        limited.join(','),
+      );
+    } catch (e) {
+      log(e.toString());
+    }
+  }
 }

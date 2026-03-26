@@ -9,6 +9,8 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/custom_app_bar.dart';
 import '../../../core/widgets/buttons/custom_bottom.dart';
 import '../provider/workout_provider.dart';
+import '../models/set_model.dart';
+import '../providers/session_provider.dart';
 
 class EditExerciseSetScreen extends StatefulWidget {
   const EditExerciseSetScreen({
@@ -63,7 +65,7 @@ class _EditExerciseSetScreenState extends State<EditExerciseSetScreen> {
     super.dispose();
   }
 
-  void _saveChanges() {
+  Future<void> _saveChanges() async {
     final reps = int.tryParse(_repsController.text);
     if (reps == null || reps <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,6 +84,10 @@ class _EditExerciseSetScreenState extends State<EditExerciseSetScreen> {
     final provider = context.read<WorkoutProgressProvider>();
     final newSet = WorkoutSet(reps: reps, weight: weight);
 
+    final setNumber = widget.setIndex != null
+        ? widget.setIndex! + 1
+        : widget.workoutProgress.sets.length + 1;
+
     if (widget.setIndex != null) {
       provider.updateSet(widget.date, widget.workoutProgress.exerciseId,
           widget.setIndex!, newSet);
@@ -93,7 +99,29 @@ class _EditExerciseSetScreenState extends State<EditExerciseSetScreen> {
       );
     }
 
-    context.pop();
+    final sessionProvider = SessionProvider();
+    final saved = await sessionProvider.saveSetToBackend(
+      exerciseId: widget.workoutProgress.exerciseId,
+      date: widget.date,
+      setNumber: setNumber,
+      set: SetModel(reps: reps, weight: weight),
+    );
+
+    if (!mounted) return;
+
+    if (!saved) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(sessionProvider.errorMessage ?? 'Failed to save set'),
+          action: SnackBarAction(
+            label: 'Retry',
+            onPressed: _saveChanges,
+          ),
+        ),
+      );
+    } else {
+      context.pop();
+    }
   }
 
   void _deleteSet() {

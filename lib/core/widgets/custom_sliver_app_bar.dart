@@ -57,10 +57,14 @@ class CustomSliverAppBar extends StatelessWidget {
                         color: AppColors.background,
                       ),
                       SizedBox(width: AppSpacing.lg),
-                      Text(
-                        title,
-                        style: AppTextStyle.text20SemiBold.copyWith(
-                          color: AppColors.background,
+                      Expanded(
+                        child: Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyle.text20SemiBold.copyWith(
+                            color: AppColors.background,
+                          ),
                         ),
                       ),
                     ],

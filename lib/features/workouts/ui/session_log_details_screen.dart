@@ -1,88 +1,141 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:convert';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/custom_app_bar.dart';
-import '../provider/workout_provider.dart';
+import '../../../core/service/local_storage_service.dart';
+import '../../../routes/app_router.dart';
+import '../widgets/date_selector.dart';
+import '../models/workout_exercise_model.dart';
+import '../services/workout_api_service.dart';
 
-class SessionLogDetailsScreen extends StatelessWidget {
-  const SessionLogDetailsScreen({
+class SessionLogDetailsScreen extends StatefulWidget {
+   SessionLogDetailsScreen({
     super.key,
     required this.date,
   });
 
-  final DateTime date;
+  DateTime date;
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: WorkoutProgressProvider(),
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: Column(
-            children: [
-              const CustomAppBar(
-                title: 'Session Log',
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _SessionSummarySection(date: date),
-                      SizedBox(height: AppSpacing.xl),
-                      Consumer<WorkoutProgressProvider>(
-                        builder: (context, provider, child) {
-                          final workoutProgress = provider.getWorkoutProgressForDate(date);
+  State<SessionLogDetailsScreen> createState() => _SessionLogDetailsScreenState();
+}
 
-                          if (workoutProgress.isEmpty) {
-                            return Padding(
-                              padding: EdgeInsets.all(AppSpacing.screenPadding.left),
-                              child: Center(
-                                child: Text(
-                                  'No exercises logged for this session',
-                                  style: AppTextStyle.text16Medium.copyWith(
-                                    color: AppColors.grey400,
-                                  ),
+class _SessionLogDetailsScreenState extends State<SessionLogDetailsScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const CustomAppBar(
+              title: 'Session Log',
+            ),
+            DateSelector(
+              selectedDate: widget.date,
+              onDateSelected: (newDate) {
+                setState(() {
+                   widget.date = newDate;
+                });
+                // context.push(
+                //   '${SessionLogDetailsRoute.path}?date=${newDate.millisecondsSinceEpoch}',
+                // );
+              },
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _SessionSummarySection(date: widget.date),
+                    SizedBox(height: AppSpacing.xl),
+                    FutureBuilder<List<WorkoutExerciseModel>>(
+                      future: _fetchWorkoutsForDate(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        final workouts = snapshot.data ?? const [];
+
+                        if (workouts.isEmpty) {
+                          return Padding(
+                            padding: EdgeInsets.all(
+                                AppSpacing.screenPadding.left),
+                            child: Center(
+                              child: Text(
+                                'No exercises logged for this session',
+                                style: AppTextStyle.text16Medium.copyWith(
+                                  color: AppColors.grey400,
                                 ),
                               ),
-                            );
-                          }
-
-                          return ListView.separated(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
                             ),
-                            itemCount: workoutProgress.length,
-                            separatorBuilder: (context, index) => SizedBox(
-                              height: AppSpacing.md,
-                            ),
-                            itemBuilder: (context, index) {
-                              return _ExerciseCard(
-                                workoutProgress: workoutProgress[index],
-                              );
-                            },
                           );
-                        },
-                      ),
-                      SizedBox(height: AppSpacing.xl),
-                    ],
-                  ),
+                        }
+
+                        return ListView.separated(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                          ),
+                          itemCount: workouts.length,
+                          separatorBuilder: (context, index) => SizedBox(
+                            height: AppSpacing.md,
+                          ),
+                          itemBuilder: (context, index) {
+                            return _ExerciseCard(
+                              workoutExercise: workouts[index],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                    SizedBox(height: AppSpacing.xl),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Future<List<WorkoutExerciseModel>> _fetchWorkoutsForDate() async {
+    final api = WorkoutApiService();
+    try {
+      final workouts = await api.getWorkoutProgressByDate(widget.date);
+      return workouts.where((w) => w.sets.isNotEmpty).toList();
+    } catch (_) {
+      // Offline fallback to cached data.
+      final dateKey = _dateKey(widget.date);
+      final cachedJson = await LocalStorageService.getWorkoutCache(dateKey);
+      if (cachedJson == null || cachedJson.isEmpty) return const [];
+      final decoded = jsonDecode(cachedJson);
+      if (decoded is! List) return const [];
+      return decoded
+          .whereType<Map<String, dynamic>>()
+          .map(WorkoutExerciseModel.fromJson)
+          .toList()
+          .where((w) => w.sets.isNotEmpty)
+          .toList();
+    }
+  }
+
+  String _dateKey(DateTime date) {
+    final d = DateTime(date.year, date.month, date.day);
+    return '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
   }
 }
 
@@ -164,10 +217,10 @@ class _SessionSummarySection extends StatelessWidget {
 
 class _ExerciseCard extends StatelessWidget {
   const _ExerciseCard({
-    required this.workoutProgress,
+    required this.workoutExercise,
   });
 
-  final WorkoutProgress workoutProgress;
+  final WorkoutExerciseModel workoutExercise;
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +250,7 @@ class _ExerciseCard extends StatelessWidget {
               ),
               SizedBox(width: AppSpacing.sm),
               Text(
-                workoutProgress.exerciseName,
+                workoutExercise.exerciseName,
                 style: AppTextStyle.text16SemiBold.copyWith(
                   color: AppColors.textPrimary,
                 ),
@@ -247,7 +300,7 @@ class _ExerciseCard extends StatelessWidget {
             color: AppColors.grey200,
             thickness: 1,
           ),
-          if (workoutProgress.sets.isEmpty)
+          if (workoutExercise.sets.isEmpty)
             Padding(
               padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
               child: Center(
@@ -260,7 +313,7 @@ class _ExerciseCard extends StatelessWidget {
               ),
             )
           else
-            ...workoutProgress.sets.asMap().entries.map((entry) {
+            ...workoutExercise.sets.asMap().entries.map((entry) {
               final index = entry.key;
               final set = entry.value;
               return Padding(

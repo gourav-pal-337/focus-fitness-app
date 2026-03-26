@@ -5,16 +5,17 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../provider/workout_provider.dart';
 
 class ExerciseCard extends StatelessWidget {
   const ExerciseCard({
     super.key,
-    required this.exercise,
+    required this.name,
+    required this.imageUrl,
     required this.onTap,
   });
 
-  final Exercise exercise;
+  final String name;
+  final String imageUrl;
   final VoidCallback onTap;
 
   @override
@@ -38,7 +39,7 @@ class ExerciseCard extends StatelessWidget {
             fit: StackFit.expand,
             children: [
               Image.network(
-                exercise.imageUrl,
+                imageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
@@ -62,17 +63,25 @@ class ExerciseCard extends StatelessWidget {
                     ],
                   ),
                 ),
-              ),
-              Positioned(
-                bottom: AppSpacing.md,
-                left: AppSpacing.md,
+                alignment: Alignment.bottomLeft,
+                padding: EdgeInsets.all(AppSpacing.sm),
                 child: Text(
-                  exercise.name,
+                  name,
                   style: AppTextStyle.text16SemiBold.copyWith(
                     color: AppColors.background,
                   ),
                 ),
               ),
+              // Positioned(
+              //   bottom: AppSpacing.md,
+              //   left: AppSpacing.md,
+              //   child: Text(
+              //     name,
+              //     style: AppTextStyle.text16SemiBold.copyWith(
+              //       color: AppColors.background,
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),

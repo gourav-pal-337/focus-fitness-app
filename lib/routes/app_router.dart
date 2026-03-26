@@ -36,8 +36,8 @@ import '../features/workouts/ui/exercises_screen.dart';
 import '../features/workouts/ui/exercise_details_screen.dart';
 import '../features/workouts/ui/workout_progress_screen.dart';
 import '../features/workouts/ui/edit_exercise_set_screen.dart';
-import '../features/workouts/ui/session_log_screen.dart';
 import '../features/workouts/ui/session_log_details_screen.dart';
+import '../features/workouts/ui/manuals_screen.dart';
 import '../features/workouts/provider/workout_provider.dart';
 import '../features/video_player/ui/video_player_screen.dart';
 import '../features/subscriptions/ui/subscriptions_screen.dart';
@@ -110,6 +110,7 @@ abstract class AppRouter {
       ExercisesRoute.route,
       ExerciseDetailsRoute.route,
       WorkoutProgressRoute.route,
+      ManualsRoute.route,
       EditExerciseSetRoute.route,
       SessionLogRoute.route,
       SessionLogDetailsRoute.route,
@@ -880,13 +881,18 @@ abstract class ExercisesRoute {
     builder: (context, state) {
       final fromWorkoutProgress =
           state.uri.queryParameters['fromWorkoutProgress'] == 'true';
+      final fromAssignedWorkout =
+          state.uri.queryParameters['fromAssignedWorkout'] == 'true';
       final dateMillis = state.uri.queryParameters['date'];
       final date = dateMillis != null
           ? DateTime.fromMillisecondsSinceEpoch(int.parse(dateMillis))
           : null;
+      final categoryId = state.uri.queryParameters['categoryId'];
       return ExercisesScreen(
         fromWorkoutProgress: fromWorkoutProgress,
         workoutDate: date,
+        fromAssignedWorkout: fromAssignedWorkout,
+        assignedCategoryId: categoryId,
       );
     },
   );
@@ -901,7 +907,14 @@ abstract class ExerciseDetailsRoute {
     name: name,
     builder: (context, state) {
       final exerciseId = state.uri.queryParameters['exerciseId'] ?? '1';
-      return ExerciseDetailsScreen(exerciseId: exerciseId);
+      final dateMillis = state.uri.queryParameters['date'];
+      final workoutDate = dateMillis != null
+          ? DateTime.fromMillisecondsSinceEpoch(int.parse(dateMillis))
+          : null;
+      return ExerciseDetailsScreen(
+        exerciseId: exerciseId,
+        workoutDate: workoutDate,
+      );
     },
   );
 }
@@ -916,11 +929,29 @@ abstract class WorkoutProgressRoute {
     builder: (context, state) {
       final exerciseId = state.uri.queryParameters['exerciseId'];
       final exerciseName = state.uri.queryParameters['exerciseName'];
+      final dateMillis = state.uri.queryParameters['date'];
+      final initialDate = dateMillis != null
+          ? DateTime.fromMillisecondsSinceEpoch(int.parse(dateMillis))
+          : null;
       return WorkoutProgressScreen(
+        initialDate: initialDate,
         exerciseIdToAdd: exerciseId,
         exerciseNameToAdd: exerciseName,
       );
     },
+  );
+}
+
+abstract class ManualsRoute {
+  static const String path = '/manuals';
+  static const String name = 'manuals';
+
+  static final GoRoute route = GoRoute(
+    path: path,
+    name: name,
+    pageBuilder: (context, state) => NoTransitionPage(
+      child: const ManualsScreen(),
+    ),
   );
 }
 
@@ -931,7 +962,13 @@ abstract class SessionLogRoute {
   static final GoRoute route = GoRoute(
     path: path,
     name: name,
-    builder: (context, state) => const SessionLogScreen(),
+    builder: (context, state) {
+      final dateMillis = state.uri.queryParameters['date'];
+      final date = dateMillis != null
+          ? DateTime.fromMillisecondsSinceEpoch(int.parse(dateMillis))
+          : DateTime.now();
+      return SessionLogDetailsScreen(date: date);
+    },
   );
 }
 

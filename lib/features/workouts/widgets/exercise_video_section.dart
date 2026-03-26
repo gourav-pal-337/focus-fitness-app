@@ -7,7 +7,7 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../routes/app_router.dart';
-import '../provider/workout_provider.dart';
+import '../models/exercise_model.dart';
 
 class ExerciseVideoSection extends StatelessWidget {
   const ExerciseVideoSection({
@@ -15,7 +15,7 @@ class ExerciseVideoSection extends StatelessWidget {
     required this.exercise,
   });
 
-  final Exercise exercise;
+  final ExerciseModel exercise;
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +100,7 @@ class ExerciseVideoSection extends StatelessWidget {
         Row(
           children: [
             Text(
-              'Beginner',
+              _capitalize(exercise.level),
               style: AppTextStyle.text10Medium.copyWith(
                 color: AppColors.grey400,
               ),
@@ -122,7 +122,7 @@ class ExerciseVideoSection extends StatelessWidget {
             ),
             SizedBox(width: AppSpacing.xs),
             Text(
-              '${exercise.videoDurationMinutes} min',
+              '${exercise.videoDurationMinutes ?? 0} min',
               style: AppTextStyle.text10Medium.copyWith(
                 color: AppColors.grey400,
               ),
@@ -131,6 +131,12 @@ class ExerciseVideoSection extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _capitalize(String value) {
+    if (value.trim().isEmpty) return 'Beginner';
+    final v = value.trim();
+    return '${v[0].toUpperCase()}${v.substring(1)}';
   }
 }
 

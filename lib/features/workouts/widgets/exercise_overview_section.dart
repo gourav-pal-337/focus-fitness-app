@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
-import '../provider/workout_provider.dart';
+import '../models/exercise_model.dart';
 
 class ExerciseOverviewSection extends StatelessWidget {
   const ExerciseOverviewSection({
@@ -11,29 +11,7 @@ class ExerciseOverviewSection extends StatelessWidget {
     required this.exercise,
   });
 
-  final Exercise exercise;
-
-  String _getLevelText(ExerciseLevel level) {
-    switch (level) {
-      case ExerciseLevel.beginner:
-        return 'Beginner';
-      case ExerciseLevel.intermediate:
-        return 'Intermediate';
-      case ExerciseLevel.advanced:
-        return 'Advanced';
-    }
-  }
-
-  String _getIntensityText(ExerciseIntensity intensity) {
-    switch (intensity) {
-      case ExerciseIntensity.low:
-        return 'Low';
-      case ExerciseIntensity.moderate:
-        return 'Moderate';
-      case ExerciseIntensity.high:
-        return 'High';
-    }
-  }
+  final ExerciseModel exercise;
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +19,27 @@ class ExerciseOverviewSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _MetricsRow(
-          level: _getLevelText(exercise.level),
+          level: exercise.level,
           averageMinutes: exercise.averageMinutes,
-          intensity: _getIntensityText(exercise.intensity),
+          intensity: exercise.intensity,
         ),
+        if (exercise.category != null && exercise.category!.isNotEmpty) ...[
+          SizedBox(height: AppSpacing.lg),
+          Text(
+            'Category',
+            style: AppTextStyle.text12Regular.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.xs),
+          Text(
+            exercise.category!,
+            style: AppTextStyle.text14SemiBold.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.lg),
+        ],
         SizedBox(height: AppSpacing.lg),
         Text(
           exercise.description,
@@ -72,9 +67,9 @@ class ExerciseOverviewSection extends StatelessWidget {
         ),
         SizedBox(height: AppSpacing.xs),
         Text(
-          exercise.goodFor.join(', '),
+          exercise.goodFor.isEmpty ? '-' : exercise.goodFor.join(', '),
           style: AppTextStyle.text14Regular.copyWith(
-            color: AppColors.textPrimary,
+            color: exercise.goodFor.isEmpty ? AppColors.grey400 : AppColors.textPrimary,
           ),
         ),
       ],

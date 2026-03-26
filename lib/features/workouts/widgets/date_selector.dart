@@ -15,7 +15,7 @@ class DateSelector extends StatefulWidget {
   });
 
   final DateTime selectedDate;
-  final ValueChanged<DateTime> onDateSelected;
+  final Function(DateTime) onDateSelected;
 
   @override
   State<DateSelector> createState() => _DateSelectorState();
@@ -29,8 +29,10 @@ class _DateSelectorState extends State<DateSelector> {
   @override
   void initState() {
     super.initState();
-    dates = List.generate(7, (index) {
-      return today.add(Duration(days: index - 3));
+    // Show past 7 days + today + next 7 days.
+    // Total = 15 items.
+    dates = List.generate(15, (index) {
+      return today.add(Duration(days: index - 7));
     });
     _scrollController = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -115,7 +117,10 @@ class _DateSelectorState extends State<DateSelector> {
               date.year == today.year;
 
           return GestureDetector(
-            onTap: () => widget.onDateSelected(date),
+            onTap: () {
+              widget.onDateSelected.call(date);
+              debugPrint('onDateSelected 0 : $date');
+            },
             child: Container(
               height: 32.h,
               alignment: Alignment.center,

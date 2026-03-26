@@ -9,12 +9,15 @@ import '../../../core/widgets/buttons/custom_bottom.dart';
 class EmptyWorkoutSection extends StatelessWidget {
   const EmptyWorkoutSection({
     super.key,
+
     required this.onCreateTap,
     required this.onViewLogTap,
+    required this.hasData,
   });
 
   final VoidCallback onCreateTap;
   final VoidCallback onViewLogTap;
+  final bool hasData;
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +27,14 @@ class EmptyWorkoutSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Empty Workout',
+            hasData ? 'Today\'s Workout' : 'No workout for this date',
             style: AppTextStyle.text16SemiBold.copyWith(
               color: AppColors.textPrimary,
             ),
           ),
           SizedBox(height: AppSpacing.xs),
           Text(
-            'Start a workout from scratch',
+            hasData ?  "Start a workout from scratch"  :'Your trainer will assign workouts for you here',
             style: AppTextStyle.text12Medium.copyWith(
               color: AppColors.grey400,
             ),
@@ -40,7 +43,7 @@ class EmptyWorkoutSection extends StatelessWidget {
           Row(
             children: [
               CustomButton(
-                text: '+ Create',
+                text: 'Add Logs +',
                 type: ButtonType.filled,
                 onPressed: onCreateTap,
                 backgroundColor: AppColors.primary,

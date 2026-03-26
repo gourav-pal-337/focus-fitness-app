@@ -212,10 +212,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         debugPrint("trainerWhatsapp : $trainerWhatsapp");
                         // Check if User has a Mobile Number first
                         if (userPhone != null && userPhone.isNotEmpty) {
-                          if (trainerWhatsapp != null &&
-                              trainerWhatsapp.isNotEmpty) {
+                          // if (trainerWhatsapp != null &&
+                          //     trainerWhatsapp.isNotEmpty) {
                             final Uri whatsappUrl = Uri.parse(
-                              'https://wa.me/$trainerWhatsapp?text=Hello',
+                              'https://wa.me/+15551436124?text=Hello',
                             );
 
                             // if (await canLaunchUrl(whatsappUrl)) {
@@ -226,17 +226,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             // } else {
                             //   debugPrint('Could not launch $whatsappUrl');
                             // }
-                          } else {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Trainer WhatsApp number not available",
-                                  ),
-                                ),
-                              );
-                            }
-                          }
+                          // } else {
+                          //   if (context.mounted) {
+                          //     ScaffoldMessenger.of(context).showSnackBar(
+                          //       const SnackBar(
+                          //         content: Text(
+                          //           "Trainer WhatsApp number not available",
+                          //         ),
+                          //       ),
+                          //     );
+                          //   }
+                          // }
                         } else {
                           // User phone missing -> Show popup to update
                           final sessionPopupProvider =
