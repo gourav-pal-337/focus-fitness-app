@@ -61,10 +61,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     onPressed: () {
                       context.push(ManualsRoute.path);
                     },
-                    icon: Icon(
-                      Icons.menu_book,
-                      color: AppColors.textPrimary,
-                    ),
+                    icon: Icon(Icons.menu_book, color: AppColors.textPrimary),
                   ),
                 ],
               ),
@@ -76,7 +73,7 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     _selectedDate = date;
                   });
                   debugPrint('onDateSelected 2: $date');
-                  _workoutProvider.fetchWorkoutByDate(date);
+                  _workoutProvider.fetchWorkoutByDate(date, force: true);
                 },
               ),
               SizedBox(height: AppSpacing.xl),
@@ -98,7 +95,9 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                               provider.errorMessage != _lastErrorMessage) {
                             _lastErrorMessage = provider.errorMessage;
                             WidgetsBinding.instance.addPostFrameCallback((_) {
-                              final msg = provider.errorMessage ?? 'Failed to load workout';
+                              final msg =
+                                  provider.errorMessage ??
+                                  'Failed to load workout';
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(msg),
@@ -130,7 +129,10 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                                   ),
                                   SizedBox(height: AppSpacing.xs),
                                   Text(
-                                    (provider.errorMessage ?? '').replaceAll("Exception: ", ""),
+                                    (provider.errorMessage ?? '').replaceAll(
+                                      "Exception: ",
+                                      "",
+                                    ),
                                     style: AppTextStyle.text12Medium.copyWith(
                                       color: AppColors.grey400,
                                     ),
@@ -156,23 +158,25 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                           return Column(
                             children: [
                               EmptyWorkoutSection(
-                              hasData: provider.workouts.isNotEmpty,
-                              onCreateTap: () {
-                                context.push(
-                                  '${WorkoutProgressRoute.path}?date=${_selectedDate.millisecondsSinceEpoch}',
-                                ).then((value) {
-                                  if (value == true) {
-                                    provider.refresh();
-                                  }
-                                });
-                              },
-                              onViewLogTap: () {
-                                context.push(
-                                  '${SessionLogDetailsRoute.path}?date=${_selectedDate.millisecondsSinceEpoch}',
-                                );
-                              },
-                            ),
-                            SizedBox(height: AppSpacing.md),
+                                hasData: provider.workouts.isNotEmpty,
+                                onCreateTap: () {
+                                  context
+                                      .push(
+                                        '${WorkoutProgressRoute.path}?date=${_selectedDate.millisecondsSinceEpoch}',
+                                      )
+                                      .then((value) {
+                                        if (value == true) {
+                                          provider.refresh();
+                                        }
+                                      });
+                                },
+                                onViewLogTap: () {
+                                  context.push(
+                                    '${SessionLogDetailsRoute.path}?date=${_selectedDate.millisecondsSinceEpoch}',
+                                  );
+                                },
+                              ),
+                              SizedBox(height: AppSpacing.md),
                               _AssignedCategoriesSection(
                                 provider: provider,
                                 selectedDate: _selectedDate,

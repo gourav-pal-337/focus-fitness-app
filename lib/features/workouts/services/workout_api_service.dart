@@ -2,6 +2,8 @@ import '../../../core/constants/api_endpoints.dart';
 import '../models/exercise_model.dart';
 import '../models/manual_model.dart';
 import '../models/set_model.dart';
+import '../models/today_workout_summary_model.dart';
+import '../models/weekly_progress_model.dart';
 import '../models/workout_exercise_model.dart';
 import 'base_service.dart';
 
@@ -10,6 +12,18 @@ class WorkoutApiService {
     : _baseService = baseService ?? BaseService();
 
   final BaseService _baseService;
+
+  Future<List<WeeklyProgressModel>> getWeeklyProgress() async {
+    final response = await _baseService.get(Endpoints.getWeeklyProgress);
+    final list = _extractList(response, keys: ['data', 'results']);
+    return list.map(WeeklyProgressModel.fromJson).toList();
+  }
+
+  Future<TodayWorkoutSummaryModel> getTodayWorkoutSummary() async {
+    final response = await _baseService.get(Endpoints.getTodayWorkoutSummary);
+    final data = response['data'] ?? response;
+    return TodayWorkoutSummaryModel.fromJson(data);
+  }
 
   Future<ExerciseModel> getExerciseById(String exerciseId) async {
     final response = await _baseService.get('${Endpoints.exercises}/$exerciseId');

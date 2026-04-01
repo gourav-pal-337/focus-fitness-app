@@ -1,7 +1,7 @@
 class Endpoints {
   // TODO: Update baseUrl with actual API base URL
   static const String baseUrl =
-        // 'https://focus-fusion-api.applore.in/api/mobile'; // dev
+      //   'https://focus-fusion-api.applore.in/api/mobile'; // dev
       // 'http://localhost:4000/api/mobile';
       'https://martha-insightful-genevie.ngrok-free.dev/api/mobile'; //gourav dev
   // 'https://3p68r138-4000.inc1.devtunnels.ms/api/mobile'; //sahil dev
@@ -79,4 +79,6 @@ class Endpoints {
   static const String exercises = '/exercises';
   static const String exerciseCategories = '/exercises/categories';
   static const String workoutManuals = '/workouts/manuals';
+  static const String getTodayWorkoutSummary = '/workouts/today-summary';
+  static const String getWeeklyProgress = '/workouts/weekly-progress';
 }
