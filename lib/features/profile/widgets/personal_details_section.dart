@@ -47,30 +47,6 @@ class PersonalDetailsSection extends StatelessWidget {
     return '${weight}kg';
   }
 
-  String? _formatAge(int? age, String? dateOfBirth) {
-    if (age == 0) {
-      return null;
-    }
-    // Use age from profile if available, otherwise calculate from DOB
-    if (age != null) {
-      return '$age Years';
-    }
-    if (dateOfBirth == null || dateOfBirth.isEmpty) return null;
-    try {
-      final birthDate = DateTime.parse(dateOfBirth);
-      final today = DateTime.now();
-      int calculatedAge = today.year - birthDate.year;
-      // Adjust if birthday hasn't occurred this year
-      if (today.month < birthDate.month ||
-          (today.month == birthDate.month && today.day < birthDate.day)) {
-        calculatedAge--;
-      }
-      return '$calculatedAge Years';
-    } catch (e) {
-      return null;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<ClientProfileProvider>(
@@ -89,13 +65,9 @@ class PersonalDetailsSection extends StatelessWidget {
             SizedBox(height: AppSpacing.md),
             ProfileDetailCard(
               items: [
-                // ProfileDetailItem(
-                //   label: 'DOB',
-                //   value: _formatDateOfBirth(profile?.dateOfBirth),
-                // ),
                 ProfileDetailItem(
-                  label: 'Age',
-                  value: _formatAge(profile?.age, profile?.dateOfBirth),
+                  label: 'DOB',
+                  value: _formatDateOfBirth(profile?.dateOfBirth),
                 ),
                 ProfileDetailItem(
                   label: 'Height',

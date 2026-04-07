@@ -593,18 +593,18 @@ class _ActionButton extends StatelessWidget {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CustomButton(
-              text: 'Book Again',
-              type: ButtonType.filled,
-              onPressed: () {
-                bookAgain(context);
-              },
-              width: double.infinity,
-              backgroundColor: AppColors.primary,
-              textColor: AppColors.background,
-              borderRadius: 12.r,
-            ),
-            SizedBox(height: AppSpacing.md),
+            // CustomButton(
+            //   text: 'Book Again',
+            //   type: ButtonType.filled,
+            //   onPressed: () {
+            //     bookAgain(context);
+            //   },
+            //   width: double.infinity,
+            //   backgroundColor: AppColors.primary,
+            //   textColor: AppColors.background,
+            //   borderRadius: 12.r,
+            // ),
+            // SizedBox(height: AppSpacing.md),
             Container(
               width: double.infinity,
               decoration: BoxDecoration(

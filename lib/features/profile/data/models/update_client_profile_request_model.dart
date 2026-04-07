@@ -17,8 +17,9 @@ class UpdateClientProfileRequestModel {
     this.gender,
     this.phone,
     this.countryCode,
-    this.isTfaEnabled,
     this.tfaVerified,
+    this.isTfaEnabled,
+    this.profilePicture,
   });
 
   final String? fullName;
@@ -40,6 +41,7 @@ class UpdateClientProfileRequestModel {
   final String? email;
   final bool? tfaVerified;
   final bool? isTfaEnabled;
+  final String? profilePicture;
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
@@ -102,6 +104,7 @@ class UpdateClientProfileRequestModel {
     );
     addIfNotNull('tfaVerified', tfaVerified);
     addIfNotNull('isTfaEnabled', isTfaEnabled);
+    addIfNotNull('profilePicture', profilePicture);
 
     return data;
   }

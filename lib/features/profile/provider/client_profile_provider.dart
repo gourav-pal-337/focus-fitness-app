@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 
+import '../data/models/update_client_profile_request_model.dart';
 import '../data/models/client_profile_model.dart';
 import '../data/repository/profile_repository.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
@@ -59,5 +61,53 @@ class ClientProfileProvider extends ChangeNotifier {
     _error = null;
     _isLoading = false;
     notifyListeners();
+  }
+
+  /// Update profile photo
+  Future<bool> updateProfilePhoto(XFile file) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      // 1. Upload the photo
+      final uploadResult = await _repository.uploadProfilePhoto(file);
+
+      return await uploadResult.when(
+        success: (photoUrl) async {
+          // 2. Update the profile with the new photo URL
+          final updateResult = await _repository.updateClientProfile(
+            UpdateClientProfileRequestModel(profilePicture: photoUrl),
+          );
+
+          return await updateResult.when(
+            success: (response) async {
+              // 3. Refresh profile
+              await fetchProfile();
+              _isLoading = false;
+              notifyListeners();
+              return true;
+            },
+            failure: (message, code) {
+              _error = message;
+              _isLoading = false;
+              notifyListeners();
+              return false;
+            },
+          );
+        },
+        failure: (message, code) {
+          _error = message;
+          _isLoading = false;
+          notifyListeners();
+          return false;
+        },
+      );
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
   }
 }

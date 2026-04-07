@@ -1,16 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-enum ExerciseLevel {
-  beginner,
-  intermediate,
-  advanced,
-}
+enum ExerciseLevel { beginner, intermediate, advanced }
 
-enum ExerciseIntensity {
-  low,
-  moderate,
-  high,
-}
+enum ExerciseIntensity { low, moderate, high }
 
 class Exercise {
   const Exercise({
@@ -20,7 +12,8 @@ class Exercise {
     this.level = ExerciseLevel.intermediate,
     this.averageMinutes = 10,
     this.intensity = ExerciseIntensity.moderate,
-    this.description = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    this.description =
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     this.calories = 123,
     this.goodFor = const [],
     this.videoUrl,
@@ -47,50 +40,60 @@ class ExercisesProvider extends ChangeNotifier {
     Exercise(
       id: '1',
       name: 'Push Ups',
-      imageUrl: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800',
       level: ExerciseLevel.intermediate,
       averageMinutes: 10,
       intensity: ExerciseIntensity.moderate,
       calories: 123,
       goodFor: ['Chest', 'Triceps', 'Shoulders', 'Core'],
-      videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-      videoThumbnailUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
+      videoUrl:
+          'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+      videoThumbnailUrl:
+          'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
       videoDurationMinutes: 30,
     ),
     const Exercise(
       id: '2',
       name: 'Squats',
-      imageUrl: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800',
     ),
     const Exercise(
       id: '3',
       name: 'Bench Press',
-      imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
     ),
     const Exercise(
       id: '4',
       name: 'Dumbbell Press',
-      imageUrl: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800',
     ),
     const Exercise(
       id: '5',
       name: 'Lat Pulldown',
-      imageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800',
     ),
     const Exercise(
       id: '6',
       name: 'Pull Ups',
-      imageUrl: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800',
     ),
     const Exercise(
       id: '7',
       name: 'Deadlift',
-      imageUrl: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800',
     ),
     const Exercise(
       id: '8',
       name: 'Bicep Curls',
-      imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
+      imageUrl:
+          'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
     ),
   ];
 
@@ -104,8 +107,10 @@ class ExercisesProvider extends ChangeNotifier {
       return _exercises;
     }
     return _exercises
-        .where((exercise) =>
-            exercise.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+        .where(
+          (exercise) =>
+              exercise.name.toLowerCase().contains(_searchQuery.toLowerCase()),
+        )
         .toList();
   }
 
@@ -138,10 +143,7 @@ class ExercisesProvider extends ChangeNotifier {
 }
 
 class WorkoutSet {
-  const WorkoutSet({
-    required this.reps,
-    this.weight,
-  });
+  const WorkoutSet({required this.reps, this.weight});
 
   final int reps;
   final double? weight;
@@ -153,33 +155,41 @@ class WorkoutProgress {
     required this.exerciseName,
     required this.date,
     required this.sets,
+    this.planSets,
+    this.planReps,
   });
 
   final String exerciseId;
   final String exerciseName;
   final DateTime date;
   final List<WorkoutSet> sets;
+  final int? planSets;
+  final String? planReps;
 
   WorkoutProgress copyWith({
     String? exerciseId,
     String? exerciseName,
     DateTime? date,
     List<WorkoutSet>? sets,
+    int? planSets,
+    String? planReps,
   }) {
     return WorkoutProgress(
       exerciseId: exerciseId ?? this.exerciseId,
       exerciseName: exerciseName ?? this.exerciseName,
       date: date ?? this.date,
       sets: sets ?? this.sets,
+      planSets: planSets ?? this.planSets,
+      planReps: planReps ?? this.planReps,
     );
   }
 }
 
 class WorkoutProgressProvider extends ChangeNotifier {
   static WorkoutProgressProvider? _instance;
-  
+
   WorkoutProgressProvider._internal();
-  
+
   factory WorkoutProgressProvider() {
     _instance ??= WorkoutProgressProvider._internal();
     return _instance!;
@@ -200,32 +210,50 @@ class WorkoutProgressProvider extends ChangeNotifier {
     return Map.from(_workoutProgressByDate);
   }
 
-  void addExerciseToWorkout(DateTime date, Exercise exercise) {
+  void addExerciseToWorkout(DateTime date, Exercise exercise, {int? planSets, String? planReps}) {
     final dateKey = _formatDate(date);
     final existingProgress = _workoutProgressByDate[dateKey] ?? [];
+    final existingIndex = existingProgress.indexWhere((wp) => wp.exerciseId == exercise.id);
 
-    if (!existingProgress.any((wp) => wp.exerciseId == exercise.id)) {
+    if (existingIndex == -1) {
       final newProgress = WorkoutProgress(
         exerciseId: exercise.id,
         exerciseName: exercise.name,
         date: date,
         sets: [],
+        planSets: planSets,
+        planReps: planReps,
       );
       existingProgress.add(newProgress);
       _workoutProgressByDate[dateKey] = existingProgress;
       notifyListeners();
+    } else {
+      // Update plan values if they are provided
+      if (planSets != null || planReps != null) {
+        final existing = existingProgress[existingIndex];
+        existingProgress[existingIndex] = existing.copyWith(
+          planSets: planSets ?? existing.planSets,
+          planReps: planReps ?? existing.planReps,
+        );
+        _workoutProgressByDate[dateKey] = existingProgress;
+        notifyListeners();
+      }
     }
   }
 
   void addSetToExercise(DateTime date, String exerciseId, WorkoutSet set) {
     final dateKey = _formatDate(date);
     final existingProgress = _workoutProgressByDate[dateKey] ?? [];
-    final exerciseIndex = existingProgress.indexWhere((wp) => wp.exerciseId == exerciseId);
+    final exerciseIndex = existingProgress.indexWhere(
+      (wp) => wp.exerciseId == exerciseId,
+    );
 
     if (exerciseIndex != -1) {
       final exerciseProgress = existingProgress[exerciseIndex];
       final updatedSets = [...exerciseProgress.sets, set];
-      existingProgress[exerciseIndex] = exerciseProgress.copyWith(sets: updatedSets);
+      existingProgress[exerciseIndex] = exerciseProgress.copyWith(
+        sets: updatedSets,
+      );
       _workoutProgressByDate[dateKey] = existingProgress;
       notifyListeners();
     }
@@ -234,31 +262,44 @@ class WorkoutProgressProvider extends ChangeNotifier {
   void removeSetFromExercise(DateTime date, String exerciseId, int setIndex) {
     final dateKey = _formatDate(date);
     final existingProgress = _workoutProgressByDate[dateKey] ?? [];
-    final exerciseIndex = existingProgress.indexWhere((wp) => wp.exerciseId == exerciseId);
+    final exerciseIndex = existingProgress.indexWhere(
+      (wp) => wp.exerciseId == exerciseId,
+    );
 
     if (exerciseIndex != -1) {
       final exerciseProgress = existingProgress[exerciseIndex];
       final updatedSets = List<WorkoutSet>.from(exerciseProgress.sets);
       if (setIndex >= 0 && setIndex < updatedSets.length) {
         updatedSets.removeAt(setIndex);
-        existingProgress[exerciseIndex] = exerciseProgress.copyWith(sets: updatedSets);
+        existingProgress[exerciseIndex] = exerciseProgress.copyWith(
+          sets: updatedSets,
+        );
         _workoutProgressByDate[dateKey] = existingProgress;
         notifyListeners();
       }
     }
   }
 
-  void updateSet(DateTime date, String exerciseId, int setIndex, WorkoutSet updatedSet) {
+  void updateSet(
+    DateTime date,
+    String exerciseId,
+    int setIndex,
+    WorkoutSet updatedSet,
+  ) {
     final dateKey = _formatDate(date);
     final existingProgress = _workoutProgressByDate[dateKey] ?? [];
-    final exerciseIndex = existingProgress.indexWhere((wp) => wp.exerciseId == exerciseId);
+    final exerciseIndex = existingProgress.indexWhere(
+      (wp) => wp.exerciseId == exerciseId,
+    );
 
     if (exerciseIndex != -1) {
       final exerciseProgress = existingProgress[exerciseIndex];
       final updatedSets = List<WorkoutSet>.from(exerciseProgress.sets);
       if (setIndex >= 0 && setIndex < updatedSets.length) {
         updatedSets[setIndex] = updatedSet;
-        existingProgress[exerciseIndex] = exerciseProgress.copyWith(sets: updatedSets);
+        existingProgress[exerciseIndex] = exerciseProgress.copyWith(
+          sets: updatedSets,
+        );
         _workoutProgressByDate[dateKey] = existingProgress;
         notifyListeners();
       }
@@ -273,4 +314,3 @@ class WorkoutProgressProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-

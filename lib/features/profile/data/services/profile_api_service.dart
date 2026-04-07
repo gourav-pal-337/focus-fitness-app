@@ -1,3 +1,5 @@
+import 'package:image_picker/image_picker.dart';
+
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_hitter.dart';
 import '../../../../features/authentication/data/exceptions/api_exception.dart';
@@ -100,6 +102,42 @@ class ProfileApiService {
 
       if (response.status) {
         return true;
+      } else {
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Upload profile photo
+  Future<String> uploadProfilePhoto(XFile file) async {
+    try {
+      final response = await _apiHitter.uploadXFile(
+        file: file,
+        body: {'purpose': 'profile'},
+      );
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        
+        final uploads = responseData['uploads'] as List?;
+        if (uploads != null && uploads.isNotEmpty) {
+          final upload = uploads.first as Map<String, dynamic>;
+          return upload['url'] as String? ?? '';
+        }
+
+        return responseData['url'] as String? ??
+            responseData['data']?['url'] as String? ??
+            '';
       } else {
         throw ApiException(
           message: response.msg,

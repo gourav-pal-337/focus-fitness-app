@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -6,15 +7,13 @@ import '../../../core/theme/app_text_styles.dart';
 import '../models/exercise_model.dart';
 
 class ExerciseOverviewSection extends StatelessWidget {
-  const ExerciseOverviewSection({
-    super.key,
-    required this.exercise,
-  });
+  const ExerciseOverviewSection({super.key, required this.exercise});
 
   final ExerciseModel exercise;
 
   @override
   Widget build(BuildContext context) {
+    print('check data ::: ${exercise.calories} : ${exercise.averageMinutes}');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -25,12 +24,12 @@ class ExerciseOverviewSection extends StatelessWidget {
         ),
         if (exercise.category != null && exercise.category!.isNotEmpty) ...[
           SizedBox(height: AppSpacing.lg),
-          Text(
-            'Category',
-            style: AppTextStyle.text12Regular.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
+          // Text(
+          //   'Category',
+          //   style: AppTextStyle.text14SemiBold.copyWith(
+          //     color: AppColors.textPrimary,
+          //   ),
+          // ),
           SizedBox(height: AppSpacing.xs),
           Text(
             exercise.category!,
@@ -38,26 +37,105 @@ class ExerciseOverviewSection extends StatelessWidget {
               color: AppColors.textPrimary,
             ),
           ),
-          SizedBox(height: AppSpacing.lg),
+          if (exercise.categoryDescription != null &&
+              exercise.categoryDescription!.isNotEmpty) ...[
+            SizedBox(height: 4.h),
+            Text(
+              exercise.categoryDescription!,
+              style: AppTextStyle.text14Regular.copyWith(
+                color: AppColors.grey400,
+                height: 1.5,
+              ),
+            ),
+          ],
+          // SizedBox(height: AppSpacing.lg),
         ],
         SizedBox(height: AppSpacing.lg),
         Text(
           exercise.description,
-          style: AppTextStyle.text16Regular.copyWith(
+          style: AppTextStyle.text14Regular.copyWith(
             color: AppColors.grey400,
-            height: 1.2,
+            height: 1.5,
           ),
         ),
         SizedBox(height: AppSpacing.lg),
-        RichText(text: TextSpan(children: [
-          TextSpan(text: 'Calories: ', style: AppTextStyle.text14SemiBold.copyWith(
-            color: AppColors.textPrimary,
-          )),
-          TextSpan(text: '${exercise.calories} cal', style: AppTextStyle.text14Regular.copyWith(
-            color: AppColors.grey400,
-          )),
-        ])),
-       
+        _PlanRow(
+          sets: exercise.planSets,
+          reps: exercise.planReps,
+          restTime: exercise.restTime,
+        ),
+        SizedBox(height: AppSpacing.lg),
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: 'Calories:  ',
+                style: AppTextStyle.text14SemiBold.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              TextSpan(
+                text: '${exercise.calories} cal',
+                style: AppTextStyle.text14Regular.copyWith(
+                  color: AppColors.grey400,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (exercise.instructions != null &&
+            exercise.instructions!.isNotEmpty) ...[
+          SizedBox(height: AppSpacing.xl),
+          Text(
+            'Instructions',
+            style: AppTextStyle.text16SemiBold.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.xs),
+          Text(
+            exercise.instructions!,
+            style: AppTextStyle.text14Regular.copyWith(
+              color: AppColors.grey400,
+              height: 1.5,
+            ),
+          ),
+        ],
+        if (exercise.tips != null && exercise.tips!.isNotEmpty) ...[
+          SizedBox(height: AppSpacing.xl),
+          Text(
+            'Tips',
+            style: AppTextStyle.text16SemiBold.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.xs),
+          Text(
+            exercise.tips!,
+            style: AppTextStyle.text14Regular.copyWith(
+              color: AppColors.grey400,
+              height: 1.5,
+            ),
+          ),
+        ],
+        if (exercise.commonMistakes != null &&
+            exercise.commonMistakes!.isNotEmpty) ...[
+          SizedBox(height: AppSpacing.xl),
+          Text(
+            'Common Mistakes',
+            style: AppTextStyle.text16SemiBold.copyWith(
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: AppSpacing.xs),
+          Text(
+            exercise.commonMistakes!,
+            style: AppTextStyle.text14Regular.copyWith(
+              color: AppColors.grey400,
+              height: 1.5,
+            ),
+          ),
+        ],
         SizedBox(height: AppSpacing.lg),
         Text(
           'Good For',
@@ -69,7 +147,9 @@ class ExerciseOverviewSection extends StatelessWidget {
         Text(
           exercise.goodFor.isEmpty ? '-' : exercise.goodFor.join(', '),
           style: AppTextStyle.text14Regular.copyWith(
-            color: exercise.goodFor.isEmpty ? AppColors.grey400 : AppColors.textPrimary,
+            color: exercise.goodFor.isEmpty
+                ? AppColors.grey400
+                : AppColors.textPrimary,
           ),
         ),
       ],
@@ -139,9 +219,7 @@ class _MetricItem extends StatelessWidget {
           label,
           style: AppTextStyle.text12Regular.copyWith(
             color: AppColors.textPrimary,
-           
           ),
-         
         ),
         SizedBox(height: AppSpacing.xs),
         Text(
@@ -149,10 +227,65 @@ class _MetricItem extends StatelessWidget {
           style: AppTextStyle.text14SemiBold.copyWith(
             color: AppColors.textPrimary,
           ),
-         
         ),
       ],
     );
   }
 }
 
+class _PlanRow extends StatelessWidget {
+  const _PlanRow({this.sets, this.reps, this.restTime});
+
+  final int? sets;
+  final String? reps;
+  final int? restTime;
+
+  @override
+  Widget build(BuildContext context) {
+    if (sets == null && reps == null && restTime == null) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Workout Plan',
+          style: AppTextStyle.text16SemiBold.copyWith(
+            color: AppColors.textPrimary,
+          ),
+        ),
+        SizedBox(height: AppSpacing.md),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (sets != null)
+              Expanded(
+                child: _MetricItem(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  label: 'Sets',
+                  value: '$sets',
+                ),
+              ),
+            if (reps != null)
+              Expanded(
+                child: _MetricItem(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  label: 'Reps',
+                  value: reps!,
+                ),
+              ),
+            if (restTime != null)
+              Expanded(
+                child: _MetricItem(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  label: 'Rest',
+                  value: '$restTime sec',
+                ),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}

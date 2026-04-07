@@ -44,7 +44,10 @@ class ExerciseProgressCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 11.h),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: 11.h,
+            ),
             child: Row(
               children: [
                 Icon(
@@ -59,15 +62,30 @@ class ExerciseProgressCard extends StatelessWidget {
                     color: AppColors.textPrimary,
                   ),
                 ),
+                const Spacer(),
+                if (workoutProgress.planSets != null ||
+                    workoutProgress.planReps != null)
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    child: Text(
+                      'Goal: ${workoutProgress.planSets ?? "-"} × ${workoutProgress.planReps ?? "-"}',
+                      style: AppTextStyle.text10SemiBold.copyWith(
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
           // SizedBox(height: AppSpacing.sm),
-          Divider(
-            color: AppColors.grey200,
-            thickness: 1,
-            height: 0,
-          ),
+          Divider(color: AppColors.grey200, thickness: 1, height: 0),
           SizedBox(height: AppSpacing.md),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -102,10 +120,7 @@ class ExerciseProgressCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: AppSpacing.sm),
-          Divider(
-            color: AppColors.grey200,
-            thickness: 1,
-          ),
+          Divider(color: AppColors.grey200, thickness: 1),
           if (workoutProgress.sets.isEmpty)
             Padding(
               padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
@@ -159,21 +174,14 @@ class ExerciseProgressCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Divider(
-                    color: AppColors.grey200,
-                    thickness: 1,
-                    
-                  ),
+                  Divider(color: AppColors.grey200, thickness: 1),
                 ],
               );
             }),
           // SizedBox(height: AppSpacing.md),
-        if(workoutProgress.sets.isEmpty)  Divider(
-            color: AppColors.grey200,
-            thickness: 1,
-            height: 0,
-          ),
-         
+          if (workoutProgress.sets.isEmpty)
+            Divider(color: AppColors.grey200, thickness: 1, height: 0),
+
           Center(
             child: CustomButton(
               margin: EdgeInsets.only(bottom: AppSpacing.xs),
@@ -191,11 +199,7 @@ class ExerciseProgressCard extends StatelessWidget {
               textStyle: AppTextStyle.text16Regular.copyWith(
                 color: AppColors.textPrimary,
               ),
-              icon: Icon(
-                Icons.add,
-                size: 20.sp,
-                color: AppColors.textPrimary,
-              ),
+              icon: Icon(Icons.add, size: 20.sp, color: AppColors.textPrimary),
               iconPosition: IconPosition.left,
             ),
           ),
@@ -204,4 +208,3 @@ class ExerciseProgressCard extends StatelessWidget {
     );
   }
 }
-

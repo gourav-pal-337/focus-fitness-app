@@ -32,11 +32,13 @@ class _EditExerciseSetScreenState extends State<EditExerciseSetScreen> {
   late TextEditingController _repsController;
   late TextEditingController _weightController;
   bool _hasChanges = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
-    final set = widget.setIndex != null &&
+    final set =
+        widget.setIndex != null &&
             widget.setIndex! < widget.workoutProgress.sets.length
         ? widget.workoutProgress.sets[widget.setIndex!]
         : null;
@@ -81,46 +83,59 @@ class _EditExerciseSetScreenState extends State<EditExerciseSetScreen> {
         ? double.tryParse(_weightController.text)
         : null;
 
-    final provider = context.read<WorkoutProgressProvider>();
-    final newSet = WorkoutSet(reps: reps, weight: weight);
+    setState(() {
+      _isSaving = true;
+    });
 
-    final setNumber = widget.setIndex != null
-        ? widget.setIndex! + 1
-        : widget.workoutProgress.sets.length + 1;
+    try {
+      final provider = context.read<WorkoutProgressProvider>();
+      final newSet = WorkoutSet(reps: reps, weight: weight);
 
-    if (widget.setIndex != null) {
-      provider.updateSet(widget.date, widget.workoutProgress.exerciseId,
-          widget.setIndex!, newSet);
-    } else {
-      provider.addSetToExercise(
-        widget.date,
-        widget.workoutProgress.exerciseId,
-        newSet,
+      final setNumber = widget.setIndex != null
+          ? widget.setIndex! + 1
+          : widget.workoutProgress.sets.length + 1;
+
+      if (widget.setIndex != null) {
+        provider.updateSet(
+          widget.date,
+          widget.workoutProgress.exerciseId,
+          widget.setIndex!,
+          newSet,
+        );
+      } else {
+        provider.addSetToExercise(
+          widget.date,
+          widget.workoutProgress.exerciseId,
+          newSet,
+        );
+      }
+
+      final sessionProvider = SessionProvider();
+      final saved = await sessionProvider.saveSetToBackend(
+        exerciseId: widget.workoutProgress.exerciseId,
+        date: widget.date,
+        setNumber: setNumber,
+        set: SetModel(reps: reps, weight: weight),
       );
-    }
 
-    final sessionProvider = SessionProvider();
-    final saved = await sessionProvider.saveSetToBackend(
-      exerciseId: widget.workoutProgress.exerciseId,
-      date: widget.date,
-      setNumber: setNumber,
-      set: SetModel(reps: reps, weight: weight),
-    );
+      if (!mounted) return;
 
-    if (!mounted) return;
-
-    if (!saved) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(sessionProvider.errorMessage ?? 'Failed to save set'),
-          action: SnackBarAction(
-            label: 'Retry',
-            onPressed: _saveChanges,
+      if (!saved) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(sessionProvider.errorMessage ?? 'Failed to save set'),
+            action: SnackBarAction(label: 'Retry', onPressed: _saveChanges),
           ),
-        ),
-      );
-    } else {
-      context.pop();
+        );
+      } else {
+        context.pop();
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+        });
+      }
     }
   }
 
@@ -198,6 +213,7 @@ class _EditExerciseSetScreenState extends State<EditExerciseSetScreen> {
                 child: CustomButton(
                   text: 'Save Changes',
                   type: ButtonType.text,
+                  isLoading: _isSaving,
                   onPressed: _saveChanges,
                   textColor: AppColors.primary,
                 ),
@@ -234,9 +250,7 @@ class _EditField extends StatelessWidget {
         children: [
           Text(
             label,
-            style: AppTextStyle.text16Medium.copyWith(
-              color: AppColors.grey400,
-            ),
+            style: AppTextStyle.text16Medium.copyWith(color: AppColors.grey400),
           ),
           if (controller != null)
             SizedBox(
@@ -270,4 +284,3 @@ class _EditField extends StatelessWidget {
     );
   }
 }
-

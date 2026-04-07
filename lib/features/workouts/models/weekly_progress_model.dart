@@ -20,6 +20,20 @@ class WeeklyProgressModel {
     );
   }
 
+  WeeklyProgressModel copyWith({
+    String? date,
+    int? completed,
+    int? expected,
+    int? percent,
+  }) {
+    return WeeklyProgressModel(
+      date: date ?? this.date,
+      completed: completed ?? this.completed,
+      expected: expected ?? this.expected,
+      percent: percent ?? this.percent,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'date': date,

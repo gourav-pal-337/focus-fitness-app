@@ -14,16 +14,13 @@ import '../../../routes/app_router.dart';
 import '../data/models/ticket_model.dart';
 
 class TicketSuccessScreen extends StatelessWidget {
-  const TicketSuccessScreen({
-    super.key,
-    this.ticket,
-  });
+  const TicketSuccessScreen({super.key, this.ticket});
 
   final TicketModel? ticket;
 
   @override
   Widget build(BuildContext context) {
-    final displayTicketId = ticket?.id ?? '#48291';
+    final displayTicketId = ticket?.ticketId ?? '#48291';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -43,12 +40,11 @@ class TicketSuccessScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   // mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                   SizedBox(
-      width: 120.w,
-      height: 120.w,
-      child: 
-        SvgPicture.asset(AppAssets.supportIcon),
-    ),
+                    SizedBox(
+                      width: 120.w,
+                      height: 120.w,
+                      child: SvgPicture.asset(AppAssets.supportIcon),
+                    ),
                     SizedBox(height: AppSpacing.xl),
                     Text(
                       'Your ticket has been raised $displayTicketId',
@@ -130,4 +126,3 @@ class _ActionButtons extends StatelessWidget {
     );
   }
 }
-

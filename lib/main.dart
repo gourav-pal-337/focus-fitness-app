@@ -12,9 +12,7 @@ import 'package:focus_fitness/features/authentication/provider/forgot_password_p
 import 'package:focus_fitness/features/profile/provider/account_details_provider.dart';
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
 import 'package:focus_fitness/features/session/provider/session_details_provider.dart';
-
 import 'package:focus_fitness/features/session/provider/session_history_provider.dart';
-
 import 'package:focus_fitness/features/trainer/provider/linked_trainer_provider.dart';
 import 'package:focus_fitness/features/trainer/provider/payment_method_provider.dart';
 import 'package:focus_fitness/features/trainer/provider/trainer_profile_provider.dart';
@@ -22,11 +20,9 @@ import 'package:focus_fitness/features/trainer/provider/system_settings_provider
 import 'package:focus_fitness/features/workouts/providers/workout_provider.dart';
 import 'package:focus_fitness/firebase_options.dart';
 import 'package:provider/provider.dart';
-
 import 'app.dart';
 import 'features/sample/provider/sample_provider.dart';
 import 'core/service/notification_service.dart';
-
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 @pragma('vm:entry-point')

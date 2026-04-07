@@ -308,7 +308,7 @@ abstract class OtpVerificationRoute {
       final countryCode = extra?['countryCode'];
       final identifier = extra?['identifier'] ?? '';
       final mode = extra?['mode'] as AuthMode? ?? AuthMode.signup;
-      
+
       return OtpVerificationScreen(
         type: type,
         countryCode: countryCode,
@@ -504,12 +504,12 @@ abstract class EditProfileDetailsRoute {
             isDateField: true,
           ),
           EditField(
-            label: 'Height',
+            label: 'Height(cm)',
             value: (profile?.height ?? '').toString(),
             hintText: 'Enter height in cm',
           ),
           EditField(
-            label: 'Weight',
+            label: 'Weight(kg)',
             value: (profile?.weight ?? '').toString(),
             hintText: 'Enter weight in kg',
           ),
@@ -949,9 +949,8 @@ abstract class ManualsRoute {
   static final GoRoute route = GoRoute(
     path: path,
     name: name,
-    pageBuilder: (context, state) => NoTransitionPage(
-      child: const ManualsScreen(),
-    ),
+    pageBuilder: (context, state) =>
+        NoTransitionPage(child: const ManualsScreen()),
   );
 }
 

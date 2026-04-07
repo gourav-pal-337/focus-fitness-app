@@ -55,7 +55,7 @@ class UserModel {
     required this.id,
     required this.role,
     this.fullName,
-    this.profilePhoto,
+    this.profilePicture,
     this.email,
     this.phone,
     this.phoneCountry,
@@ -79,7 +79,7 @@ class UserModel {
   final String? gender;
   final String role;
   final String? fullName;
-  final String? profilePhoto;
+  final String? profilePicture;
   final String? email;
   final String? phone;
   final String? phoneCountry;
@@ -102,7 +102,7 @@ class UserModel {
       fullName: json['fullName'] as String?,
       gender: json['gender'] as String?,
       // dob: json['dob'] as String?,
-      profilePhoto: json['profilePhoto'] as String?,
+      profilePicture: json['profilePicture'] as String? ?? json['profilePhoto'] as String?,
       email: json['email'] as String?,
       phone: json['phone'] as String?,
       phoneCountry: json['phoneCountry'] as String?,
@@ -131,7 +131,7 @@ class UserModel {
       'id': id,
       'role': role,
       'fullName': fullName,
-      'profilePhoto': profilePhoto,
+      'profilePicture': profilePicture,
       'email': email,
       'phone': phone,
       'phoneCountry': phoneCountry,
@@ -147,6 +147,51 @@ class UserModel {
       'isTfaEnabled': isTfaEnabled,
       'tfaVerified': tfaVerified,
     };
+  }
+  UserModel copyWith({
+    String? id,
+    String? dob,
+    String? gender,
+    String? role,
+    String? fullName,
+    String? profilePicture,
+    String? email,
+    String? phone,
+    String? phoneCountry,
+    String? linkedTrainerId,
+    bool? isTrainerLinked,
+    bool? emailVerified,
+    bool? phoneVerified,
+    String? status,
+    String? onboardingStage,
+    String? termsAcceptedAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isTfaEnabled,
+    bool? tfaVerified,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      dob: dob ?? this.dob,
+      gender: gender ?? this.gender,
+      role: role ?? this.role,
+      fullName: fullName ?? this.fullName,
+      profilePicture: profilePicture ?? this.profilePicture,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      phoneCountry: phoneCountry ?? this.phoneCountry,
+      linkedTrainerId: linkedTrainerId ?? this.linkedTrainerId,
+      isTrainerLinked: isTrainerLinked ?? this.isTrainerLinked,
+      emailVerified: emailVerified ?? this.emailVerified,
+      phoneVerified: phoneVerified ?? this.phoneVerified,
+      status: status ?? this.status,
+      onboardingStage: onboardingStage ?? this.onboardingStage,
+      termsAcceptedAt: termsAcceptedAt ?? this.termsAcceptedAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isTfaEnabled: isTfaEnabled ?? this.isTfaEnabled,
+      tfaVerified: tfaVerified ?? this.tfaVerified,
+    );
   }
 }
 

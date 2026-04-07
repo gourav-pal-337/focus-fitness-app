@@ -1,14 +1,17 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '../../../core/service/local_storage_service.dart';
 import '../models/today_workout_summary_model.dart';
 import '../models/weekly_progress_model.dart';
 import '../models/workout_exercise_model.dart';
 import '../services/workout_api_service.dart';
+import '../provider/workout_provider.dart';
 
 class WorkoutProvider extends ChangeNotifier {
-  WorkoutProvider._internal(this._apiService);
+  WorkoutProvider._internal(this._apiService) {
+    WorkoutProgressProvider().addListener(_onDailyProgressChanged);
+  }
 
   static WorkoutProvider? _instance;
 
@@ -143,6 +146,49 @@ class WorkoutProvider extends ChangeNotifier {
 
   Future<void> refresh() async {
     await fetchWorkoutByDate(_selectedDate, force: true);
+  }
+
+  void _onDailyProgressChanged() {
+    if (_weeklyProgress.isEmpty) return;
+
+    final today = DateTime.now();
+    final index = _weeklyProgress.indexWhere((p) {
+      final d = DateTime.tryParse(p.date);
+      return d != null && DateUtils.isSameDay(d, today);
+    });
+    if (index == -1) return;
+
+    final dailyProvider = WorkoutProgressProvider();
+    final dailyProgress = dailyProvider.getWorkoutProgressForDate(today);
+
+    int totalCompleted = 0;
+    int totalPlanSets = 0;
+    bool hasPlanInfo = false;
+
+    for (final exp in dailyProgress) {
+      totalCompleted += exp.sets.length;
+      if (exp.planSets != null) {
+        totalPlanSets += exp.planSets!;
+        hasPlanInfo = true;
+      }
+    }
+
+    final entry = _weeklyProgress[index];
+    // Preserve existing expected from API if we don't have plan info locally
+    final int finalExpected = hasPlanInfo ? totalPlanSets : entry.expected;
+
+    if (entry.completed != totalCompleted || entry.expected != finalExpected) {
+      final int newPercent = finalExpected > 0
+          ? (totalCompleted * 100 ~/ finalExpected).clamp(0, 100)
+          : (totalCompleted > 0 ? 100 : 0);
+
+      _weeklyProgress[index] = entry.copyWith(
+        completed: totalCompleted,
+        expected: finalExpected,
+        percent: newPercent,
+      );
+      notifyListeners();
+    }
   }
 
   String _dateKey(DateTime date) {

@@ -7,6 +7,8 @@ class WorkoutExerciseModel {
     required this.exerciseName,
     required this.date,
     required this.sets,
+    this.planSets,
+    this.planReps,
     this.category,
     this.imageUrl,
     this.level,
@@ -24,6 +26,8 @@ class WorkoutExerciseModel {
   final String exerciseName;
   final DateTime date;
   final List<SetModel> sets;
+  final int? planSets;
+  final String? planReps;
   final WorkoutCategoryModel? category;
   final String? imageUrl;
   final String? level;
@@ -49,8 +53,8 @@ class WorkoutExerciseModel {
     final category = categoryJson is Map<String, dynamic>
         ? WorkoutCategoryModel.fromJson(categoryJson)
         : categoryJson is Map
-            ? WorkoutCategoryModel.fromJson(Map<String, dynamic>.from(categoryJson))
-            : null;
+        ? WorkoutCategoryModel.fromJson(Map<String, dynamic>.from(categoryJson))
+        : null;
 
     final goodForRaw = json['goodFor'];
     final goodFor = goodForRaw is List
@@ -60,8 +64,11 @@ class WorkoutExerciseModel {
     return WorkoutExerciseModel(
       exerciseId: (json['exerciseId'] ?? json['id'] ?? '').toString(),
       exerciseName: (json['exerciseName'] ?? json['name'] ?? '').toString(),
-      date: DateTime.tryParse((json['date'] ?? '').toString()) ?? DateTime.now(),
+      date:
+          DateTime.tryParse((json['date'] ?? '').toString()) ?? DateTime.now(),
       sets: parsedSets,
+      planSets: _parseInt(json['planSets'] ?? json['expectedSets'] ?? json['targetSets']),
+      planReps: (json['planReps'] ?? json['expectedReps'] ?? json['targetReps'])?.toString(),
       category: category,
       imageUrl: json['imageUrl']?.toString(),
       level: json['level']?.toString(),
@@ -82,6 +89,8 @@ class WorkoutExerciseModel {
       'exerciseName': exerciseName,
       'date': date.toIso8601String(),
       'sets': sets.map((set) => set.toJson()).toList(),
+      'planSets': planSets,
+      'planReps': planReps,
       'category': category?.toJson(),
       'imageUrl': imageUrl,
       'level': level,
@@ -101,6 +110,8 @@ class WorkoutExerciseModel {
     String? exerciseName,
     DateTime? date,
     List<SetModel>? sets,
+    int? planSets,
+    String? planReps,
     WorkoutCategoryModel? category,
     String? imageUrl,
     String? level,
@@ -118,6 +129,8 @@ class WorkoutExerciseModel {
       exerciseName: exerciseName ?? this.exerciseName,
       date: date ?? this.date,
       sets: sets ?? this.sets,
+      planSets: planSets ?? this.planSets,
+      planReps: planReps ?? this.planReps,
       category: category ?? this.category,
       imageUrl: imageUrl ?? this.imageUrl,
       level: level ?? this.level,
@@ -130,5 +143,12 @@ class WorkoutExerciseModel {
       videoThumbnailUrl: videoThumbnailUrl ?? this.videoThumbnailUrl,
       videoDurationMinutes: videoDurationMinutes ?? this.videoDurationMinutes,
     );
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value.toString());
   }
 }

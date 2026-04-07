@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:focus_fitness/features/profile/provider/account_details_provider.dart';
 import 'package:focus_fitness/features/profile/provider/edit_profile_details_provider.dart';
 import 'package:focus_fitness/features/profile/ui/edit_profile_details_screen.dart';
+import '../../workouts/providers/workout_provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -108,17 +109,18 @@ class _HomeScreenState extends State<HomeScreen> {
   void initializeHome() {
     final provider = Provider.of<LinkedTrainerProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final workoutProvider =
+        Provider.of<WorkoutProvider>(context, listen: false);
 
     // Fetch linked trainer when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Ensure we have latest details
-      // await userProvider.fetchUserDetails();
-
       if (!mounted) return;
       Future.wait([
         userProvider.fetchUserDetails(),
         userProvider.getFcmToken(),
         provider.fetchLinkedTrainer(),
+        workoutProvider.fetchTodaySummary(),
+        workoutProvider.fetchWeeklyProgress(),
         checkuserDetails(),
       ]);
     });
@@ -139,10 +141,17 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           listen: false,
         );
-        provider.fetchLinkedTrainer();
         final userProvider = Provider.of<UserProvider>(context, listen: false);
-        userProvider.fetchUserDetails();
-        checkuserDetails();
+        final workoutProvider =
+            Provider.of<WorkoutProvider>(context, listen: false);
+
+        await Future.wait([
+          provider.fetchLinkedTrainer(),
+          userProvider.fetchUserDetails(),
+          workoutProvider.fetchTodaySummary(),
+          workoutProvider.fetchWeeklyProgress(),
+          checkuserDetails(),
+        ]);
       },
       child: AutoSystemUIWrapper(
         headerColor: Colors.black,

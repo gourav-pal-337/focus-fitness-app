@@ -16,15 +16,13 @@ import '../models/workout_exercise_model.dart';
 import '../services/workout_api_service.dart';
 
 class SessionLogDetailsScreen extends StatefulWidget {
-   SessionLogDetailsScreen({
-    super.key,
-    required this.date,
-  });
+  SessionLogDetailsScreen({super.key, required this.date});
 
   DateTime date;
 
   @override
-  State<SessionLogDetailsScreen> createState() => _SessionLogDetailsScreenState();
+  State<SessionLogDetailsScreen> createState() =>
+      _SessionLogDetailsScreenState();
 }
 
 class _SessionLogDetailsScreenState extends State<SessionLogDetailsScreen> {
@@ -35,14 +33,12 @@ class _SessionLogDetailsScreenState extends State<SessionLogDetailsScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            const CustomAppBar(
-              title: 'Session Log',
-            ),
+            const CustomAppBar(title: 'Session Log'),
             DateSelector(
               selectedDate: widget.date,
               onDateSelected: (newDate) {
                 setState(() {
-                   widget.date = newDate;
+                  widget.date = newDate;
                 });
                 // context.push(
                 //   '${SessionLogDetailsRoute.path}?date=${newDate.millisecondsSinceEpoch}',
@@ -54,7 +50,7 @@ class _SessionLogDetailsScreenState extends State<SessionLogDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _SessionSummarySection(date: widget.date),
+                    // _SessionSummarySection(date: widget.date),
                     SizedBox(height: AppSpacing.xl),
                     FutureBuilder<List<WorkoutExerciseModel>>(
                       future: _fetchWorkoutsForDate(),
@@ -71,7 +67,8 @@ class _SessionLogDetailsScreenState extends State<SessionLogDetailsScreen> {
                         if (workouts.isEmpty) {
                           return Padding(
                             padding: EdgeInsets.all(
-                                AppSpacing.screenPadding.left),
+                              AppSpacing.screenPadding.left,
+                            ),
                             child: Center(
                               child: Text(
                                 'No exercises logged for this session',
@@ -90,9 +87,8 @@ class _SessionLogDetailsScreenState extends State<SessionLogDetailsScreen> {
                             horizontal: AppSpacing.md,
                           ),
                           itemCount: workouts.length,
-                          separatorBuilder: (context, index) => SizedBox(
-                            height: AppSpacing.md,
-                          ),
+                          separatorBuilder: (context, index) =>
+                              SizedBox(height: AppSpacing.md),
                           itemBuilder: (context, index) {
                             return _ExerciseCard(
                               workoutExercise: workouts[index],
@@ -140,9 +136,7 @@ class _SessionLogDetailsScreenState extends State<SessionLogDetailsScreen> {
 }
 
 class _SessionSummarySection extends StatelessWidget {
-  const _SessionSummarySection({
-    required this.date,
-  });
+  const _SessionSummarySection({required this.date});
 
   final DateTime date;
 
@@ -216,9 +210,7 @@ class _SessionSummarySection extends StatelessWidget {
 }
 
 class _ExerciseCard extends StatelessWidget {
-  const _ExerciseCard({
-    required this.workoutExercise,
-  });
+  const _ExerciseCard({required this.workoutExercise});
 
   final WorkoutExerciseModel workoutExercise;
 
@@ -258,10 +250,7 @@ class _ExerciseCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: AppSpacing.sm),
-          Divider(
-            color: AppColors.grey200,
-            thickness: 1,
-          ),
+          Divider(color: AppColors.grey200, thickness: 1),
           SizedBox(height: AppSpacing.md),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -296,10 +285,7 @@ class _ExerciseCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: AppSpacing.sm),
-          Divider(
-            color: AppColors.grey200,
-            thickness: 1,
-          ),
+          Divider(color: AppColors.grey200, thickness: 1),
           if (workoutExercise.sets.isEmpty)
             Padding(
               padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
@@ -357,4 +343,3 @@ class _ExerciseCard extends StatelessWidget {
     );
   }
 }
-

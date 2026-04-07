@@ -25,6 +25,7 @@ class ClientProfileModel {
     this.healthNotes,
     this.notes,
     this.tags,
+    this.profilePicture,
   });
 
   final String id;
@@ -51,6 +52,7 @@ class ClientProfileModel {
   final List<String>? tags;
   final String createdAt;
   final String updatedAt;
+  final String? profilePicture;
 
   factory ClientProfileModel.fromJson(Map<String, dynamic> json) {
     return ClientProfileModel(
@@ -89,6 +91,7 @@ class ClientProfileModel {
           : null,
       createdAt: json['createdAt'] as String? ?? '',
       updatedAt: json['updatedAt'] as String? ?? '',
+      profilePicture: json['profilePicture'] as String? ?? json['profilePhoto'] as String?,
     );
   }
 }

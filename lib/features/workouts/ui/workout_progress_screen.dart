@@ -74,7 +74,8 @@ class _WorkoutProgressContent extends StatefulWidget {
   final String? exerciseNameToAdd;
 
   @override
-  State<_WorkoutProgressContent> createState() => _WorkoutProgressContentState();
+  State<_WorkoutProgressContent> createState() =>
+      _WorkoutProgressContentState();
 }
 
 class _WorkoutProgressContentState extends State<_WorkoutProgressContent> {
@@ -125,8 +126,9 @@ class _WorkoutProgressContentState extends State<_WorkoutProgressContent> {
     setState(() => _isSyncingFromBackend = true);
 
     try {
-      final workouts =
-          await _workoutApiService.getWorkoutProgressByDate(normalizedDate);
+      final workouts = await _workoutApiService.getWorkoutProgressByDate(
+        normalizedDate,
+      );
 
       for (final workout in workouts) {
         final exercise = Exercise(
@@ -135,7 +137,12 @@ class _WorkoutProgressContentState extends State<_WorkoutProgressContent> {
           imageUrl: '',
         );
 
-        provider.addExerciseToWorkout(normalizedDate, exercise);
+        provider.addExerciseToWorkout(
+          normalizedDate,
+          exercise,
+          planSets: workout.planSets,
+          planReps: workout.planReps,
+        );
 
         for (final set in workout.sets) {
           provider.addSetToExercise(
@@ -169,9 +176,7 @@ class _WorkoutProgressContentState extends State<_WorkoutProgressContent> {
       body: SafeArea(
         child: Column(
           children: [
-            const CustomAppBar(
-              title: 'Workout Progress',
-            ),
+            const CustomAppBar(title: 'Workout Progress'),
             DateSelector(
               selectedDate: widget.selectedDate,
               onDateSelected: widget.onDateSelected,
@@ -179,7 +184,9 @@ class _WorkoutProgressContentState extends State<_WorkoutProgressContent> {
             Expanded(
               child: Consumer<WorkoutProgressProvider>(
                 builder: (context, provider, child) {
-                  final workoutProgress = provider.getWorkoutProgressForDate(widget.selectedDate);
+                  final workoutProgress = provider.getWorkoutProgressForDate(
+                    widget.selectedDate,
+                  );
 
                   if (_isSyncingFromBackend) {
                     return const Center(child: CircularProgressIndicator());
@@ -204,15 +211,15 @@ class _WorkoutProgressContentState extends State<_WorkoutProgressContent> {
                     itemCount: workoutProgress.length,
                     itemBuilder: (context, index) {
                       final progress = workoutProgress[index];
-                                    return ExerciseProgressCard(
-                                      workoutProgress: progress,
-                                      date: widget.selectedDate,
-                                      onAddSet: () {
-                                        context.push(
-                                          '${EditExerciseSetRoute.path}?exerciseId=${progress.exerciseId}&exerciseName=${Uri.encodeComponent(progress.exerciseName)}&date=${widget.selectedDate.millisecondsSinceEpoch}',
-                                        );
-                                      },
-                                    );
+                      return ExerciseProgressCard(
+                        workoutProgress: progress,
+                        date: widget.selectedDate,
+                        onAddSet: () {
+                          context.push(
+                            '${EditExerciseSetRoute.path}?exerciseId=${progress.exerciseId}&exerciseName=${Uri.encodeComponent(progress.exerciseName)}&date=${widget.selectedDate.millisecondsSinceEpoch}',
+                          );
+                        },
+                      );
                     },
                   );
                 },
@@ -221,109 +228,118 @@ class _WorkoutProgressContentState extends State<_WorkoutProgressContent> {
           ],
         ),
       ),
-            bottomNavigationBar: SafeArea(
-        child: Consumer<WorkoutProgressProvider>(
-          builder: (context, provider, _) {
-            final workouts = provider.getWorkoutProgressForDate(widget.selectedDate);
-            final hasExercises = workouts.isNotEmpty;
+      // bottomNavigationBar: SafeArea(
+      //   child: Consumer<WorkoutProgressProvider>(
+      //     builder: (context, provider, _) {
+      //       final workouts = provider.getWorkoutProgressForDate(
+      //         widget.selectedDate,
+      //       );
+      //       final hasExercises = workouts.isNotEmpty;
 
-            return Padding(
-              padding: EdgeInsets.all(AppSpacing.screenPadding.left),
-              child: CustomButton(
-                text: hasExercises
-                    ? (_isFinishing ? 'Saving...' : 'Finish Workout')
-                    : 'Add Exercise',
-                type: ButtonType.filled,
-                onPressed: _isFinishing
-                    ? null
-                    : () async {
-                  if (!hasExercises) {
-                    context.push(
-                      '${ExercisesRoute.path}?fromWorkoutProgress=true&date=${widget.selectedDate.millisecondsSinceEpoch}',
-                    );
-                    return;
-                  }
+      //       return Padding(
+      //         padding: EdgeInsets.all(AppSpacing.screenPadding.left),
+      //         child: CustomButton(
+      //           text: hasExercises
+      //               ? (_isFinishing ? 'Saving...' : 'Finish Workout')
+      //               : 'Add Exercise',
+      //           type: ButtonType.filled,
+      //           onPressed: _isFinishing
+      //               ? null
+      //               : () async {
+      //                   if (!hasExercises) {
+      //                     context.push(
+      //                       '${ExercisesRoute.path}?fromWorkoutProgress=true&date=${widget.selectedDate.millisecondsSinceEpoch}',
+      //                     );
+      //                     return;
+      //                   }
 
-                  final payload = workouts
-                      .map(
-                        (w) => WorkoutExerciseModel(
-                          exerciseId: w.exerciseId,
-                          exerciseName: w.exerciseName,
-                          date: widget.selectedDate,
-                          sets: w.sets
-                              .map((s) => SetModel(reps: s.reps, weight: s.weight))
-                              .toList(),
-                        ),
-                      )
-                      .toList();
+      //                   final payload = workouts
+      //                       .map(
+      //                         (w) => WorkoutExerciseModel(
+      //                           exerciseId: w.exerciseId,
+      //                           exerciseName: w.exerciseName,
+      //                           date: widget.selectedDate,
+      //                           sets: w.sets
+      //                               .map(
+      //                                 (s) => SetModel(
+      //                                   reps: s.reps,
+      //                                   weight: s.weight,
+      //                                 ),
+      //                               )
+      //                               .toList(),
+      //                         ),
+      //                       )
+      //                       .toList();
 
-                  setState(() => _isFinishing = true);
+      //                   setState(() => _isFinishing = true);
 
-                  final success = await _sessionProvider.saveFullDay(
-                    date: widget.selectedDate,
-                    workouts: payload,
-                  );
+      //                   final success = await _sessionProvider.saveFullDay(
+      //                     date: widget.selectedDate,
+      //                     workouts: payload,
+      //                   );
 
-                  if (!mounted) return;
-                  setState(() => _isFinishing = false);
+      //                   if (!mounted) return;
+      //                   setState(() => _isFinishing = false);
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        success
-                            ? 'Workout saved successfully'
-                            : (_sessionProvider.errorMessage ?? 'Failed to save workout'),
-                      ),
-                      action: !success
-                          ? SnackBarAction(
-                              label: 'Retry',
-                              onPressed: () async {
-                                setState(() => _isFinishing = true);
-                                final retrySuccess =
-                                    await _sessionProvider.saveFullDay(
-                                  date: widget.selectedDate,
-                                  workouts: payload,
-                                );
-                                if (!mounted) return;
-                                setState(() => _isFinishing = false);
+      //                   ScaffoldMessenger.of(context).showSnackBar(
+      //                     SnackBar(
+      //                       content: Text(
+      //                         success
+      //                             ? 'Workout saved successfully'
+      //                             : (_sessionProvider.errorMessage ??
+      //                                   'Failed to save workout'),
+      //                       ),
+      //                       action: !success
+      //                           ? SnackBarAction(
+      //                               label: 'Retry',
+      //                               onPressed: () async {
+      //                                 setState(() => _isFinishing = true);
+      //                                 final retrySuccess =
+      //                                     await _sessionProvider.saveFullDay(
+      //                                       date: widget.selectedDate,
+      //                                       workouts: payload,
+      //                                     );
+      //                                 if (!mounted) return;
+      //                                 setState(() => _isFinishing = false);
 
-                                if (retrySuccess) {
-                                  context.pop(true);
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        _sessionProvider.errorMessage ??
-                                            'Retry failed',
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                            )
-                          : null,
-                    ),
-                  );
+      //                                 if (retrySuccess) {
+      //                                   context.pop(true);
+      //                                 } else {
+      //                                   ScaffoldMessenger.of(
+      //                                     context,
+      //                                   ).showSnackBar(
+      //                                     SnackBar(
+      //                                       content: Text(
+      //                                         _sessionProvider.errorMessage ??
+      //                                             'Retry failed',
+      //                                       ),
+      //                                     ),
+      //                                   );
+      //                                 }
+      //                               },
+      //                             )
+      //                           : null,
+      //                     ),
+      //                   );
 
-                  if (success) {
-                    context.pop(true);
-                  }
-                },
-                backgroundColor: AppColors.primary,
-                textColor: AppColors.background,
-                borderRadius: 12.r,
-                icon: Icon(
-                  hasExercises ? Icons.check : Icons.add,
-                  size: 20.sp,
-                  color: AppColors.background,
-                ),
-                iconPosition: IconPosition.left,
-              ),
-            );
-          },
-        ),
-      ),
+      //                   if (success) {
+      //                     context.pop(true);
+      //                   }
+      //                 },
+      //           backgroundColor: AppColors.primary,
+      //           textColor: AppColors.background,
+      //           borderRadius: 12.r,
+      //           icon: Icon(
+      //             hasExercises ? Icons.check : Icons.add,
+      //             size: 20.sp,
+      //             color: AppColors.background,
+      //           ),
+      //           iconPosition: IconPosition.left,
+      //         ),
+      //       );
+      //     },
+      //   ),
+      // ),
     );
   }
 }
-

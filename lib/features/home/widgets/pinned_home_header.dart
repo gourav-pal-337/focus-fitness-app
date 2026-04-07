@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/show_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
-import 'package:focus_fitness/features/authentication/provider/auth_provider.dart';
+
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
 import 'package:focus_fitness/features/profile/widgets/profile_header_section.dart';
 import 'package:go_router/go_router.dart';
@@ -92,17 +93,13 @@ class PinnedHomeHeader extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: AppColors.grey75,
                       ),
-                      child: user?.profilePhoto != null
-                          ? ClipOval(
-                              child: Image.network(
-                                user!.profilePhoto!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return DefaultAvatar(size: 15.w);
-                                },
-                              ),
-                            )
-                          : DefaultAvatar(size: 15.w),
+                      child: ShowImage(
+                        imageUrl: user?.profilePicture,
+                        width: 35.w,
+                        height: 35.w,
+                        isCircle: true,
+                        errorWidget: DefaultAvatar(size: 15.w),
+                      ),
                     ),
                   ),
                 ],

@@ -67,7 +67,8 @@ class _ExerciseDetailsScreenState extends State<ExerciseDetailsScreen> {
                   child: CustomButton(
                     text: 'Retry',
                     type: ButtonType.text,
-                    onPressed: () => provider.fetchExerciseById(widget.exerciseId),
+                    onPressed: () =>
+                        provider.fetchExerciseById(widget.exerciseId),
                     borderColor: AppColors.textPrimary,
                     textColor: AppColors.textPrimary,
                     borderRadius: 12.r,
@@ -155,4 +156,3 @@ class _ExerciseDetailsScreenState extends State<ExerciseDetailsScreen> {
     );
   }
 }
-

@@ -109,7 +109,7 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
                       return TrainerInfoSection(
                         name: widget.trainerInfo?.fullName ?? "trainer",
                         specialty: "HIIT & Cardio",
-                        rating: 4.6,
+                        rating: 0.0,
                         imageUrl: widget.trainerInfo?.profilePhoto ?? "",
                       );
                     }
@@ -119,7 +119,7 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
                       specialty: trainer.expertiseAreas.isNotEmpty
                           ? trainer.expertiseAreas.join(' & ')
                           : "HIIT & Cardio",
-                      rating: trainer.avgRating ?? 4.6,
+                      rating: trainer.avgRating ?? 0.0,
                       imageUrl: trainer.profilePhoto ?? "",
                     );
                   },

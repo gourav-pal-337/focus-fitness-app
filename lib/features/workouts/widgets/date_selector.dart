@@ -31,8 +31,8 @@ class _DateSelectorState extends State<DateSelector> {
     super.initState();
     // Show past 7 days + today + next 7 days.
     // Total = 15 items.
-    dates = List.generate(15, (index) {
-      return today.add(Duration(days: index - 7));
+    dates = List.generate(7, (index) {
+      return today.add(Duration(days: index - 6));
     });
     _scrollController = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {

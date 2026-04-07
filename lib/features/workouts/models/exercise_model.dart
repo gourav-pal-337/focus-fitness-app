@@ -13,6 +13,13 @@ class ExerciseModel {
     this.videoThumbnailUrl,
     this.videoDurationMinutes,
     this.category,
+    this.categoryDescription,
+    this.instructions,
+    this.tips,
+    this.commonMistakes,
+    this.planSets,
+    this.planReps,
+    this.restTime,
   });
 
   final String id;
@@ -28,6 +35,13 @@ class ExerciseModel {
   final String? videoThumbnailUrl;
   final int? videoDurationMinutes;
   final String? category;
+  final String? categoryDescription;
+  final String? instructions;
+  final String? tips;
+  final String? commonMistakes;
+  final int? planSets;
+  final String? planReps;
+  final int? restTime;
 
   factory ExerciseModel.fromJson(Map<String, dynamic> json) {
     final goodForRaw = json['goodFor'];
@@ -55,14 +69,21 @@ class ExerciseModel {
           .toString(),
       level: (json['level'] ?? 'Intermediate').toString(),
       intensity: (json['intensity'] ?? 'Moderate').toString(),
-      averageMinutes: (json['averageMinutes'] as num?)?.toInt() ?? 0,
-      calories: (json['calories'] as num?)?.toInt() ?? 0,
+      averageMinutes: (json['averageMinutes'] as num? ?? json['durationMinutes'] as num?)?.toInt() ?? 0,
+      calories: (json['calories'] as num? ?? json['caloriesBurn'] as num?)?.toInt() ?? 0,
       description: (json['description'] ?? '').toString(),
       goodFor: goodFor,
       videoUrl: json['videoUrl']?.toString(),
       videoThumbnailUrl: json['videoThumbnailUrl']?.toString(),
       videoDurationMinutes: (json['videoDurationMinutes'] as num?)?.toInt(),
       category: category,
+      categoryDescription: json['categoryMeta']?['description']?.toString(),
+      instructions: json['instructions']?.toString(),
+      tips: json['tips']?.toString(),
+      commonMistakes: json['commonMistakes']?.toString(),
+      planSets: (json['planSets'] as num?)?.toInt(),
+      planReps: json['planReps']?.toString(),
+      restTime: (json['restTime'] as num?)?.toInt(),
     );
   }
 }

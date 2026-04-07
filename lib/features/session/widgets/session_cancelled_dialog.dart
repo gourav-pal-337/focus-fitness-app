@@ -8,10 +8,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/buttons/custom_bottom.dart';
 
 class SessionCancelledDialog extends StatelessWidget {
-  const SessionCancelledDialog({
-    super.key,
-    required this.onOk,
-  });
+  const SessionCancelledDialog({super.key, required this.onOk});
 
   final VoidCallback onOk;
 
@@ -35,7 +32,7 @@ class SessionCancelledDialog extends StatelessWidget {
         horizontal: AppSpacing.screenPadding.left,
         vertical: AppSpacing.xl,
       ),
-      
+
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.8,
@@ -62,7 +59,7 @@ class SessionCancelledDialog extends StatelessWidget {
                 ),
                 SizedBox(height: AppSpacing.md),
                 Text(
-                  'Your scheduled session with your trainer has been cancelled. A refund for this session has been processed and will be credited to your original payment method shortly.',
+                  'Your scheduled session with your trainer has been cancelled. You can reschedule this session later at your convenience.',
                   style: AppTextStyle.text14Regular.copyWith(
                     color: AppColors.grey400,
                     height: 1.5,
@@ -98,15 +95,10 @@ class _CancellationIcon extends StatelessWidget {
       width: 80.w,
       height: 80.w,
       decoration: BoxDecoration(
-        color:  Colors.red, // Orange-red color
+        color: Colors.red, // Orange-red color
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        Icons.close,
-        size: 40.sp,
-        color: AppColors.background,
-      ),
+      child: Icon(Icons.close, size: 40.sp, color: AppColors.background),
     );
   }
 }
-

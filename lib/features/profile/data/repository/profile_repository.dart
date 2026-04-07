@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../features/authentication/data/exceptions/api_exception.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
@@ -29,6 +30,17 @@ class ProfileRepository {
   ) async {
     try {
       final response = await _apiService.updateClientProfile(request);
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  Future<Result<String>> uploadProfilePhoto(XFile file) async {
+    try {
+      final response = await _apiService.uploadProfilePhoto(file);
       return Success(response);
     } on ApiException catch (e) {
       return Failure(e.message, code: e.statusCode ?? 500);
