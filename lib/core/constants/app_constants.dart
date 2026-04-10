@@ -4,4 +4,5 @@ class AppConstants {
 
   /// The global currency code used throughout the app
   static const String currencyCode = 'GBP';
+  static const String defaultCurrencyCode = 'GBP';
 }

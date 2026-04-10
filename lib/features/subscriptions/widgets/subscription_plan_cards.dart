@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../provider/subscription_provider.dart';
 import 'subscription_plan_card.dart';
 
@@ -39,7 +39,7 @@ class SubscriptionPlanCards extends StatelessWidget {
             child: SubscriptionPlanCard(
               name: name,
               title: offer.title,
-              price: '${AppConstants.currencySymbol}${offer.amount}',
+              price: CurrencyFormatter.format(offer.amount, offer.currency),
               plan: offer,
               isSelected: selectedPlan?.planType == offer.planType,
               onTap: () {

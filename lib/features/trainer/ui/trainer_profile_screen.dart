@@ -215,7 +215,10 @@ class _BookingContent extends StatelessWidget {
             padding: EdgeInsets.symmetric(
               horizontal: AppSpacing.screenPadding.left,
             ),
-            child: PaymentBreakdownWidget(sessionPrice: sessionPlan.feeAmount),
+            child: PaymentBreakdownWidget(
+              sessionPrice: sessionPlan.feeAmount,
+              currency: sessionPlan.feeCurrency,
+            ),
           ),
       ],
     );
@@ -440,6 +443,7 @@ class _BookSessionButton extends StatelessWidget {
                             )['startTime'] ??
                             '',
                         'mode': provider.sessionType.name,
+                        'currency': sessionPlan?.feeCurrency ?? 'GBP',
                       },
                     ).toString();
 

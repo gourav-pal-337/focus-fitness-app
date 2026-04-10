@@ -220,7 +220,10 @@ class _PaymentInfoSection extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding.left),
-      child: PaymentBreakdownWidget(sessionPrice: sessionPlan.feeAmount),
+      child: PaymentBreakdownWidget(
+        sessionPrice: sessionPlan.feeAmount,
+        currency: sessionPlan.feeCurrency,
+      ),
     );
   }
 }

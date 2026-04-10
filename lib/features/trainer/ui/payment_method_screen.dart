@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/core/utils/currency_formatter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -37,6 +38,7 @@ class PaymentMethodScreen extends StatelessWidget {
     this.sessionTime = '',
     this.sessionStartTime = '',
     this.mode,
+    this.currency,
   });
 
   final double amount;
@@ -56,6 +58,7 @@ class PaymentMethodScreen extends StatelessWidget {
   final String sessionTime;
   final String sessionStartTime;
   final String? mode;
+  final String? currency;
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +126,7 @@ class PaymentMethodScreen extends StatelessWidget {
               sessionTime: sessionTime,
               sessionStartTime: sessionStartTime,
               mode: mode,
+              currency: currency,
             ),
           ],
         ),
@@ -261,6 +265,7 @@ class _PayButton extends StatelessWidget {
     required this.sessionTime,
     required this.sessionStartTime,
     this.mode,
+    this.currency,
   });
 
   final double amount;
@@ -278,6 +283,7 @@ class _PayButton extends StatelessWidget {
   final String sessionTime;
   final String sessionStartTime;
   final String? mode;
+  final String? currency;
 
   @override
   Widget build(BuildContext context) {
@@ -345,7 +351,7 @@ class _PayButton extends StatelessWidget {
       child: CustomButton(
         text: provider.isBooking
             ? 'Booking...'
-            : 'Pay \$${totalChargedAmount.toStringAsFixed(2)}',
+            : 'Pay ${CurrencyFormatter.format(totalChargedAmount, settings?.platformFeeCurrency ?? currency)}',
         size: ButtonSize.large,
         width: double.infinity,
         height: 52.h,
@@ -599,7 +605,7 @@ class _PayButton extends StatelessWidget {
                         onSuccess: (bookingData) {
                           if (!context.mounted) return;
                           context.push(
-                            '/transaction-successful?amount=${totalChargedAmount.toStringAsFixed(2)}&paymentMethod=${Uri.encodeComponent(paymentMethod)}&cardNumber=${Uri.encodeComponent(cardNumber)}&trainerName=${Uri.encodeComponent(trainerName)}&sessionDate=${Uri.encodeComponent(sessionDate)}&sessionTime=${Uri.encodeComponent(sessionTime)}&sessionStartTime=${Uri.encodeComponent(sessionStartTime)}&bookingId=${bookingData['_id'] ?? trainerId}',
+                            '/transaction-successful?amount=${totalChargedAmount.toStringAsFixed(2)}&currency=${settings?.platformFeeCurrency ?? currency}&paymentMethod=${Uri.encodeComponent(paymentMethod)}&cardNumber=${Uri.encodeComponent(cardNumber)}&trainerName=${Uri.encodeComponent(trainerName)}&sessionDate=${Uri.encodeComponent(sessionDate)}&sessionTime=${Uri.encodeComponent(sessionTime)}&sessionStartTime=${Uri.encodeComponent(sessionStartTime)}&bookingId=${bookingData['_id'] ?? trainerId}',
                           );
                         },
                         onError: (error) {

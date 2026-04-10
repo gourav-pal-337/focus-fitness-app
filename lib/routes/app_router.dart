@@ -694,6 +694,7 @@ abstract class PaymentMethodRoute {
       final sessionStartTime =
           state.uri.queryParameters['sessionStartTime'] ?? '';
       final mode = state.uri.queryParameters['mode'];
+      final currency = state.uri.queryParameters['currency'];
 
       return PaymentMethodScreen(
         amount: amount,
@@ -711,6 +712,7 @@ abstract class PaymentMethodRoute {
         sessionTime: sessionTime,
         sessionStartTime: sessionStartTime,
         mode: mode,
+        currency: currency,
       );
     },
   );
@@ -762,9 +764,11 @@ abstract class TransactionSuccessfulRoute {
       final sessionStartTime = startTimeIso != null
           ? DateTime.tryParse(startTimeIso)
           : null;
+      final currency = state.uri.queryParameters['currency'];
 
       return TransactionSuccessfulScreen(
         amount: amount,
+        currency: currency,
         paymentMethod: paymentMethod,
         cardNumber: cardNumber,
         trainerName: trainerName,

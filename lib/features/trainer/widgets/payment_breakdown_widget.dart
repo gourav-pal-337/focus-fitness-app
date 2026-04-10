@@ -4,12 +4,18 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../provider/system_settings_provider.dart';
 
 class PaymentBreakdownWidget extends StatefulWidget {
   final double sessionPrice;
+  final String? currency;
 
-  const PaymentBreakdownWidget({super.key, required this.sessionPrice});
+  const PaymentBreakdownWidget({
+    super.key,
+    required this.sessionPrice,
+    this.currency,
+  });
 
   @override
   State<PaymentBreakdownWidget> createState() => _PaymentBreakdownWidgetState();
@@ -42,15 +48,20 @@ class _PaymentBreakdownWidgetState extends State<PaymentBreakdownWidget> {
             ? settings.platformFee
             : (widget.sessionPrice * (settings.platformFee / 100));
 
-        final displayPlatformFeeValue =
-            '\$${serviceFeeValue.toStringAsFixed(2)}';
+        final displayPlatformFeeValue = CurrencyFormatter.format(
+          serviceFeeValue,
+          settings.platformFeeCurrency,
+        );
         final displayPlatformFeeRate = settings.platformFeeType == 'fixed'
             ? ''
             : ' (${settings.platformFee.toStringAsFixed(0)}%)';
 
         // 2. Calculate VAT (always percentage)
         final vatValue = widget.sessionPrice * (settings.vatTaxPercent / 100);
-        final displayVatValue = '\$${vatValue.toStringAsFixed(2)}';
+        final displayVatValue = CurrencyFormatter.format(
+          vatValue,
+          settings.platformFeeCurrency,
+        );
 
         // 3. Calculate Total
         final totalCharged = provider.calculateTotalAmount(widget.sessionPrice);
@@ -67,7 +78,10 @@ class _PaymentBreakdownWidgetState extends State<PaymentBreakdownWidget> {
             SizedBox(height: AppSpacing.md),
             _PaymentRow(
               label: 'Session Price',
-              value: '\$${widget.sessionPrice.toStringAsFixed(2)}',
+              value: CurrencyFormatter.format(
+                widget.sessionPrice,
+                settings.platformFeeCurrency,
+              ),
             ),
             SizedBox(height: AppSpacing.sm),
             _PaymentRow(
@@ -94,7 +108,10 @@ class _PaymentBreakdownWidgetState extends State<PaymentBreakdownWidget> {
                   ),
                 ),
                 Text(
-                  '\$${totalCharged.toStringAsFixed(2)}',
+                  CurrencyFormatter.format(
+                    totalCharged,
+                    settings.platformFeeCurrency,
+                  ),
                   style: AppTextStyle.text20SemiBold.copyWith(
                     color: AppColors.textPrimary,
                   ),

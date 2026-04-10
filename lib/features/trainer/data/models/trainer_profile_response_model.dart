@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 /// Response model for get trainer profile with session plans
 class GetTrainerProfileResponseModel {
   GetTrainerProfileResponseModel({
@@ -18,8 +20,11 @@ class GetTrainerProfileResponseModel {
           : throw Exception('Trainer data is required'),
       sessionPlans: json['sessionPlans'] != null
           ? (json['sessionPlans'] as List)
-              .map((item) => SessionPlanModel.fromJson(item as Map<String, dynamic>))
-              .toList()
+                .map(
+                  (item) =>
+                      SessionPlanModel.fromJson(item as Map<String, dynamic>),
+                )
+                .toList()
           : [],
     );
   }
@@ -108,12 +113,13 @@ class SessionPlanModel {
   final String? timeRange; // String format: "09:00 AM - 10:00 AM"
 
   factory SessionPlanModel.fromJson(Map<String, dynamic> json) {
+    debugPrint("json platformFeeCurrency: ${json['platformFeeCurrency']}");
     return SessionPlanModel(
       id: json['_id'] as String? ?? '',
       title: json['title'] as String? ?? '',
       description: json['description'] as String?,
       feeAmount: (json['feeAmount'] as num).toDouble(),
-      feeCurrency: json['feeCurrency'] as String? ?? 'USD',
+      feeCurrency: json['platformFeeCurrency'] as String? ?? 'USD',
       durationMinutes: json['durationMinutes'] as int? ?? 60,
       packageSessions: json['packageSessions'] as int?,
       packageValidityDays: json['packageValidityDays'] as int?,
@@ -126,8 +132,8 @@ class SessionPlanModel {
           : null,
       timeSlots: json['timeSlots'] != null
           ? (json['timeSlots'] as List)
-              .map((item) => TimeSlot.fromJson(item as Map<String, dynamic>))
-              .toList()
+                .map((item) => TimeSlot.fromJson(item as Map<String, dynamic>))
+                .toList()
           : null,
       timeStart: json['timeStart'] as String?,
       timeEnd: json['timeEnd'] as String?,
@@ -138,11 +144,7 @@ class SessionPlanModel {
 
 /// Time slot model
 class TimeSlot {
-  TimeSlot({
-    required this.startTime,
-    required this.endTime,
-    this.id,
-  });
+  TimeSlot({required this.startTime, required this.endTime, this.id});
 
   final String startTime; // Format: '15:09'
   final String endTime; // Format: '16:09'
@@ -156,4 +158,3 @@ class TimeSlot {
     );
   }
 }
-

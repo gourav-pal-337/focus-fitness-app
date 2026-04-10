@@ -12,6 +12,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/buttons/custom_bottom.dart';
 
 class TransactionSuccessfulScreen extends StatefulWidget {
@@ -25,9 +26,11 @@ class TransactionSuccessfulScreen extends StatefulWidget {
     this.sessionDate,
     this.sessionTime,
     this.sessionStartTime,
+    this.currency,
   });
 
   final double amount;
+  final String? currency;
   final String paymentMethod;
   final String cardNumber;
   final String? trainerName;
@@ -93,6 +96,14 @@ class _TransactionSuccessfulScreenState
                           'Your session has been successfully booked.',
                           style: AppTextStyle.text16Medium.copyWith(
                             color: AppColors.grey400,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: AppSpacing.md),
+                        Text(
+                          CurrencyFormatter.format(widget.amount, widget.currency),
+                          style: AppTextStyle.text24SemiBold.copyWith(
+                            color: AppColors.primary,
                           ),
                           textAlign: TextAlign.center,
                         ),

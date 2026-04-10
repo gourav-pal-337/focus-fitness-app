@@ -12,6 +12,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/custom_app_bar.dart';
 import '../../../core/widgets/buttons/custom_bottom.dart';
 import '../../../core/widgets/date_time_bar.dart';
+import '../../../core/utils/currency_formatter.dart';
 import '../../../../routes/app_router.dart';
 import '../provider/session_details_provider.dart';
 import '../widgets/session_card.dart' show SessionData, SessionStatus;
@@ -245,18 +246,18 @@ class _PaymentDetailsSection extends StatelessWidget {
             children: [
               _PaymentDetailRow(
                 label: 'Session Amount',
-                value: '\$${payment.sessionFee.toStringAsFixed(2)}',
+                value: CurrencyFormatter.format(payment.sessionFee, payment.currency),
               ),
               SizedBox(height: AppSpacing.sm),
               _PaymentDetailRow(
                 label: 'Platform Fee',
-                value: '\$${payment.platformFee.toStringAsFixed(2)}',
+                value: CurrencyFormatter.format(payment.platformFee, payment.currency),
                 isSubText: true,
               ),
               SizedBox(height: AppSpacing.sm),
               _PaymentDetailRow(
                 label: 'VAT Amount',
-                value: '\$${payment.vatAmount.toStringAsFixed(2)}',
+                value: CurrencyFormatter.format(payment.vatAmount, payment.currency),
                 isSubText: true,
               ),
               SizedBox(height: AppSpacing.md),
@@ -264,7 +265,7 @@ class _PaymentDetailsSection extends StatelessWidget {
               SizedBox(height: AppSpacing.md),
               _PaymentDetailRow(
                 label: 'Total Paid',
-                value: '\$${payment.totalAmount.toStringAsFixed(2)}',
+                value: CurrencyFormatter.format(payment.totalAmount, payment.currency),
                 isTotal: true,
               ),
               SizedBox(height: AppSpacing.md),
