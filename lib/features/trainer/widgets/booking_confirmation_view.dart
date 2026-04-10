@@ -151,10 +151,10 @@ class _SessionTypeSelector extends StatelessWidget {
                 Expanded(
                   child: _SessionTypeButton(
                     label: 'Physical',
-                    isSelected: sessionType == SessionType.physical,
+                    isSelected: sessionType == SessionType.inPerson,
                     onTap: () {
                       context.read<TrainerProfileProvider>().setSessionType(
-                        SessionType.physical,
+                        SessionType.inPerson,
                       );
                     },
                     borderRadius: BorderRadius.only(

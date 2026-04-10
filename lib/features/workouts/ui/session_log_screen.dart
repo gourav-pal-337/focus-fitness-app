@@ -13,6 +13,7 @@ import '../../../routes/app_router.dart';
 import '../widgets/date_selector.dart';
 import '../services/workout_api_service.dart';
 import '../models/workout_exercise_model.dart';
+import '../models/workout_day_response_model.dart';
 
 class SessionLogScreen extends StatefulWidget {
   const SessionLogScreen({super.key});
@@ -111,8 +112,8 @@ class _SessionLogScreenState extends State<SessionLogScreen> {
 
     final api = WorkoutApiService();
     try {
-      final workouts = await api.getWorkoutProgressByDate(normalized);
-      final loggedWorkouts = workouts.where((w) => w.sets.isNotEmpty).toList();
+      final response = await api.getWorkoutProgressByDate(normalized);
+      final loggedWorkouts = response.progress.where((w) => w.sets.isNotEmpty).toList();
 
       if (loggedWorkouts.isEmpty) return const [];
 
@@ -146,12 +147,18 @@ class _SessionLogScreenState extends State<SessionLogScreen> {
       if (cachedJson == null || cachedJson.isEmpty) return const [];
 
       final decoded = jsonDecode(cachedJson);
-      if (decoded is! List) return const [];
-
-      final workouts = decoded
-          .whereType<Map<String, dynamic>>()
-          .map(WorkoutExerciseModel.fromJson)
-          .toList();
+      
+      List<WorkoutExerciseModel> workouts;
+      if (decoded is Map<String, dynamic>) {
+        workouts = WorkoutDayResponseModel.fromJson(decoded).progress;
+      } else if (decoded is List) {
+        workouts = decoded
+            .whereType<Map<String, dynamic>>()
+            .map(WorkoutExerciseModel.fromJson)
+            .toList();
+      } else {
+        return const [];
+      }
 
       final loggedWorkouts =
           workouts.where((w) => w.sets.isNotEmpty).toList();

@@ -159,9 +159,20 @@ class _DateTimeBar extends StatelessWidget {
 }
 
 String gettime(SessionData session) {
+  if (session.booking == null) return "";
   DateTime startTime = DateTime.parse(session.booking!.startTime);
   DateTime endTime = DateTime.parse(session.booking!.endTime);
-  return "${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')} - ${endTime.hour.toString().padLeft(2, '0')}:${endTime.minute.toString().padLeft(2, '0')}";
+
+  String format(DateTime time) {
+    final hour = time.hour > 12
+        ? time.hour - 12
+        : (time.hour == 0 ? 12 : time.hour);
+    final period = time.hour >= 12 ? 'PM' : 'AM';
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute $period';
+  }
+
+  return "${format(startTime)} - ${format(endTime)}";
 }
 
 class _PaymentDetailsSection extends StatelessWidget {

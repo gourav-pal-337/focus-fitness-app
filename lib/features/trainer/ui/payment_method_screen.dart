@@ -36,6 +36,7 @@ class PaymentMethodScreen extends StatelessWidget {
     this.sessionDate = '',
     this.sessionTime = '',
     this.sessionStartTime = '',
+    this.mode,
   });
 
   final double amount;
@@ -54,6 +55,7 @@ class PaymentMethodScreen extends StatelessWidget {
   final String sessionDate;
   final String sessionTime;
   final String sessionStartTime;
+  final String? mode;
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +122,7 @@ class PaymentMethodScreen extends StatelessWidget {
               sessionDate: sessionDate,
               sessionTime: sessionTime,
               sessionStartTime: sessionStartTime,
+              mode: mode,
             ),
           ],
         ),
@@ -257,6 +260,7 @@ class _PayButton extends StatelessWidget {
     required this.sessionDate,
     required this.sessionTime,
     required this.sessionStartTime,
+    this.mode,
   });
 
   final double amount;
@@ -273,6 +277,7 @@ class _PayButton extends StatelessWidget {
   final String sessionDate;
   final String sessionTime;
   final String sessionStartTime;
+  final String? mode;
 
   @override
   Widget build(BuildContext context) {
@@ -357,7 +362,8 @@ class _PayButton extends StatelessWidget {
               }
             : () async {
                 print("tap tap tap...");
-
+                print("mode: $mode");
+                // return;
                 if (isSubscription) {
                   if (trainerId.isEmpty || planType.isEmpty) return;
 
@@ -510,6 +516,7 @@ class _PayButton extends StatelessWidget {
                     platformFeeValue: settings?.platformFee,
                     platformFeeType: settings?.platformFeeType,
                     vatTaxPercent: settings?.vatTaxPercent,
+                    mode: mode,
                   );
 
                   log(

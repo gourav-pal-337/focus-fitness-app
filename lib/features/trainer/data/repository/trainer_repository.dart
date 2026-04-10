@@ -10,6 +10,7 @@ import '../models/trainer_referral_response_model.dart';
 import '../models/trainer_profile_response_model.dart';
 import '../models/unlink_trainer_response_model.dart';
 import '../models/payment_booking_models.dart';
+import '../models/check_booking_response_model.dart';
 import '../services/trainer_api_service.dart';
 
 /// Repository for trainer operations
@@ -219,6 +220,34 @@ class TrainerRepository {
       final response = await _apiService.verifyPaymentStatus(
         id,
         isPaypal: isPaypal,
+      );
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    }
+  }
+
+  /// Check trainer availability for a specific time slot
+  Future<Result<CheckBookingResponseModel>> checkTrainerBooking({
+    required String trainerId,
+    required String startTime,
+    required String endTime,
+  }) async {
+    try {
+      if (trainerId.trim().isEmpty) {
+        return Failure('Trainer ID is required.', code: 400);
+      }
+      if (startTime.trim().isEmpty) {
+        return Failure('Start time is required.', code: 400);
+      }
+      if (endTime.trim().isEmpty) {
+        return Failure('End time is required.', code: 400);
+      }
+
+      final response = await _apiService.checkTrainerBooking(
+        trainerId: trainerId,
+        startTime: startTime,
+        endTime: endTime,
       );
       return Success(response);
     } on ApiException catch (e) {

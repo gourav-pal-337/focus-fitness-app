@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class InitiatePaymentRequestModel {
   final String trainerId;
   final String sessionPlanId;
@@ -12,6 +14,7 @@ class InitiatePaymentRequestModel {
   final double? platformFeeValue;
   final String? platformFeeType;
   final double? vatTaxPercent;
+  final String? mode;
 
   InitiatePaymentRequestModel({
     required this.trainerId,
@@ -27,9 +30,11 @@ class InitiatePaymentRequestModel {
     this.platformFeeValue,
     this.platformFeeType,
     this.vatTaxPercent,
+    this.mode,
   });
 
   Map<String, dynamic> toJson() {
+    debugPrint('mode::: $mode');
     return {
       'trainerId': trainerId,
       'sessionPlanId': sessionPlanId,
@@ -44,6 +49,7 @@ class InitiatePaymentRequestModel {
       if (platformFeeValue != null) 'platformFeeValue': platformFeeValue,
       if (platformFeeType != null) 'platformFeeType': platformFeeType,
       if (vatTaxPercent != null) 'vatTaxPercent': vatTaxPercent,
+      if (mode != null) 'mode': mode,
     };
   }
 }

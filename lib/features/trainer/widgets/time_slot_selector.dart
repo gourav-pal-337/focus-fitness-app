@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -10,6 +11,17 @@ import '../provider/trainer_profile_provider.dart';
 
 class TimeSlotSelector extends StatelessWidget {
   const TimeSlotSelector({super.key});
+
+  bool shouldShowTimeSlot(String dateStr) {
+    try {
+      final format = DateFormat('yyyy-MM-dd hh:mm a');
+      DateTime slotTime = format.parse(dateStr.toUpperCase());
+      DateTime now = DateTime.now();
+      return slotTime.isAfter(now);
+    } catch (e) {
+      return true;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +55,28 @@ class TimeSlotSelector extends StatelessWidget {
                 SizedBox(width: AppSpacing.sm),
             itemBuilder: (context, index) {
               final timeSlot = availableTimeSlots[index];
+
+              // final dateTime = parseDateTime(
+              //   '${provider.selectedDate} $timeSlot',
+              // );
+
+              // debugPrint("dateTime: $dateTime");
+
+              bool isSlotAvailable = shouldShowTimeSlot(
+                '${provider.selectedDate} $timeSlot',
+              );
+              if (!isSlotAvailable) {
+                return const SizedBox.shrink();
+              }
               return _TimeSlotButton(
                 timeSlot: timeSlot,
                 isSelected: provider.selectedTimeSlot == timeSlot,
                 onTap: () {
+                  // final dateTime = shouldShowTimeSlot(
+                  //   '${provider.selectedDate} $timeSlot',
+                  // );
+
+                  // debugPrint("dateTime: $dateTime");
                   provider.selectTimeSlot(timeSlot);
                 },
               );

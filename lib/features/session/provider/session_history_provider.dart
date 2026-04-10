@@ -41,10 +41,14 @@ class SessionHistoryProvider extends ChangeNotifier {
   }
 
   /// Fetch bookings from API
-  Future<void> fetchBookings() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+  Future<void> fetchBookings({bool force = false}) async {
+    if (!force && _allBookings.isNotEmpty) {
+      // Background update
+    } else {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+    }
 
     try {
       // Map tab to API status filter
@@ -141,6 +145,14 @@ class SessionHistoryProvider extends ChangeNotifier {
     final durationMinutes = booking.sessionPlan?.durationMinutes ?? 60;
     final duration = '${durationMinutes}min';
 
+    // Format time
+    final hour = startTime.hour > 12
+        ? startTime.hour - 12
+        : (startTime.hour == 0 ? 12 : startTime.hour);
+    final period = startTime.hour >= 12 ? 'PM' : 'AM';
+    final minute = startTime.minute.toString().padLeft(2, '0');
+    final timeStr = '$hour:$minute $period';
+
     return SessionData(
       trainerName: trainerName,
       trainerImageUrl: trainerImageUrl,
@@ -148,6 +160,7 @@ class SessionHistoryProvider extends ChangeNotifier {
       duration: duration,
       status: status,
       date: dateStr,
+      startTime: timeStr,
       invoiceUrl: booking.invoiceUrl,
       bookingId: booking.id,
       booking: booking,

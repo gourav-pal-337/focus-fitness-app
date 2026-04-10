@@ -55,15 +55,15 @@ class SupportScreen extends StatelessWidget {
                         context.push(ContactSupportRoute.path);
                       },
                     ),
-                    Divider(color: AppColors.grey200, thickness: 1, height: 0),
-                    SupportOptionItem(
-                      icon: Icons.receipt_long_outlined,
-                      title: 'Billing & Subscriptions',
-                      description: 'Billing & subscription settings.',
-                      onTap: () {
-                        context.go(SubscriptionsRoute.path);
-                      },
-                    ),
+                    // Divider(color: AppColors.grey200, thickness: 1, height: 0),
+                    // SupportOptionItem(
+                    //   icon: Icons.receipt_long_outlined,
+                    //   title: 'Billing & Subscriptions',
+                    //   description: 'Billing & subscription settings.',
+                    //   onTap: () {
+                    //     context.go(SubscriptionsRoute.path);
+                    //   },
+                    // ),
                     Divider(color: AppColors.grey200, thickness: 1, height: 0),
                     SupportOptionItem(
                       icon: Icons.check_circle_outline,

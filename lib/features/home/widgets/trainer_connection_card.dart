@@ -140,25 +140,25 @@ class TrainerConnectionCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Row(
-                      children: [
-                        Container(
-                          width: 8.w,
-                          height: 8.w,
-                          decoration: BoxDecoration(
-                            color: isLive ? AppColors.green : AppColors.grey400,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        SizedBox(width: 6.w),
-                        Text(
-                          isLive ? 'Connected' : 'Pending',
-                          style: AppTextStyle.text12Medium.copyWith(
-                            color: isLive ? AppColors.green : AppColors.grey400,
-                          ),
-                        ),
-                      ],
-                    ),
+                    // Row(
+                    //   children: [
+                    //     Container(
+                    //       width: 8.w,
+                    //       height: 8.w,
+                    //       decoration: BoxDecoration(
+                    //         color: isLive ? AppColors.green : AppColors.grey400,
+                    //         shape: BoxShape.circle,
+                    //       ),
+                    //     ),
+                    //     SizedBox(width: 6.w),
+                    //     Text(
+                    //       isLive ? 'Connected' : 'Pending',
+                    //       style: AppTextStyle.text12Medium.copyWith(
+                    //         color: isLive ? AppColors.green : AppColors.grey400,
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
                   ],
                 ),
               ),

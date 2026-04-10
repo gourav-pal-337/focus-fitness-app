@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../core/service/local_storage_service.dart';
 import '../models/today_workout_summary_model.dart';
 import '../models/weekly_progress_model.dart';
+import '../models/workout_day_response_model.dart';
 import '../models/workout_exercise_model.dart';
 import '../services/workout_api_service.dart';
 import '../provider/workout_provider.dart';
@@ -24,6 +25,8 @@ class WorkoutProvider extends ChangeNotifier {
 
   List<WorkoutExerciseModel> _workouts = [];
   bool _isLoading = false;
+  bool _isRestDay = false;
+  String? _dayTitle;
   DateTime _selectedDate = DateTime.now();
   String? _errorMessage;
   DateTime? _lastFetchedDate;
@@ -36,6 +39,8 @@ class WorkoutProvider extends ChangeNotifier {
 
   List<WorkoutExerciseModel> get workouts => _workouts;
   bool get isLoading => _isLoading;
+  bool get isRestDay => _isRestDay;
+  String? get dayTitle => _dayTitle;
   DateTime get selectedDate => _selectedDate;
   String? get errorMessage => _errorMessage;
 
@@ -45,10 +50,14 @@ class WorkoutProvider extends ChangeNotifier {
   List<WeeklyProgressModel> get weeklyProgress => _weeklyProgress;
   bool get isWeeklyLoading => _isWeeklyLoading;
 
-  Future<void> fetchWeeklyProgress() async {
-    _isWeeklyLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+  Future<void> fetchWeeklyProgress({bool force = false}) async {
+    if (!force && _weeklyProgress.isNotEmpty) {
+      // Just fetch in background silently
+    } else {
+      _isWeeklyLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
       _weeklyProgress = await _apiService.getWeeklyProgress();
@@ -60,10 +69,14 @@ class WorkoutProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchTodaySummary() async {
-    _isSummaryLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+  Future<void> fetchTodaySummary({bool force = false}) async {
+    if (!force && _todaySummary != null) {
+      // Just fetch in background silently
+    } else {
+      _isSummaryLoading = true;
+      _errorMessage = null;
+      notifyListeners();
+    }
 
     try {
       _todaySummary = await _apiService.getTodayWorkoutSummary();
@@ -94,11 +107,22 @@ class WorkoutProvider extends ChangeNotifier {
       if (cachedJson != null && cachedJson.isNotEmpty) {
         try {
           final decoded = jsonDecode(cachedJson);
-          if (decoded is List) {
+          if (decoded is Map<String, dynamic>) {
+            final response = WorkoutDayResponseModel.fromJson(decoded);
+            _workouts = response.progress;
+            _isRestDay = response.isRestDay;
+            _dayTitle = response.dayTitle;
+            _lastFetchedDate = normalizedDate;
+            _errorMessage = null;
+            notifyListeners();
+            return;
+          } else if (decoded is List) {
             _workouts = decoded
                 .whereType<Map<String, dynamic>>()
                 .map(WorkoutExerciseModel.fromJson)
                 .toList();
+            _isRestDay = false;
+            _dayTitle = null;
             _lastFetchedDate = normalizedDate;
             _errorMessage = null;
             notifyListeners();
@@ -127,13 +151,16 @@ class WorkoutProvider extends ChangeNotifier {
     notifyListeners();
     debugPrint('shouldSkip: $shouldSkip');
     try {
-      _workouts = await _apiService.getWorkoutProgressByDate(normalizedDate);
+      final response = await _apiService.getWorkoutProgressByDate(normalizedDate);
+      _workouts = response.progress;
+      _isRestDay = response.isRestDay;
+      _dayTitle = response.dayTitle;
       _lastFetchedDate = normalizedDate;
 
       // Cache today only (per UX/performance requirement).
       if (isToday) {
         final dateKey = _dateKey(normalizedDate);
-        final cacheJson = jsonEncode(_workouts.map((e) => e.toJson()).toList());
+        final cacheJson = jsonEncode(response.toJson());
         await LocalStorageService.setWorkoutCache(dateKey, cacheJson);
       }
     } catch (e) {

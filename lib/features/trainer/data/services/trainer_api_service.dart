@@ -10,6 +10,7 @@ import '../models/trainer_referral_response_model.dart';
 import '../models/trainer_profile_response_model.dart';
 import '../models/unlink_trainer_response_model.dart';
 import '../models/payment_booking_models.dart';
+import '../models/check_booking_response_model.dart';
 
 /// API service for trainer operations
 class TrainerApiService {
@@ -456,6 +457,55 @@ class TrainerApiService {
           message: response.msg.isNotEmpty
               ? response.msg
               : 'Failed to verify payment status',
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Check if trainer is available for a specific time slot
+  Future<CheckBookingResponseModel> checkTrainerBooking({
+    required String trainerId,
+    required String startTime,
+    required String endTime,
+  }) async {
+    try {
+      final response = await _apiHitter.getApiResponse(
+        Endpoints.checkTrainerBooking(trainerId),
+        queryParameters: {
+          'startTime': startTime,
+          'endTime': endTime,
+        },
+      );
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        return CheckBookingResponseModel.fromJson(responseData);
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage = (responseData['error'] as String?) ??
+              (responseData['message'] as String?) ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage.isNotEmpty
+                ? errorMessage
+                : 'Failed to check trainer availability',
+            statusCode: response.response?.statusCode,
+          );
+        }
+        throw ApiException(
+          message: response.msg.isNotEmpty
+              ? response.msg
+              : 'Failed to check trainer availability',
           statusCode: response.response?.statusCode,
         );
       }

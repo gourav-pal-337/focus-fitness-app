@@ -7,7 +7,7 @@ import '../utils/date_time_utils.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
 
-enum SessionType { online, physical }
+enum SessionType { online, inPerson }
 
 class TrainerProfileProvider extends ChangeNotifier {
   final TrainerRepository _repository = TrainerRepository();
@@ -27,6 +27,9 @@ class TrainerProfileProvider extends ChangeNotifier {
   String? _error;
   bool _isBooking = false;
   String? _bookingError;
+  bool _isCheckingAvailability = false;
+  bool _isSlotAvailable = true;
+  String? _availabilityCheckError;
 
   TrainerProfileInfo? get trainer => _trainer;
   List<SessionPlanModel> get sessionPlans => _sessionPlans;
@@ -43,6 +46,7 @@ class TrainerProfileProvider extends ChangeNotifier {
     // Map DayAvailability to DateInfo for compatibility with the existing DateSelector
     return _availability.map((day) {
       final dateTime = DateTime.parse(day.date);
+
       return DateInfo(
         date: dateTime.day.toString(),
         day: DateTimeUtils.getDayAbbreviation(dateTime.weekday),
@@ -83,6 +87,9 @@ class TrainerProfileProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isBooking => _isBooking;
   String? get bookingError => _bookingError;
+  bool get isCheckingAvailability => _isCheckingAvailability;
+  bool get isSlotAvailable => _isSlotAvailable;
+  String? get availabilityCheckError => _availabilityCheckError;
 
   bool get canBookSession => _selectedDate != null && _selectedTimeSlot != null;
 
@@ -141,6 +148,66 @@ class TrainerProfileProvider extends ChangeNotifier {
     }
   }
 
+  /// Check if session plan is selected and slot is available
+  bool get canProceedToBooking =>
+      _selectedDate != null &&
+      _selectedTimeSlot != null &&
+      _isSlotAvailable &&
+      !_isCheckingAvailability;
+
+  /// Check trainer availability for the selected time slot
+  Future<bool> checkSlotAvailability() async {
+    if (_trainer == null ||
+        _selectedDate == null ||
+        _selectedTimeSlot == null ||
+        _selectedSessionPlan == null) {
+      return false;
+    }
+
+    _isCheckingAvailability = true;
+    _availabilityCheckError = null;
+    notifyListeners();
+
+    try {
+      final timestamps = DateTimeUtils.convertToIsoTimestamps(
+        dateId: _selectedDate!,
+        timeSlot: _selectedTimeSlot!,
+        availableDates: availableDates,
+        durationMinutes: _selectedSessionPlan!.durationMinutes,
+      );
+
+      final result = await _repository.checkTrainerBooking(
+        trainerId: _trainer!.id,
+        startTime: timestamps['startTime']!,
+        endTime: timestamps['endTime']!,
+      );
+
+      return await result.when(
+        success: (response) async {
+          _isCheckingAvailability = false;
+          _isSlotAvailable = !response.hasBooking;
+          if (response.hasBooking) {
+            _availabilityCheckError =
+                'This slot is no longer available. Please choose another time.';
+          }
+          notifyListeners();
+          return _isSlotAvailable;
+        },
+        failure: (message, code) {
+          _isCheckingAvailability = false;
+          _availabilityCheckError = message;
+          notifyListeners();
+          return false;
+        },
+      );
+    } catch (e) {
+      _isCheckingAvailability = false;
+      _availabilityCheckError = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return false;
+    }
+  }
+
   /// Select a session plan (Legacy support, resets availability-based selections)
   void selectSessionPlan(SessionPlanModel plan) {
     _selectedSessionPlan = plan;
@@ -169,12 +236,16 @@ class TrainerProfileProvider extends ChangeNotifier {
 
     // Reset time slot selection when date changes
     _selectedTimeSlot = null;
+    _isSlotAvailable = true;
+    _availabilityCheckError = null;
 
     notifyListeners();
   }
 
   void selectTimeSlot(String timeSlot) {
     _selectedTimeSlot = timeSlot;
+    _isSlotAvailable = true;
+    _availabilityCheckError = null;
 
     // Identify which session plan this time slot belongs to for the selected date
     if (_selectedDate != null) {
@@ -325,6 +396,7 @@ class TrainerProfileProvider extends ChangeNotifier {
         endTime: timestamps['endTime']!,
         timezone: 'UTC', // You can get this from device timezone if needed
         notes: notes,
+        mode: _sessionType.name,
       );
 
       final result = await _repository.bookSession(request);

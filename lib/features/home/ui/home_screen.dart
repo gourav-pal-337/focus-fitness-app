@@ -13,6 +13,8 @@ import 'package:provider/provider.dart';
 import 'package:focus_fitness/features/profile/provider/account_details_provider.dart';
 import 'package:focus_fitness/features/profile/provider/edit_profile_details_provider.dart';
 import 'package:focus_fitness/features/profile/ui/edit_profile_details_screen.dart';
+import 'package:focus_fitness/features/home/widgets/home_nudge_section.dart';
+import '../../session/provider/session_history_provider.dart';
 import '../../workouts/providers/workout_provider.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -109,8 +111,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void initializeHome() {
     final provider = Provider.of<LinkedTrainerProvider>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final workoutProvider =
-        Provider.of<WorkoutProvider>(context, listen: false);
+    final workoutProvider = Provider.of<WorkoutProvider>(
+      context,
+      listen: false,
+    );
+    final sessionHistory = Provider.of<SessionHistoryProvider>(
+      context,
+      listen: false,
+    );
 
     // Fetch linked trainer when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -121,6 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
         provider.fetchLinkedTrainer(),
         workoutProvider.fetchTodaySummary(),
         workoutProvider.fetchWeeklyProgress(),
+        sessionHistory.fetchBookings(),
         checkuserDetails(),
       ]);
     });
@@ -142,14 +151,21 @@ class _HomeScreenState extends State<HomeScreen> {
           listen: false,
         );
         final userProvider = Provider.of<UserProvider>(context, listen: false);
-        final workoutProvider =
-            Provider.of<WorkoutProvider>(context, listen: false);
+        final workoutProvider = Provider.of<WorkoutProvider>(
+          context,
+          listen: false,
+        );
+        final sessionHistory = Provider.of<SessionHistoryProvider>(
+          context,
+          listen: false,
+        );
 
         await Future.wait([
           provider.fetchLinkedTrainer(),
           userProvider.fetchUserDetails(),
           workoutProvider.fetchTodaySummary(),
           workoutProvider.fetchWeeklyProgress(),
+          sessionHistory.fetchBookings(),
           checkuserDetails(),
         ]);
       },
@@ -174,11 +190,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     delegate: SliverChildListDelegate([
                       SizedBox(height: 24.h),
                       const TrainerConnectionCard(),
+                      SizedBox(height: 16.h),
+                      const HomeNudgeSection(),
                       SizedBox(height: 32.h),
-                      const TodaysWorkoutSection(),
-                      SizedBox(height: 32.h),
-                      const ProgressSection(),
-                      SizedBox(height: 32.h),
+                      // const TodaysWorkoutSection(),
+                      // SizedBox(height: 32.h),
+                      // const ProgressSection(),
+                      // SizedBox(height: 32.h),
                       // const TrainerSpotlightSection(),
                       // SizedBox(height: 24.h),
                       const TrainerSummarySection(),
@@ -223,18 +241,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (userPhone != null && userPhone.isNotEmpty) {
                           // if (trainerWhatsapp != null &&
                           //     trainerWhatsapp.isNotEmpty) {
-                            final Uri whatsappUrl = Uri.parse(
-                              'https://wa.me/+15551436124?text=Hello',
-                            );
+                          final Uri whatsappUrl = Uri.parse(
+                            'https://wa.me/+15551436124?text=Hello',
+                          );
 
-                            // if (await canLaunchUrl(whatsappUrl)) {
-                            await launchUrl(
-                              whatsappUrl,
-                              mode: LaunchMode.externalApplication,
-                            );
-                            // } else {
-                            //   debugPrint('Could not launch $whatsappUrl');
-                            // }
+                          // if (await canLaunchUrl(whatsappUrl)) {
+                          await launchUrl(
+                            whatsappUrl,
+                            mode: LaunchMode.externalApplication,
+                          );
+                          // } else {
+                          //   debugPrint('Could not launch $whatsappUrl');
+                          // }
                           // } else {
                           //   if (context.mounted) {
                           //     ScaffoldMessenger.of(context).showSnackBar(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:convert';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -10,9 +9,9 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/custom_app_bar.dart';
 import '../../../core/service/local_storage_service.dart';
-import '../../../routes/app_router.dart';
 import '../widgets/date_selector.dart';
 import '../models/workout_exercise_model.dart';
+import '../models/workout_day_response_model.dart';
 import '../services/workout_api_service.dart';
 
 class SessionLogDetailsScreen extends StatefulWidget {
@@ -40,9 +39,6 @@ class _SessionLogDetailsScreenState extends State<SessionLogDetailsScreen> {
                 setState(() {
                   widget.date = newDate;
                 });
-                // context.push(
-                //   '${SessionLogDetailsRoute.path}?date=${newDate.millisecondsSinceEpoch}',
-                // );
               },
             ),
             Expanded(
@@ -50,7 +46,6 @@ class _SessionLogDetailsScreenState extends State<SessionLogDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // _SessionSummarySection(date: widget.date),
                     SizedBox(height: AppSpacing.xl),
                     FutureBuilder<List<WorkoutExerciseModel>>(
                       future: _fetchWorkoutsForDate(),
@@ -111,21 +106,27 @@ class _SessionLogDetailsScreenState extends State<SessionLogDetailsScreen> {
   Future<List<WorkoutExerciseModel>> _fetchWorkoutsForDate() async {
     final api = WorkoutApiService();
     try {
-      final workouts = await api.getWorkoutProgressByDate(widget.date);
-      return workouts.where((w) => w.sets.isNotEmpty).toList();
+      final response = await api.getWorkoutProgressByDate(widget.date);
+      return response.progress.where((w) => w.sets.isNotEmpty).toList();
     } catch (_) {
       // Offline fallback to cached data.
       final dateKey = _dateKey(widget.date);
       final cachedJson = await LocalStorageService.getWorkoutCache(dateKey);
       if (cachedJson == null || cachedJson.isEmpty) return const [];
       final decoded = jsonDecode(cachedJson);
-      if (decoded is! List) return const [];
-      return decoded
-          .whereType<Map<String, dynamic>>()
-          .map(WorkoutExerciseModel.fromJson)
-          .toList()
-          .where((w) => w.sets.isNotEmpty)
-          .toList();
+      
+      if (decoded is Map<String, dynamic>) {
+        final response = WorkoutDayResponseModel.fromJson(decoded);
+        return response.progress.where((w) => w.sets.isNotEmpty).toList();
+      } else if (decoded is List) {
+        return decoded
+            .whereType<Map<String, dynamic>>()
+            .map(WorkoutExerciseModel.fromJson)
+            .toList()
+            .where((w) => w.sets.isNotEmpty)
+            .toList();
+      }
+      return const [];
     }
   }
 

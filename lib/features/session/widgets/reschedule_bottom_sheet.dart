@@ -321,6 +321,17 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
     );
   }
 
+  bool shouldShowTimeSlot(String dateStr) {
+    try {
+      final format = DateFormat('yyyy-MM-dd hh:mm a');
+      DateTime slotTime = format.parse(dateStr.toUpperCase());
+      DateTime now = DateTime.now();
+      return slotTime.isAfter(now);
+    } catch (e) {
+      return true;
+    }
+  }
+
   Widget _buildSlotsList(SessionDetailsProvider provider) {
     final dayAvailability = provider.availability.firstWhere(
       (e) => e.date == _selectedDate,
@@ -352,6 +363,10 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
         final timeStr = DateFormat('hh:mm a').format(startTime);
         final isSelected = _selectedSlot == slot;
 
+        bool isSlotAvailable = shouldShowTimeSlot('$_selectedDate $timeStr');
+        if (!isSlotAvailable) {
+          return const SizedBox.shrink();
+        }
         return GestureDetector(
           onTap: () {
             setState(() {

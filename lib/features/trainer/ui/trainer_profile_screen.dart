@@ -276,28 +276,27 @@ class _SessionTypeSelector extends StatelessWidget {
                         SessionType.online,
                       );
                     },
-                    borderRadius: BorderRadius.circular(5.r),
-                    // .only(
-                    //   topLeft: Radius.circular(12.r),
-                    //   bottomLeft: Radius.circular(12.r),
-                    // ),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12.r),
+                      bottomLeft: Radius.circular(12.r),
+                    ),
                   ),
                 ),
-                // Expanded(
-                //   child: _SessionTypeButton(
-                //     label: 'Physical',
-                //     isSelected: sessionType == SessionType.physical,
-                //     onTap: () {
-                //       context.read<TrainerProfileProvider>().setSessionType(
-                //         SessionType.physical,
-                //       );
-                //     },
-                //     borderRadius: BorderRadius.only(
-                //       topRight: Radius.circular(12.r),
-                //       bottomRight: Radius.circular(12.r),
-                //     ),
-                //   ),
-                // ),
+                Expanded(
+                  child: _SessionTypeButton(
+                    label: 'In-Person',
+                    isSelected: sessionType == SessionType.inPerson,
+                    onTap: () {
+                      context.read<TrainerProfileProvider>().setSessionType(
+                        SessionType.inPerson,
+                      );
+                    },
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(12.r),
+                      bottomRight: Radius.circular(12.r),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -368,72 +367,100 @@ class _BookSessionButton extends StatelessWidget {
           ),
         ],
       ),
-      child: CustomButton(
-        text: provider.isBooking
-            ? 'Booking...'
-            : (showBookingConfirmation ? 'Confirm' : 'Book Session'),
-        size: ButtonSize.large,
-        width: double.infinity,
-        height: 52.h,
-        backgroundColor: showBookingConfirmation || canBook
-            ? AppColors.primary
-            : AppColors.grey300,
-        textColor: AppColors.background,
-        textStyle: AppTextStyle.text16SemiBold.copyWith(
-          color: AppColors.background,
-        ),
-        borderRadius: 12.r,
-        isEnabled: (showBookingConfirmation || canBook) && !provider.isBooking,
-        onPressed: showBookingConfirmation
-            ? () async {
-                final sessionPlan = provider.selectedSessionPlan;
-                final baseAmount = sessionPlan?.feeAmount ?? 100.00;
-                final totalAmount = settingsProvider.calculateTotalAmount(
-                  baseAmount,
-                );
-                final trainerId = provider.trainer?.id ?? '';
-                final sessionPlanId = sessionPlan?.id ?? '';
-                final dateId = provider.selectedDate ?? '';
-                final timeSlot = provider.selectedTimeSlot ?? '';
-                final durationMinutes = sessionPlan?.durationMinutes ?? 60;
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (provider.availabilityCheckError != null)
+            Padding(
+              padding: EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Text(
+                provider.availabilityCheckError!,
+                style: AppTextStyle.text12Regular.copyWith(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          CustomButton(
+            text: provider.isBooking
+                ? 'Booking...'
+                : provider.isCheckingAvailability
+                ? 'Checking...'
+                : (showBookingConfirmation ? 'Confirm' : 'Book Session'),
+            size: ButtonSize.large,
+            width: double.infinity,
+            height: 52.h,
+            backgroundColor: showBookingConfirmation || canBook
+                ? AppColors.primary
+                : AppColors.grey300,
+            textColor: AppColors.background,
+            textStyle: AppTextStyle.text16SemiBold.copyWith(
+              color: AppColors.background,
+            ),
+            borderRadius: 12.r,
+            isEnabled:
+                (showBookingConfirmation || canBook) &&
+                !provider.isBooking &&
+                !provider.isCheckingAvailability &&
+                provider.isSlotAvailable,
+            onPressed: showBookingConfirmation
+                ? () async {
+                    final sessionPlan = provider.selectedSessionPlan;
+                    final baseAmount = sessionPlan?.feeAmount ?? 100.00;
+                    final totalAmount = settingsProvider.calculateTotalAmount(
+                      baseAmount,
+                    );
+                    final trainerId = provider.trainer?.id ?? '';
+                    final sessionPlanId = sessionPlan?.id ?? '';
+                    final dateId = provider.selectedDate ?? '';
+                    final timeSlot = provider.selectedTimeSlot ?? '';
+                    final durationMinutes = sessionPlan?.durationMinutes ?? 60;
 
-                final uri = Uri(
-                  path: PaymentMethodRoute.path,
-                  queryParameters: {
-                    if (trainerId.isNotEmpty) 'trainerId': trainerId,
-                    if (sessionPlanId.isNotEmpty)
-                      'sessionPlanId': sessionPlanId,
-                    if (dateId.isNotEmpty) 'dateId': dateId,
-                    if (timeSlot.isNotEmpty) 'timeSlot': timeSlot,
-                    'amount': totalAmount.toStringAsFixed(2),
-                    'baseAmount': baseAmount.toStringAsFixed(2),
-                    'durationMinutes': durationMinutes.toString(),
-                    'trainerName': provider.trainer?.fullName ?? 'Trainer',
-                    'sessionDate': DateTimeUtils.formatDateId(
-                      dateId,
-                      provider.availableDates,
-                    ),
-                    'sessionTime': timeSlot,
-                    'sessionStartTime':
-                        DateTimeUtils.convertToIsoTimestamps(
-                          dateId: dateId,
-                          timeSlot: timeSlot,
-                          availableDates: provider.availableDates,
-                          durationMinutes: durationMinutes,
-                        )['startTime'] ??
-                        '',
-                  },
-                ).toString();
+                    final uri = Uri(
+                      path: PaymentMethodRoute.path,
+                      queryParameters: {
+                        if (trainerId.isNotEmpty) 'trainerId': trainerId,
+                        if (sessionPlanId.isNotEmpty)
+                          'sessionPlanId': sessionPlanId,
+                        if (dateId.isNotEmpty) 'dateId': dateId,
+                        if (timeSlot.isNotEmpty) 'timeSlot': timeSlot,
+                        'amount': totalAmount.toStringAsFixed(2),
+                        'baseAmount': baseAmount.toStringAsFixed(2),
+                        'durationMinutes': durationMinutes.toString(),
+                        'trainerName': provider.trainer?.fullName ?? 'Trainer',
+                        'sessionDate': DateTimeUtils.formatDateId(
+                          dateId,
+                          provider.availableDates,
+                        ),
+                        'sessionTime': timeSlot,
+                        'sessionStartTime':
+                            DateTimeUtils.convertToIsoTimestamps(
+                              dateId: dateId,
+                              timeSlot: timeSlot,
+                              availableDates: provider.availableDates,
+                              durationMinutes: durationMinutes,
+                            )['startTime'] ??
+                            '',
+                        'mode': provider.sessionType.name,
+                      },
+                    ).toString();
 
-                context.push(uri);
-              }
-            : canBook
-            ? () {
-                // Fetch settings when entering booking view to ensure total is calculated correctly
-                context.read<SystemSettingsProvider>().fetchFeeSettings();
-                context.read<TrainerProfileProvider>().showBookingView();
-              }
-            : null,
+                    context.push(uri);
+                  }
+                : canBook
+                ? () async {
+                    final isAvailable = await provider.checkSlotAvailability();
+                    if (isAvailable) {
+                      // Fetch settings when entering booking view to ensure total is calculated correctly
+                      if (context.mounted) {
+                        context
+                            .read<SystemSettingsProvider>()
+                            .fetchFeeSettings();
+                        provider.showBookingView();
+                      }
+                    }
+                  }
+                : null,
+          ),
+        ],
       ),
     );
   }

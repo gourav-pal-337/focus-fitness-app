@@ -5,6 +5,7 @@ import '../models/set_model.dart';
 import '../models/today_workout_summary_model.dart';
 import '../models/weekly_progress_model.dart';
 import '../models/workout_exercise_model.dart';
+import '../models/workout_day_response_model.dart';
 import 'base_service.dart';
 
 class WorkoutApiService {
@@ -43,7 +44,7 @@ class WorkoutApiService {
     return ExerciseModel.fromJson(response);
   }
 
-  Future<List<WorkoutExerciseModel>> getWorkoutProgressByDate(
+  Future<WorkoutDayResponseModel> getWorkoutProgressByDate(
     DateTime date,
   ) async {
     final apiDate = _dateToApi(date);
@@ -52,12 +53,7 @@ class WorkoutApiService {
       queryParameters: {'date': apiDate},
     );
 
-    // Backend currently returns: { success: true, progress: [ ... ] }
-    final list = _extractList(
-      response,
-      keys: ['progress', 'workouts', 'data', 'results'],
-    );
-    return list.map(WorkoutExerciseModel.fromJson).toList();
+    return WorkoutDayResponseModel.fromJson(response);
   }
 
   Future<void> saveSet({

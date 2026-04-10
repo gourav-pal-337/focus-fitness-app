@@ -35,10 +35,14 @@ class LinkedTrainerProvider extends ChangeNotifier {
   bool get canDelink => _delinkReason.isNotEmpty;
 
   /// Fetch linked trainer information
-  Future<void> fetchLinkedTrainer() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
+  Future<void> fetchLinkedTrainer({bool force = false}) async {
+    if (!force && _trainer != null) {
+      // Background update
+    } else {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+    }
 
     try {
       final result = await _repository.getLinkedTrainer();

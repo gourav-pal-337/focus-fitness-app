@@ -151,9 +151,13 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                             );
                           }
 
-                          // // if (provider.workouts.isEmpty) {
-                          //   return ;
-                          // // }
+                          if ((provider.isRestDay ||
+                                  provider.dayTitle == 'Rest Day') &&
+                              provider.workouts.isEmpty) {
+                            return _RestDaySection(
+                              dayTitle: provider.dayTitle ?? 'Rest Day',
+                            );
+                          }
 
                           return Column(
                             children: [
@@ -193,6 +197,140 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _RestDaySection extends StatelessWidget {
+  const _RestDaySection({required this.dayTitle});
+
+  final String dayTitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.screenPadding.left,
+        vertical: 40.h,
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const _BreathingAvatar(),
+          SizedBox(height: 48.h),
+          Text(
+            dayTitle,
+            style: AppTextStyle.text28Bold.copyWith(
+              color: AppColors.textPrimary,
+              letterSpacing: 0.5,
+            ),
+          ),
+          SizedBox(height: 16.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            child: Text(
+              'Time to recharge. Your body performs best when it is well-rested.',
+              textAlign: TextAlign.center,
+              style: AppTextStyle.text14Medium.copyWith(
+                color: AppColors.grey400,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BreathingAvatar extends StatefulWidget {
+  const _BreathingAvatar();
+
+  @override
+  State<_BreathingAvatar> createState() => _BreathingAvatarState();
+}
+
+class _BreathingAvatarState extends State<_BreathingAvatar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _glowAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.08,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    _glowAnimation = Tween<double>(
+      begin: 10.0,
+      end: 30.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Container(
+          height: 150.h,
+          width: 150.h,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.15),
+                blurRadius: _glowAnimation.value,
+                spreadRadius: _glowAnimation.value / 2,
+              ),
+            ],
+          ),
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.primary.withValues(alpha: 0.9),
+                    AppColors.primary.withValues(alpha: 0.5),
+                  ],
+                ),
+              ),
+              child: Center(
+                child: Container(
+                  padding: EdgeInsets.all(24.w),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.2),
+                  ),
+                  child: Icon(
+                    Icons.spa_rounded,
+                    size: 80.sp,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

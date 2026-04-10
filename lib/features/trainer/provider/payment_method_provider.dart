@@ -33,6 +33,7 @@ class PaymentMethodProvider extends ChangeNotifier {
     required int durationMinutes,
     required List<Map<String, dynamic>> availableDatesData,
     String? notes,
+    String? mode,
   }) async {
     _isBooking = true;
     _bookingError = null;
@@ -69,6 +70,7 @@ class PaymentMethodProvider extends ChangeNotifier {
         endTime: timestamps['endTime']!,
         timezone: 'UTC',
         notes: notes,
+        mode: mode,
       );
 
       final result = await _repository.bookSession(request);
@@ -111,6 +113,7 @@ class PaymentMethodProvider extends ChangeNotifier {
     String? platformFeeType,
     double? vatTaxPercent,
     String? notes,
+    String? mode,
   }) async {
     _isBooking = true;
     _bookingError = null;
@@ -154,6 +157,7 @@ class PaymentMethodProvider extends ChangeNotifier {
         platformFeeValue: platformFeeValue,
         platformFeeType: platformFeeType,
         vatTaxPercent: vatTaxPercent,
+        mode: mode,
       );
 
       final result = await _repository.initiateSessionPayment(request);

@@ -22,6 +22,7 @@ class SessionData {
   final String duration;
   final SessionStatus status;
   final String date;
+  final String? startTime;
   final String? invoiceUrl;
   final String? bookingId;
   final BookingModel? booking;
@@ -33,6 +34,7 @@ class SessionData {
     required this.duration,
     required this.status,
     required this.date,
+    this.startTime,
     this.invoiceUrl,
     this.bookingId,
     this.booking,
@@ -59,6 +61,9 @@ class SessionCard extends StatelessWidget {
       'status': statusString,
       'date': session.date,
     };
+    if (session.startTime != null) {
+      queryParams['startTime'] = session.startTime!;
+    }
     if (session.bookingId != null && session.bookingId!.isNotEmpty) {
       queryParams['bookingId'] = session.bookingId!;
     }
@@ -137,7 +142,7 @@ class SessionCard extends StatelessWidget {
                           SessionStatusBadge(status: session.status),
                           SizedBox(width: AppSpacing.sm),
                           Text(
-                            session.date,
+                            '${session.date}${session.startTime != null ? ' • ${session.startTime}' : ''}',
                             style: AppTextStyle.text12Medium.copyWith(
                               color: AppColors.grey400,
                             ),

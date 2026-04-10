@@ -126,11 +126,11 @@ class _WorkoutProgressContentState extends State<_WorkoutProgressContent> {
     setState(() => _isSyncingFromBackend = true);
 
     try {
-      final workouts = await _workoutApiService.getWorkoutProgressByDate(
+      final response = await _workoutApiService.getWorkoutProgressByDate(
         normalizedDate,
       );
 
-      for (final workout in workouts) {
+      for (final workout in response.progress) {
         final exercise = Exercise(
           id: workout.exerciseId,
           name: workout.exerciseName,
@@ -338,7 +338,7 @@ class _WorkoutProgressContentState extends State<_WorkoutProgressContent> {
       //         ),
       //       );
       //     },
-      //   ),
+      // ),
       // ),
     );
   }
