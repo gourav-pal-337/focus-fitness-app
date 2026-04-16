@@ -53,16 +53,20 @@ class CustomAppBar extends StatelessWidget {
                   textAlign: centerTitle ? TextAlign.center : TextAlign.left,
                 ),
               ),
-              if (actions != null) ...actions!,
+              if (centerTitle && actions == null) ...[
+                Icon(Icons.arrow_back, size: 24.sp, color: Colors.transparent),
+                SizedBox(width: AppSpacing.md),
+              ],
+
+              if (actions != null) ...[
+                SizedBox(width: AppSpacing.md),
+                ...actions!,
+              ],
             ],
           ),
         ),
-        Container(
-              height: 1.h,
-              color: AppColors.grey200,
-            ),
+        Container(height: 1.h, color: AppColors.grey200),
       ],
     );
   }
 }
-

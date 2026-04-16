@@ -27,7 +27,7 @@ class PinnedHomeHeader extends StatelessWidget {
     return Consumer2<ClientProfileProvider, UserProvider>(
       builder: (context, authProv, userProvider, _) {
         final user = userProvider.user;
-        print("user: ${user?.fullName}");
+
         return Container(
           color: AppColors.background,
           padding: EdgeInsets.only(
@@ -39,23 +39,31 @@ class PinnedHomeHeader extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Welcome Back,',
-                    style: AppTextStyle.text12Regular.copyWith(
-                      color: AppColors.grey400,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Welcome Back,',
+                      style: AppTextStyle.text12Regular.copyWith(
+                        color: AppColors.grey400,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    user?.fullName ?? authProv.profile?.fullName ?? '',
-                    style: AppTextStyle.text24SemiBold.copyWith(
-                      color: AppColors.textPrimary,
+                    SizedBox(height: 4.h),
+                    Text(
+                      user?.forename ??
+                          authProv.profile?.forename ??
+                          user?.fullName ??
+                          authProv.profile?.fullName ??
+                          '',
+                      style: AppTextStyle.text24SemiBold.copyWith(
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               Row(
                 children: [

@@ -55,6 +55,12 @@ class ClientProfileProvider extends ChangeNotifier {
     await fetchProfile();
   }
 
+  /// Update profile manually
+  void updateProfile(ClientProfileModel profile) {
+    _profile = profile;
+    notifyListeners();
+  }
+
   /// Clear profile data
   void clear() {
     _profile = null;

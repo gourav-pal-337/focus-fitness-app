@@ -68,7 +68,7 @@ class _TicketInfoSection extends StatelessWidget {
     String formattedDate = '';
     if (ticket?.createdAt != null) {
       try {
-        final date = DateTime.parse(ticket!.createdAt!);
+        final date = DateTime.parse(ticket!.createdAt!).toLocal();
         formattedDate = DateFormat('MMM d, yyyy').format(date);
         final time = DateFormat('hh:mm a').format(date);
         formattedDate = 'Submitted on $formattedDate at $time';

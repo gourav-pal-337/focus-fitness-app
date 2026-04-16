@@ -81,15 +81,17 @@ class _SelectionOptions extends StatelessWidget {
     final screen = context
         .findAncestorWidgetOfExactType<VerificationSelectionScreen>()!;
 
+    final authProvider = context.watch<AuthProvider>();
+
     return Column(
       children: [
         _SelectionTile(
           title: 'Verify via Email',
           subtitle: screen.email,
           icon: Icons.email_outlined,
+          isLoading: authProvider.isEmailOtpLoading,
           onTap: () async {
-            final provider = context.read<AuthProvider>();
-            final success = await provider.sendEmailOtp(screen.email);
+            final success = await authProvider.sendEmailOtp(screen.email);
             if (success && context.mounted) {
               context.push(
                 OtpVerificationRoute.path,
@@ -107,9 +109,9 @@ class _SelectionOptions extends StatelessWidget {
           title: 'Verify via SMS',
           subtitle: screen.phone,
           icon: Icons.sms_outlined,
+          isLoading: authProvider.isPhoneOtpLoading,
           onTap: () async {
-            final provider = context.read<AuthProvider>();
-            final success = await provider.sendPhoneOtp(
+            final success = await authProvider.sendPhoneOtp(
               screen.countryCode,
               screen.phone,
             );
@@ -174,16 +176,17 @@ class _SelectionTile extends StatelessWidget {
     required this.subtitle,
     required this.icon,
     required this.onTap,
+    this.isLoading = false,
   });
 
   final String title;
   final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = context.watch<AuthProvider>().isLoading;
 
     return Container(
       decoration: BoxDecoration(

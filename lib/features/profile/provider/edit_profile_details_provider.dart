@@ -53,7 +53,7 @@ class EditProfileDetailsProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final request = _buildRequest();
+      final request = buildRequest();
       print("request data ${request.toJson()}");
       final response = await _apiService.updateClientProfile(request);
       _isSaving = false;
@@ -67,7 +67,7 @@ class EditProfileDetailsProvider extends ChangeNotifier {
     }
   }
 
-  UpdateClientProfileRequestModel _buildRequest() {
+  UpdateClientProfileRequestModel buildRequest() {
     switch (section) {
       case EditProfileSection.personalDetails:
         return _buildPersonalDetailsRequest();
@@ -254,6 +254,8 @@ class EditProfileDetailsProvider extends ChangeNotifier {
     
     return UpdateClientProfileRequestModel(
       fullName: fullName.isEmpty ? null : fullName,
+      forename: forename.isEmpty ? null : forename,
+      surname: surname.isEmpty ? null : surname,
       dateOfBirth: dateOfBirth,
       gender: gender,
       phone: phone,

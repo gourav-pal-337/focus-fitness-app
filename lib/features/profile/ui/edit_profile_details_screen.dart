@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/custom_app_bar.dart';
+import '../../../core/provider/user_provider.dart';
 import '../provider/client_profile_provider.dart';
 import '../provider/edit_profile_details_provider.dart';
 import '../widgets/edit_detail_row.dart';
@@ -122,12 +123,47 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
     // Save to backend
     final success = await provider.save();
     if (success && mounted) {
-      // Refresh profile data after successful save
+      // Optimistically update the UserProvider cache instantly for a fast UI response
+      final request = provider.buildRequest();
+      final userProvider = Provider.of<UserProvider>(
+        context,
+        listen: false,
+      );
+
+      if (userProvider.user != null) {
+        final updatedUser = userProvider.user!.copyWith(
+          fullName: request.fullName ?? userProvider.user!.fullName,
+          forename: request.forename ?? userProvider.user!.forename,
+          surname: request.surname ?? userProvider.user!.surname,
+          email: request.email ?? userProvider.user!.email,
+          phone: request.phone ?? userProvider.user!.phone,
+          phoneCountry: request.countryCode ?? userProvider.user!.phoneCountry,
+          dob: request.dateOfBirth ?? userProvider.user!.dob,
+          gender: request.gender ?? userProvider.user!.gender,
+        );
+        userProvider.updateUser(updatedUser);
+      }
+      
+      // Optimistically update ClientProfileProvider
       final profileProvider = Provider.of<ClientProfileProvider>(
         context,
         listen: false,
       );
-      await profileProvider.refresh();
+
+      if (profileProvider.profile != null) {
+        final updatedProfile = profileProvider.profile!.copyWith(
+          fullName: request.fullName ?? profileProvider.profile!.fullName,
+          forename: request.forename ?? profileProvider.profile!.forename,
+          surname: request.surname ?? profileProvider.profile!.surname,
+          email: request.email ?? profileProvider.profile!.email,
+          phone: request.phone ?? profileProvider.profile!.phone,
+          countryCode: request.countryCode ?? profileProvider.profile!.countryCode,
+          dateOfBirth: request.dateOfBirth ?? profileProvider.profile!.dateOfBirth,
+          gender: request.gender ?? profileProvider.profile!.gender,
+        );
+        profileProvider.updateProfile(updatedProfile);
+      }
+      
       if (mounted) {
         context.pop();
       }

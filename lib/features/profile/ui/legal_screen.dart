@@ -36,31 +36,45 @@ class _LegalScreenState extends State<LegalScreen> {
         Endpoints.getPrivacy(widget.type),
       );
       if (response.status && response.response?.data['success'] == true) {
-        final content =
-            response.response!.data['data']['content']?.toString() ?? '';
-        final htmlContent =
-            '''
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <style>
-                body {
-                  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-                  padding: 16px;
-                  color: #111827;
-                  background-color: #FFFFFF;
-                }
-                h1, h2, h3 { color: #000000; }
-                a { color: #00AEEF; }
-              </style>
-            </head>
-            <body>
-              $content
-            </body>
-          </html>
-        ''';
-        await _controller.loadHtmlString(htmlContent);
+        final data = response.response!.data['data'];
+        final pdfUrl =
+            // "https://applore-dev-projects-5.s3.ap-south-1.amazonaws.com/documents/de2a9cca-449d-441f-91cd-bcd1f4fd077a.docx";
+            data['url']?.toString();
+        final content = data['content']?.toString() ?? '';
+
+        if (pdfUrl != null && pdfUrl.isNotEmpty) {
+          // Use Google Docs viewer for better Android support if it's a PDF
+          final viewerUrl = pdfUrl.toLowerCase().contains('.pdf')
+              ? 'https://docs.google.com/gview?embedded=true&url=$pdfUrl'
+              : pdfUrl;
+          await _controller.loadRequest(Uri.parse(viewerUrl));
+        } else {
+          final htmlContent =
+              '''
+            <!DOCTYPE html>
+            <html>
+              <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                  body {
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                    padding: 16px;
+                    color: #111827;
+                    background-color: #FFFFFF;
+                    line-height: 1.6;
+                  }
+                  h1, h2, h3 { color: #000000; margin-top: 24px; }
+                  p { margin-bottom: 16px; }
+                  a { color: #00AEEF; }
+                </style>
+              </head>
+              <body>
+                $content
+              </body>
+            </html>
+          ''';
+          await _controller.loadHtmlString(htmlContent);
+        }
       } else {
         setState(() => _error = response.msg);
       }
@@ -74,7 +88,7 @@ class _LegalScreenState extends State<LegalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      // backgroundColor: AppColors.primary,
       body: SafeArea(
         child: Column(
           children: [

@@ -8,6 +8,8 @@ class ClientProfileModel {
     required this.createdAt,
     required this.updatedAt,
     this.trainerId,
+    this.forename,
+    this.surname,
     this.preferredName,
     this.dateOfBirth,
     this.age,
@@ -32,6 +34,8 @@ class ClientProfileModel {
   final String? trainerId;
   final String clientUserId;
   final String fullName;
+  final String? forename;
+  final String? surname;
   final String? preferredName;
   final String? dateOfBirth; // ISO 8601 date string (YYYY-MM-DD)
   final int? age; // Calculated from dateOfBirth
@@ -60,6 +64,8 @@ class ClientProfileModel {
       trainerId: json['trainerId'] as String?,
       clientUserId: json['clientUserId'] as String? ?? '',
       fullName: json['fullName'] as String? ?? '',
+      forename: json['forename'] as String?,
+      surname: json['surname'] as String?,
       preferredName: json['preferredName'] as String?,
       dateOfBirth: json['dob'] as String? ?? json['dateOfBirth'] as String?,
       age: int.parse(json['age'] as String? ?? '0'),
@@ -92,6 +98,66 @@ class ClientProfileModel {
       createdAt: json['createdAt'] as String? ?? '',
       updatedAt: json['updatedAt'] as String? ?? '',
       profilePicture: json['profilePicture'] as String? ?? json['profilePhoto'] as String?,
+    );
+  }
+
+  ClientProfileModel copyWith({
+    String? id,
+    String? trainerId,
+    String? clientUserId,
+    String? fullName,
+    String? forename,
+    String? surname,
+    String? preferredName,
+    String? dateOfBirth,
+    int? age,
+    String? gender,
+    double? height,
+    double? weight,
+    String? fitnessLevel,
+    String? email,
+    String? phone,
+    String? countryCode,
+    String? status,
+    String? goals,
+    String? weightGoal,
+    String? bodyType,
+    String? performanceGoal,
+    String? healthNotes,
+    String? notes,
+    List<String>? tags,
+    String? createdAt,
+    String? updatedAt,
+    String? profilePicture,
+  }) {
+    return ClientProfileModel(
+      id: id ?? this.id,
+      trainerId: trainerId ?? this.trainerId,
+      clientUserId: clientUserId ?? this.clientUserId,
+      fullName: fullName ?? this.fullName,
+      forename: forename ?? this.forename,
+      surname: surname ?? this.surname,
+      preferredName: preferredName ?? this.preferredName,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      age: age ?? this.age,
+      gender: gender ?? this.gender,
+      height: height ?? this.height,
+      weight: weight ?? this.weight,
+      fitnessLevel: fitnessLevel ?? this.fitnessLevel,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      countryCode: countryCode ?? this.countryCode,
+      status: status ?? this.status,
+      goals: goals ?? this.goals,
+      weightGoal: weightGoal ?? this.weightGoal,
+      bodyType: bodyType ?? this.bodyType,
+      performanceGoal: performanceGoal ?? this.performanceGoal,
+      healthNotes: healthNotes ?? this.healthNotes,
+      notes: notes ?? this.notes,
+      tags: tags ?? this.tags,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      profilePicture: profilePicture ?? this.profilePicture,
     );
   }
 }

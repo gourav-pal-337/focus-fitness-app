@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/core/constants/app_assets.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
@@ -26,17 +27,15 @@ class CancelSessionDialog extends StatelessWidget {
       context: context,
       barrierColor: AppColors.textPrimary.withValues(alpha: 0.5),
       barrierDismissible: true,
-      builder: (context) => CancelSessionDialog(
-        trainerName: trainerName,
-        onConfirm: onConfirm,
-      ),
+      builder: (context) =>
+          CancelSessionDialog(trainerName: trainerName, onConfirm: onConfirm),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.symmetric(
@@ -51,7 +50,7 @@ class CancelSessionDialog extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: AppColors.background,
-            borderRadius: AppRadius.small,
+            borderRadius: AppRadius.extraLarge,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -67,14 +66,14 @@ class CancelSessionDialog extends StatelessWidget {
                       child: Container(
                         width: 32.w,
                         height: 32.w,
-                        decoration: BoxDecoration(
-                          color: AppColors.background,
-                          shape: BoxShape.circle,
-                        ),
+                        // decoration: BoxDecoration(
+                        //   color: AppColors.background,
+                        //   shape: BoxShape.circle,
+                        // ),
                         child: Icon(
                           Icons.close,
-                          size: 20.sp,
-                          color: AppColors.grey400,
+                          size: 28.sp,
+                          color: AppColors.whiteBlue,
                         ),
                       ),
                     ),
@@ -129,7 +128,7 @@ class _IllustrationSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    
+
     return Container(
       height: screenHeight * 0.25,
       width: double.infinity,
@@ -145,8 +144,8 @@ class _IllustrationSection extends StatelessWidget {
           topLeft: Radius.circular(24.r),
           topRight: Radius.circular(24.r),
         ),
-        child: Image.network(
-          'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800',
+        child: Image.asset(
+          AppAssets.cancellationImage,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
             return Center(
@@ -162,4 +161,3 @@ class _IllustrationSection extends StatelessWidget {
     );
   }
 }
-

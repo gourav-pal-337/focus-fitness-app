@@ -243,7 +243,7 @@ class ProfileHeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = context.read<UserProvider>();
+    final userProvider = context.watch<UserProvider>();
     final authProvider = context.watch<ClientProfileProvider>();
     final user = userProvider.user;
     final displayImageUrl =

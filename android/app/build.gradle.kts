@@ -42,6 +42,7 @@ android {
             // shrinkingEnabled is typically false by default in Flutter 3.10+ templates but R8 is running. 
             // We explicitly enable minification and add the rules.
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

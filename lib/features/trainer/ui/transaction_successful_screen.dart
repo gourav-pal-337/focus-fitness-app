@@ -14,6 +14,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../core/widgets/buttons/custom_bottom.dart';
+import '../../../core/service/calendar_service.dart';
 
 class TransactionSuccessfulScreen extends StatefulWidget {
   const TransactionSuccessfulScreen({
@@ -51,11 +52,172 @@ class _TransactionSuccessfulScreenState
   @override
   void initState() {
     super.initState();
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      // if (mounted) {
+      _showCalendarPrompt();
+      // }
+    });
     _confettiController = ConfettiController(
       duration: const Duration(seconds: 3),
     );
     // Start confetti animation
     _confettiController.play();
+
+    // Show calendar prompt after a short delay
+  }
+
+  Future<void> _showCalendarPrompt() async {
+    final calendarService = CalendarService();
+
+    // Check if already added
+    if (widget.sessionStartTime != null) {
+      final isAlreadyAdded = await calendarService.isEventAlreadyAdded(
+        title: 'Workout Session with ${widget.trainerName ?? 'Trainer'}',
+        start: widget.sessionStartTime!,
+        end: widget.sessionStartTime!.add(const Duration(minutes: 60)),
+      );
+
+      if (isAlreadyAdded) return;
+    }
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
+        child: Container(
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(24.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 32.h),
+              // Icon Container
+              Container(
+                width: 72.w,
+                height: 72.w,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.calendar_today_rounded,
+                    color: AppColors.primary,
+                    size: 32.sp,
+                  ),
+                ),
+              ),
+              SizedBox(height: 24.h),
+              // Text Content
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                child: Column(
+                  children: [
+                    Text(
+                      'Save to Calendar?',
+                      style: AppTextStyle.text20SemiBold.copyWith(
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 12.h),
+                    Text(
+                      'Would you like to add this session to your calendar? We\'ll set a reminder so you stay on track with your fitness goals.',
+                      style: AppTextStyle.text14Regular.copyWith(
+                        color: AppColors.grey400,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 32.h),
+              // Actions
+              Padding(
+                padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 24.h),
+                child: Column(
+                  children: [
+                    CustomButton(
+                      text: 'Yes, Add it',
+                      size: ButtonSize.large,
+                      width: double.infinity,
+                      backgroundColor: AppColors.primary,
+                      onPressed: () async {
+                        Navigator.pop(context);
+                        await _addEventToCalendar();
+                      },
+                    ),
+                    SizedBox(height: 8.h),
+                    CustomButton(
+                      text: 'Later',
+                      type: ButtonType.text,
+                      width: double.infinity,
+                      textColor: AppColors.grey400,
+                      onPressed: () => Navigator.pop(context),
+                      textStyle: AppTextStyle.text14Medium.copyWith(
+                        color: AppColors.grey400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _addEventToCalendar() async {
+    if (widget.sessionStartTime == null) return;
+
+    final calendarService = CalendarService();
+
+    // Show loading indicator
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Adding to calendar...'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    final success = await calendarService.createEvent(
+      title: 'Workout Session with ${widget.trainerName ?? 'Trainer'}',
+      description:
+          'Booking ID: ${widget.bookingId ?? 'N/A'}\nSession with Focus Fitness.',
+      start: widget.sessionStartTime!,
+      end: widget.sessionStartTime!.add(const Duration(minutes: 60)),
+      reminderMinutes: [10, 30],
+    );
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            success
+                ? 'Successfully added to calendar!'
+                : 'Failed to add to calendar',
+          ),
+          backgroundColor: success ? Colors.green : Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -101,7 +263,10 @@ class _TransactionSuccessfulScreenState
                         ),
                         SizedBox(height: AppSpacing.md),
                         Text(
-                          CurrencyFormatter.format(widget.amount, widget.currency),
+                          CurrencyFormatter.format(
+                            widget.amount,
+                            widget.currency,
+                          ),
                           style: AppTextStyle.text24SemiBold.copyWith(
                             color: AppColors.primary,
                           ),

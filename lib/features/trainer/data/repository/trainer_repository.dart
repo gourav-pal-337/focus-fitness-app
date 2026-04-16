@@ -11,6 +11,7 @@ import '../models/trainer_profile_response_model.dart';
 import '../models/unlink_trainer_response_model.dart';
 import '../models/payment_booking_models.dart';
 import '../models/check_booking_response_model.dart';
+import '../models/next_available_slot_response_model.dart';
 import '../services/trainer_api_service.dart';
 
 /// Repository for trainer operations
@@ -249,6 +250,24 @@ class TrainerRepository {
         startTime: startTime,
         endTime: endTime,
       );
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  /// Get next available slot for a trainer
+  Future<Result<NextAvailableSlotResponseModel>> getNextAvailableSlot(
+    String trainerId,
+  ) async {
+    try {
+      if (trainerId.trim().isEmpty) {
+        return Failure('Trainer ID is required.', code: 400);
+      }
+
+      final response = await _apiService.getNextAvailableSlot(trainerId);
       return Success(response);
     } on ApiException catch (e) {
       return Failure(e.message, code: e.statusCode ?? 500);

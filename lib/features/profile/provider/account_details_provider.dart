@@ -64,7 +64,7 @@ class AccountDetailsProvider extends ChangeNotifier {
         // If phone still contains the code, strip it
         phone = phone.substring(countryCode.length).trim();
       }
-      
+
       final nameParts = (user.fullName ?? '').split(' ');
       final forename = nameParts.first;
       final surname = nameParts.length > 1 ? nameParts.skip(1).join(' ') : '';
@@ -72,12 +72,12 @@ class AccountDetailsProvider extends ChangeNotifier {
       _fields = [
         AccountField(
           label: 'Forename',
-          value: forename,
+          value: user.forename ?? '',
           hintText: 'Enter your forename',
         ),
         AccountField(
           label: 'Surname',
-          value: surname,
+          value: user.surname ?? '',
           hintText: 'Enter your surname',
         ),
         AccountField(
@@ -171,14 +171,12 @@ class AccountDetailsProvider extends ChangeNotifier {
       _fields = [
         AccountField(
           label: 'Forename',
-          value: user?.fullName?.split(' ').first ?? '',
+          value: user?.forename ?? '',
           hintText: 'Enter your forename',
         ),
         AccountField(
           label: 'Surname',
-          value: (user?.fullName?.split(' ').length ?? 0) > 1 
-            ? user!.fullName!.split(' ').skip(1).join(' ') 
-            : '',
+          value: user?.surname ?? '',
           hintText: 'Enter your surname',
         ),
         AccountField(
@@ -297,9 +295,11 @@ class AccountDetailsProvider extends ChangeNotifier {
         }
       }
 
-      // Note: Email and Phone are not being updated as they were removed from the request model
+      // Note: Email and Phone are now being updated
       final request = UpdateClientProfileRequestModel(
         fullName: fullName,
+        forename: forename,
+        surname: surname,
         dateOfBirth: dateOfBirth,
         gender: gender.isEmpty ? null : gender,
         phone: phone,

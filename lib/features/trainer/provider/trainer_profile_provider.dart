@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../data/models/book_session_request_model.dart';
 import '../data/models/trainer_profile_response_model.dart';
+import '../data/models/next_available_slot_response_model.dart';
 import '../data/repository/trainer_repository.dart';
 import '../../session/data/models/reschedule_models.dart';
 import '../utils/date_time_utils.dart';
@@ -31,6 +32,10 @@ class TrainerProfileProvider extends ChangeNotifier {
   bool _isSlotAvailable = true;
   String? _availabilityCheckError;
 
+  bool _isLoadingNextSlot = false;
+  AvailableSlotModel? _nextAvailableSlot;
+  String? _nextSlotError;
+
   TrainerProfileInfo? get trainer => _trainer;
   List<SessionPlanModel> get sessionPlans => _sessionPlans;
   SessionPlanModel? get selectedSessionPlan => _selectedSessionPlan;
@@ -39,6 +44,10 @@ class TrainerProfileProvider extends ChangeNotifier {
   String? get selectedDate => _selectedDate;
   String? get selectedMonth => _selectedMonth;
   String? get selectedTimeSlot => _selectedTimeSlot;
+
+  bool get isLoadingNextSlot => _isLoadingNextSlot;
+  AvailableSlotModel? get nextAvailableSlot => _nextAvailableSlot;
+  String? get nextSlotError => _nextSlotError;
 
   List<DateInfo> get availableDates {
     if (_availability.isEmpty) return [];
@@ -423,6 +432,37 @@ class TrainerProfileProvider extends ChangeNotifier {
     }
   }
 
+  /// Fetch next available slot for the trainer
+  Future<void> fetchNextAvailableSlot(String trainerId) async {
+    _isLoadingNextSlot = true;
+    _nextSlotError = null;
+    notifyListeners();
+
+    try {
+      final result = await _repository.getNextAvailableSlot(trainerId);
+
+      await result.when(
+        success: (response) async {
+          _nextAvailableSlot = response.availableSlot;
+          _isLoadingNextSlot = false;
+          _nextSlotError = response.message;
+          notifyListeners();
+        },
+        failure: (message, code) {
+          _isLoadingNextSlot = false;
+          _nextSlotError = message;
+          _nextAvailableSlot = null;
+          notifyListeners();
+        },
+      );
+    } catch (e) {
+      _isLoadingNextSlot = false;
+      _nextSlotError = e.toString().replaceAll('Exception: ', '');
+      _nextAvailableSlot = null;
+      notifyListeners();
+    }
+  }
+
   void reset() {
     _trainer = null;
     _sessionPlans = [];
@@ -435,6 +475,9 @@ class TrainerProfileProvider extends ChangeNotifier {
     _sessionType = SessionType.online;
     _isLoading = false;
     _error = null;
+    _nextAvailableSlot = null;
+    _isLoadingNextSlot = false;
+    _nextSlotError = null;
     notifyListeners();
   }
 }

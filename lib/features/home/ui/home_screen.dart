@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:focus_fitness/core/constants/app_assets.dart';
 import 'package:focus_fitness/core/provider/session_popup_provider.dart';
 import 'package:focus_fitness/features/support/widgets/auto_system_ui_wrapper.dart';
+import 'package:focus_fitness/features/trainer/provider/trainer_profile_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
 import 'package:focus_fitness/features/home/widgets/complete_profile_dialog.dart';
@@ -127,8 +128,8 @@ class _HomeScreenState extends State<HomeScreen> {
         userProvider.fetchUserDetails(),
         userProvider.getFcmToken(),
         provider.fetchLinkedTrainer(),
-        workoutProvider.fetchTodaySummary(),
-        workoutProvider.fetchWeeklyProgress(),
+        // workoutProvider.fetchTodaySummary(),
+        // workoutProvider.fetchWeeklyProgress(),
         sessionHistory.fetchBookings(),
         checkuserDetails(),
       ]);
@@ -159,15 +160,23 @@ class _HomeScreenState extends State<HomeScreen> {
           context,
           listen: false,
         );
+        final trainerProfile = Provider.of<TrainerProfileProvider>(
+          context,
+          listen: false,
+        );
 
         await Future.wait([
           provider.fetchLinkedTrainer(),
           userProvider.fetchUserDetails(),
-          workoutProvider.fetchTodaySummary(),
-          workoutProvider.fetchWeeklyProgress(),
-          sessionHistory.fetchBookings(),
+          sessionHistory.fetchBookings(
+            force: true,
+          ), // Force true guarantees isLoading transitions
           checkuserDetails(),
         ]);
+
+        if (provider.trainer != null) {
+          await trainerProfile.fetchNextAvailableSlot(provider.trainer!.id);
+        }
       },
       child: AutoSystemUIWrapper(
         headerColor: Colors.black,
@@ -178,8 +187,8 @@ class _HomeScreenState extends State<HomeScreen> {
               slivers: [
                 // SliverAppBar(toolbarHeight: 0),
                 SliverPersistentHeader(
-                  // pinned: true,
-                  floating: true,
+                  pinned: true,
+                  // floating: true,
                   delegate: PinnedHeaderDelegate(),
                 ),
                 SliverPadding(

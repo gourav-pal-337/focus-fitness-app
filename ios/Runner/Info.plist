@@ -66,6 +66,10 @@
 	<string>This app requires access to the photo library to upload profile photos.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app requires microphone access for recording videos during workouts.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>This app requires calendar access to add your workout sessions to your device calendar.</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>This app requires full calendar access to add and manage your workout sessions.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

@@ -24,15 +24,41 @@ import 'app.dart';
 import 'features/sample/provider/sample_provider.dart';
 import 'core/service/notification_service.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  tz.initializeTimeZones();
   debugPrint("Handling a background message: ${message.messageId}");
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
+
+  try {
+    final dynamic timeZoneResult = await FlutterTimezone.getLocalTimezone();
+    String locationName;
+
+    if (timeZoneResult is String) {
+      locationName = timeZoneResult;
+    } else {
+      // Extract from the TimezoneInfo object (ID is usually the first part)
+      final String raw = timeZoneResult.toString();
+      if (raw.contains('(') && raw.startsWith('TimezoneInfo')) {
+        locationName = raw.split('(')[1].split(',')[0].trim();
+      } else {
+        locationName = raw;
+      }
+    }
+    tz.setLocalLocation(tz.getLocation(locationName));
+  } catch (e) {
+    print('Could not set local timezone: $e. Falling back to UTC.');
+    tz.setLocalLocation(tz.getLocation('UTC'));
+  }
 
   // TODO: Add your actual Stripe publishable key here
   Stripe.publishableKey = 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY';

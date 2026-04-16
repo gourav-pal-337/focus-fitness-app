@@ -55,6 +55,8 @@ class UserModel {
     required this.id,
     required this.role,
     this.fullName,
+    this.forename,
+    this.surname,
     this.profilePicture,
     this.email,
     this.phone,
@@ -79,6 +81,8 @@ class UserModel {
   final String? gender;
   final String role;
   final String? fullName;
+  final String? forename;
+  final String? surname;
   final String? profilePicture;
   final String? email;
   final String? phone;
@@ -100,6 +104,8 @@ class UserModel {
       id: json['id'] as String? ?? '',
       role: json['role'] as String? ?? '',
       fullName: json['fullName'] as String?,
+      forename: json['forename'] as String?,
+      surname: json['surname'] as String?,
       gender: json['gender'] as String?,
       // dob: json['dob'] as String?,
       profilePicture: json['profilePicture'] as String? ?? json['profilePhoto'] as String?,
@@ -131,6 +137,8 @@ class UserModel {
       'id': id,
       'role': role,
       'fullName': fullName,
+      'forename': forename,
+      'surname': surname,
       'profilePicture': profilePicture,
       'email': email,
       'phone': phone,
@@ -154,6 +162,8 @@ class UserModel {
     String? gender,
     String? role,
     String? fullName,
+    String? forename,
+    String? surname,
     String? profilePicture,
     String? email,
     String? phone,
@@ -176,6 +186,8 @@ class UserModel {
       gender: gender ?? this.gender,
       role: role ?? this.role,
       fullName: fullName ?? this.fullName,
+      forename: forename ?? this.forename,
+      surname: surname ?? this.surname,
       profilePicture: profilePicture ?? this.profilePicture,
       email: email ?? this.email,
       phone: phone ?? this.phone,

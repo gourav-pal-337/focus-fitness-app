@@ -149,6 +149,9 @@ class UserProvider extends ChangeNotifier {
   void updateUser(UserModel user) {
     _user = user;
     _error = null;
+    if (_user != null) {
+      LocalStorageService.saveUser(_user!);
+    }
     notifyListeners();
   }
 }

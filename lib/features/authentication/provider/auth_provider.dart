@@ -58,6 +58,16 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool get canProceedWithProfile =>
+      _forename.trim().isNotEmpty && _surname.trim().isNotEmpty;
+
+  // Separate loading states for OTP sending
+  bool _isEmailOtpLoading = false;
+  bool _isPhoneOtpLoading = false;
+
+  bool get isEmailOtpLoading => _isEmailOtpLoading;
+  bool get isPhoneOtpLoading => _isPhoneOtpLoading;
+
   // Mobile Number Entry
   String _countryCode = '+44';
   String _countryFlag = '🇬🇧';
@@ -635,27 +645,30 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> sendEmailOtp(String email) async {
-    _setAuthState(AuthState.loading);
+    _isEmailOtpLoading = true;
     _errorMessage = '';
+    notifyListeners();
 
     try {
       final result = await _repository.sendEmailOtp(email);
+      _isEmailOtpLoading = false;
       return result.when(
         success: (response) async {
           _otpExpiresAt = response.expiresAt;
-          _setAuthState(AuthState.idle);
+          notifyListeners();
           return true;
         },
         failure: (message, code) {
           _errorMessage = message;
           _errorCode = code;
-          _setAuthState(AuthState.error);
+          notifyListeners();
           return false;
         },
       );
     } catch (e) {
+      _isEmailOtpLoading = false;
       _errorMessage = e.toString().replaceAll('Exception: ', '');
-      _setAuthState(AuthState.error);
+      notifyListeners();
       return false;
     }
   }
@@ -685,27 +698,30 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<bool> sendPhoneOtp(String countryCode, String phone) async {
-    _setAuthState(AuthState.loading);
+    _isPhoneOtpLoading = true;
     _errorMessage = '';
+    notifyListeners();
 
     try {
       final result = await _repository.sendPhoneOtp(countryCode, phone);
+      _isPhoneOtpLoading = false;
       return result.when(
         success: (response) async {
           _otpExpiresAt = response.expiresAt;
-          _setAuthState(AuthState.idle);
+          notifyListeners();
           return true;
         },
         failure: (message, code) {
           _errorMessage = message;
           _errorCode = code;
-          _setAuthState(AuthState.error);
+          notifyListeners();
           return false;
         },
       );
     } catch (e) {
+      _isPhoneOtpLoading = false;
       _errorMessage = e.toString().replaceAll('Exception: ', '');
-      _setAuthState(AuthState.error);
+      notifyListeners();
       return false;
     }
   }

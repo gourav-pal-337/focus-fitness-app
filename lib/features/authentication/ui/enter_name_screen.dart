@@ -135,13 +135,11 @@ class _ProceedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AuthProvider>();
-    final canProceed = provider.forename.trim().isNotEmpty && 
-                      provider.surname.trim().isNotEmpty;
 
     return CustomButton(
       text: 'Continue',
       width: double.infinity,
-      isEnabled: canProceed,
+      isEnabled: provider.canProceedWithProfile,
       onPressed: () {
         context.push(SignupWithEmailRoute.path);
       },

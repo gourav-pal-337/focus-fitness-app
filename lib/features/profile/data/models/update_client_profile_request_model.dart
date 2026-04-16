@@ -20,9 +20,13 @@ class UpdateClientProfileRequestModel {
     this.tfaVerified,
     this.isTfaEnabled,
     this.profilePicture,
+    this.forename,
+    this.surname,
   });
 
   final String? fullName;
+  final String? forename;
+  final String? surname;
   final String? preferredName;
   final String? dateOfBirth; // ISO 8601 date string (YYYY-MM-DD)
   final int? age; // Calculated from dateOfBirth
@@ -105,6 +109,8 @@ class UpdateClientProfileRequestModel {
     addIfNotNull('tfaVerified', tfaVerified);
     addIfNotNull('isTfaEnabled', isTfaEnabled);
     addIfNotNull('profilePicture', profilePicture);
+    addIfNotNull('forename', forename);
+    addIfNotNull('surname', surname);
 
     return data;
   }

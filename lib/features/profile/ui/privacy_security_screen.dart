@@ -31,30 +31,30 @@ class PrivacySecurityScreen extends StatelessWidget {
                       },
                     ),
                     Divider(color: AppColors.grey200, thickness: 1, height: 0),
-                    PrivacySecurityOption(
-                      label: 'Privacy Policy',
-                      onTap: () {
-                        context.pushNamed(
-                          LegalRoute.name,
-                          queryParameters: {
-                            'type': 'privacy_policy',
-                            'title': 'Privacy Policy',
-                          },
-                        );
-                      },
-                    ),
-                    const Divider(
-                      color: AppColors.grey200,
-                      thickness: 1,
-                      height: 0,
-                    ),
+                    // PrivacySecurityOption(
+                    //   label: 'Privacy Policy',
+                    //   onTap: () {
+                    //     context.pushNamed(
+                    //       LegalRoute.name,
+                    //       queryParameters: {
+                    //         'type': 'privacy_policy',
+                    //         'title': 'Privacy Policy',
+                    //       },
+                    //     );
+                    //   },
+                    // ),
+                    // const Divider(
+                    //   color: AppColors.grey200,
+                    //   thickness: 1,
+                    //   height: 0,
+                    // ),
                     PrivacySecurityOption(
                       label: 'Terms of Use',
                       onTap: () {
                         context.pushNamed(
                           LegalRoute.name,
                           queryParameters: {
-                            'type': 'terms_of_use',
+                            'type': 'client_terms_of_use',
                             'title': 'Terms of Use',
                           },
                         );

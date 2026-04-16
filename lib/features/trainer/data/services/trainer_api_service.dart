@@ -11,6 +11,7 @@ import '../models/trainer_profile_response_model.dart';
 import '../models/unlink_trainer_response_model.dart';
 import '../models/payment_booking_models.dart';
 import '../models/check_booking_response_model.dart';
+import '../models/next_available_slot_response_model.dart';
 
 /// API service for trainer operations
 class TrainerApiService {
@@ -506,6 +507,47 @@ class TrainerApiService {
           message: response.msg.isNotEmpty
               ? response.msg
               : 'Failed to check trainer availability',
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Get next available slot for a trainer
+  Future<NextAvailableSlotResponseModel> getNextAvailableSlot(String trainerId) async {
+    try {
+      final response = await _apiHitter.getApiResponse(
+        Endpoints.getNextAvailableSlot(trainerId),
+      );
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        return NextAvailableSlotResponseModel.fromJson(responseData);
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage = (responseData['error'] as String?) ??
+              (responseData['message'] as String?) ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage.isNotEmpty
+                ? errorMessage
+                : 'Failed to get next available slot',
+            statusCode: response.response?.statusCode,
+          );
+        }
+        throw ApiException(
+          message: response.msg.isNotEmpty
+              ? response.msg
+              : 'Failed to get next available slot',
           statusCode: response.response?.statusCode,
         );
       }
