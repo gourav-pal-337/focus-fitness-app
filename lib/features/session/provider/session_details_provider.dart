@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:focus_fitness/features/trainer/data/models/trainer_profile_response_model.dart';
+import 'package:focus_fitness/features/trainer/data/repository/trainer_repository.dart';
 import '../data/models/booking_payment_response_model.dart';
 import '../data/models/reschedule_models.dart';
 
@@ -9,6 +11,7 @@ import '../../trainer/utils/date_time_utils.dart';
 
 class SessionDetailsProvider extends ChangeNotifier {
   final BookingRepository _repository = BookingRepository();
+  final TrainerRepository _trainerRepository = TrainerRepository();
 
   int _rating = 0;
   String _feedback = '';
@@ -158,25 +161,49 @@ class SessionDetailsProvider extends ChangeNotifier {
   List<DayAvailability> _availability = [];
   bool _isLoadingAvailability = false;
   String? _availabilityError;
+  String? _rescheduleCheckError;
   bool _isRescheduling = false;
   String? _selectedMonth;
+  TrainerProfileInfo? _trainer;
+  bool _isCheckingAvailability = false;
+  bool _isSlotAvailable = true;
+  bool _isPreparingPayment = false;
 
   List<DayAvailability> get availability => _availability;
   bool get isLoadingAvailability => _isLoadingAvailability;
   String? get availabilityError => _availabilityError;
+  String? get rescheduleCheckError => _rescheduleCheckError;
   bool get isRescheduling => _isRescheduling;
   String? get selectedMonth => _selectedMonth;
+  TrainerProfileInfo? get trainer => _trainer;
+  bool get isCheckingAvailability => _isCheckingAvailability;
+  bool get isSlotAvailable => _isSlotAvailable;
+  bool get isPreparingPayment => _isPreparingPayment;
 
   List<String> get uniqueMonths {
-    return _availability.map((day) {
-      final dateTime = DateTime.parse(day.date);
-      return DateTimeUtils.getMonthAbbreviation(dateTime.month);
-    }).toSet().toList();
+    return _availability
+        .map((day) {
+          final dateTime = DateTime.parse(day.date);
+          return DateTimeUtils.getMonthAbbreviation(dateTime.month);
+        })
+        .toSet()
+        .toList();
   }
 
   void selectMonth(String month) {
     if (_selectedMonth == month) return;
     _selectedMonth = month;
+    notifyListeners();
+  }
+
+  void clearAvailabilityError() {
+    _availabilityError = null;
+    _rescheduleCheckError = null;
+    notifyListeners();
+  }
+
+  void setIsPreparingPayment(bool value) {
+    _isPreparingPayment = value;
     notifyListeners();
   }
 
@@ -203,6 +230,7 @@ class SessionDetailsProvider extends ChangeNotifier {
 
       await result.when(
         success: (response) async {
+          _trainer = response.trainer;
           // Group flat slots by date
           final Map<String, List<RescheduleSlot>> grouped = {};
           for (final slot in response.availableSlots) {
@@ -223,7 +251,9 @@ class SessionDetailsProvider extends ChangeNotifier {
           // Set initial selected month
           if (_availability.isNotEmpty) {
             final firstDate = DateTime.parse(_availability.first.date);
-            _selectedMonth = DateTimeUtils.getMonthAbbreviation(firstDate.month);
+            _selectedMonth = DateTimeUtils.getMonthAbbreviation(
+              firstDate.month,
+            );
           }
 
           _isLoadingAvailability = false;
@@ -239,6 +269,52 @@ class SessionDetailsProvider extends ChangeNotifier {
       _isLoadingAvailability = false;
       _availabilityError = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
+    }
+  }
+
+  /// Check trainer availability for the selected reschedule slot
+  Future<bool> checkRescheduleAvailability({
+    required String startTime,
+    required String endTime,
+  }) async {
+    if (_trainer == null) {
+      return false;
+    }
+
+    _isCheckingAvailability = true;
+    _rescheduleCheckError = null;
+    notifyListeners();
+
+    try {
+      final result = await _trainerRepository.checkTrainerBooking(
+        trainerId: _trainer!.id,
+        startTime: startTime,
+        endTime: endTime,
+      );
+
+      return await result.when(
+        success: (response) async {
+          _isCheckingAvailability = false;
+          _isSlotAvailable = !response.hasBooking;
+          if (response.hasBooking) {
+            _rescheduleCheckError =
+                'This time slot is already booked. Please choose another time.';
+          }
+          notifyListeners();
+          return _isSlotAvailable;
+        },
+        failure: (message, code) {
+          _isCheckingAvailability = false;
+          _rescheduleCheckError = message;
+          notifyListeners();
+          return false;
+        },
+      );
+    } catch (e) {
+      _isCheckingAvailability = false;
+      _rescheduleCheckError = e.toString().replaceAll('Exception: ', '');
+      notifyListeners();
+      return false;
     }
   }
 

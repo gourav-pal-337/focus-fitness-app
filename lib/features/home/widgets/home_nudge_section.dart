@@ -26,7 +26,7 @@ class _HomeNudgeSectionState extends State<HomeNudgeSection> {
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    // _fetchData();
   }
 
   Future<void> _fetchData() async {
@@ -159,29 +159,29 @@ class _HomeNudgeSectionState extends State<HomeNudgeSection> {
         final isLinked =
             trainerProvider.isLinked && trainerProvider.trainer != null;
 
-        if (isLinked) {
-          bool shouldFetch = false;
+        // if (isLinked) {
+        //   bool shouldFetch = false;
 
-          // 1. Have we ever fetched for this trainer? If the provider just loaded asynchronously, we catch it here.
-          if (!_hasFetchedForLinkedTrainer) {
-            _hasFetchedForLinkedTrainer = true;
-            shouldFetch = true;
-          }
+        //   // 1. Have we ever fetched for this trainer? If the provider just loaded asynchronously, we catch it here.
+        //   if (!_hasFetchedForLinkedTrainer) {
+        //     _hasFetchedForLinkedTrainer = true;
+        //     shouldFetch = true;
+        //   }
 
-          // 2. Did the user pull-to-refresh on the Home screen? (session history went from loading -> done)
-          if (_previousSessionLoading && !sessionHistory.isLoading) {
-            shouldFetch = true;
-          }
+        //   // 2. Did the user pull-to-refresh on the Home screen? (session history went from loading -> done)
+        //   if (_previousSessionLoading && !sessionHistory.isLoading) {
+        //     shouldFetch = true;
+        //   }
 
-          if (shouldFetch) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              trainerProfile.fetchTrainerProfile(trainerProvider.trainer!.id);
-              trainerProfile.fetchNextAvailableSlot(
-                trainerProvider.trainer!.id,
-              );
-            });
-          }
-        }
+        //   if (shouldFetch) {
+        //     // WidgetsBinding.instance.addPostFrameCallback((_) {
+        //     //   trainerProfile.fetchTrainerProfile(trainerProvider.trainer!.id);
+        //     //   trainerProfile.fetchNextAvailableSlot(
+        //     //     trainerProvider.trainer!.id,
+        //     //   );
+        //     // });
+        //   }
+        // }
 
         // Delaying state update until end of build
         WidgetsBinding.instance.addPostFrameCallback((_) {

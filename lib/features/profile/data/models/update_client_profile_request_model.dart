@@ -22,6 +22,7 @@ class UpdateClientProfileRequestModel {
     this.profilePicture,
     this.forename,
     this.surname,
+    this.timezone,
   });
 
   final String? fullName;
@@ -46,6 +47,7 @@ class UpdateClientProfileRequestModel {
   final bool? tfaVerified;
   final bool? isTfaEnabled;
   final String? profilePicture;
+  final String? timezone;
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
@@ -111,6 +113,7 @@ class UpdateClientProfileRequestModel {
     addIfNotNull('profilePicture', profilePicture);
     addIfNotNull('forename', forename);
     addIfNotNull('surname', surname);
+    addIfNotNull('timezone', timezone);
 
     return data;
   }

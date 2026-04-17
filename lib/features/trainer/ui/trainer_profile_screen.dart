@@ -218,6 +218,7 @@ class _BookingContent extends StatelessWidget {
             child: PaymentBreakdownWidget(
               sessionPrice: sessionPlan.feeAmount,
               currency: sessionPlan.feeCurrency,
+              vatConfig: provider.trainer?.vatConfig,
             ),
           ),
       ],
@@ -408,8 +409,18 @@ class _BookSessionButton extends StatelessWidget {
                 ? () async {
                     final sessionPlan = provider.selectedSessionPlan;
                     final baseAmount = sessionPlan?.feeAmount ?? 100.00;
+
+                    // Use trainer-specific VAT if available
+                    final vatConfig = provider.trainer?.vatConfig;
+                    final vatPercent = vatConfig != null
+                        ? (vatConfig.mode == 'percentage'
+                            ? vatConfig.percent
+                            : 0.0)
+                        : null;
+
                     final totalAmount = settingsProvider.calculateTotalAmount(
                       baseAmount,
+                      vatPercent: vatPercent,
                     );
                     final trainerId = provider.trainer?.id ?? '';
                     final sessionPlanId = sessionPlan?.id ?? '';

@@ -52,18 +52,18 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
               title: 'Session History',
               backgroundImage:
                   'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800',
-              actions: [
-                IconButton(
-                  icon: Icon(
-                    Icons.more_vert,
-                    size: 24.sp,
-                    color: AppColors.background,
-                  ),
-                  onPressed: () {
-                    // TODO: Handle menu
-                  },
-                ),
-              ],
+              // actions: [
+              //   IconButton(
+              //     icon: Icon(
+              //       Icons.more_vert,
+              //       size: 24.sp,
+              //       color: AppColors.background,
+              //     ),
+              //     onPressed: () {
+              //       // TODO: Handle menu
+              //     },
+              //   ),
+              // ],
             ),
             SliverPersistentHeader(
               pinned: true,

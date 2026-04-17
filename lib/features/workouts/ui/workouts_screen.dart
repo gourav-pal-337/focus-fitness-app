@@ -51,19 +51,42 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              CustomAppBar(
-                onBack: () {
-                  context.go(HomeRoute.path);
-                },
-                title: 'Workout',
-                actions: [
-                  IconButton(
-                    onPressed: () {
-                      context.push(ManualsRoute.path);
+              Consumer<WorkoutProvider>(
+                builder: (context, provider, _) {
+                  return CustomAppBar(
+                    onBack: () {
+                      context.go(HomeRoute.path);
                     },
-                    icon: Icon(Icons.menu_book, color: AppColors.textPrimary),
-                  ),
-                ],
+                    title: 'Workout',
+                    actions: [
+                      if (provider.isLoading && provider.workouts.isNotEmpty)
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8.w),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 14.w,
+                                height: 14.w,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      IconButton(
+                        onPressed: () {
+                          context.push(ManualsRoute.path);
+                        },
+                        icon: Icon(Icons.menu_book, color: AppColors.textPrimary),
+                      ),
+                    ],
+                  );
+                },
               ),
               DateSelector(
                 selectedDate: _selectedDate,
@@ -84,11 +107,8 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
                     children: [
                       Consumer<WorkoutProvider>(
                         builder: (context, provider, _) {
-                          if (provider.isLoading) {
-                            return const SizedBox(
-                              height: 120,
-                              child: LoadingShimmer(),
-                            );
+                          if (provider.isLoading && provider.workouts.isEmpty) {
+                            return const LoadingShimmer();
                           }
 
                           if (provider.errorMessage != null &&

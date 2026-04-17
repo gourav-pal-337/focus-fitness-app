@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:focus_fitness/core/constants/app_assets.dart';
 import 'package:focus_fitness/core/provider/session_popup_provider.dart';
+import 'package:focus_fitness/features/home/widgets/home_nudge_section.dart';
 import 'package:focus_fitness/features/support/widgets/auto_system_ui_wrapper.dart';
 import 'package:focus_fitness/features/trainer/provider/trainer_profile_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -14,7 +15,6 @@ import 'package:provider/provider.dart';
 import 'package:focus_fitness/features/profile/provider/account_details_provider.dart';
 import 'package:focus_fitness/features/profile/provider/edit_profile_details_provider.dart';
 import 'package:focus_fitness/features/profile/ui/edit_profile_details_screen.dart';
-import 'package:focus_fitness/features/home/widgets/home_nudge_section.dart';
 import '../../session/provider/session_history_provider.dart';
 import '../../workouts/providers/workout_provider.dart';
 

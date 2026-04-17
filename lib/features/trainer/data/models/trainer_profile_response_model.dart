@@ -43,6 +43,9 @@ class TrainerProfileInfo {
     required this.clientCount,
     required this.experience,
     required this.expertiseAreas,
+    this.isStripeConnected = false,
+    this.isPayPalConnected = false,
+    this.vatConfig,
   });
 
   final String id;
@@ -55,6 +58,9 @@ class TrainerProfileInfo {
   final int clientCount;
   final int experience;
   final List<String> expertiseAreas;
+  final bool isStripeConnected;
+  final bool isPayPalConnected;
+  final VatConfig? vatConfig;
 
   factory TrainerProfileInfo.fromJson(Map<String, dynamic> json) {
     return TrainerProfileInfo(
@@ -72,6 +78,31 @@ class TrainerProfileInfo {
       expertiseAreas: json['expertiseAreas'] != null
           ? List<String>.from(json['expertiseAreas'] as List)
           : [],
+      isStripeConnected: json['isStripeConnected'] as bool? ?? false,
+      isPayPalConnected: json['isPayPalConnected'] as bool? ?? false,
+      vatConfig: json['vatConfig'] != null
+          ? VatConfig.fromJson(json['vatConfig'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+}
+
+class VatConfig {
+  VatConfig({
+    required this.mode,
+    required this.percent,
+    required this.showVatLine,
+  });
+
+  final String mode;
+  final double percent;
+  final bool showVatLine;
+
+  factory VatConfig.fromJson(Map<String, dynamic> json) {
+    return VatConfig(
+      mode: json['mode'] as String? ?? 'na',
+      percent: (json['percent'] as num?)?.toDouble() ?? 0.0,
+      showVatLine: json['showVatLine'] as bool? ?? false,
     );
   }
 }

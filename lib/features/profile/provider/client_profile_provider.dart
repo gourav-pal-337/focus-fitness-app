@@ -6,6 +6,7 @@ import '../data/models/client_profile_model.dart';
 import '../data/repository/profile_repository.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
+import '../../../../core/service/local_storage_service.dart';
 
 /// Provider to manage client profile state
 class ClientProfileProvider extends ChangeNotifier {
@@ -31,6 +32,9 @@ class ClientProfileProvider extends ChangeNotifier {
       await result.when(
         success: (response) async {
           _profile = response.profile;
+          if (_profile?.timezone != null) {
+            await LocalStorageService.setTimezone(_profile!.timezone!);
+          }
           _error = null;
           _isLoading = false;
           notifyListeners();

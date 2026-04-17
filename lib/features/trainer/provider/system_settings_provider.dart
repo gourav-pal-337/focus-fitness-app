@@ -89,14 +89,15 @@ class SystemSettingsProvider extends ChangeNotifier {
   }
 
   /// Calculate total charged amount including platform fee and VAT
-  double calculateTotalAmount(double sessionPrice) {
+  double calculateTotalAmount(double sessionPrice, {double? vatPercent}) {
     if (_feeSettings == null) return sessionPrice;
 
     final serviceFee = _feeSettings!.platformFeeType == 'fixed'
         ? _feeSettings!.platformFee
         : (sessionPrice * (_feeSettings!.platformFee / 100));
 
-    final vat = sessionPrice * (_feeSettings!.vatTaxPercent / 100);
+    final effectiveVatPercent = vatPercent ?? _feeSettings!.vatTaxPercent;
+    final vat = sessionPrice * (effectiveVatPercent / 100);
 
     return sessionPrice + serviceFee + vat;
   }

@@ -97,67 +97,81 @@ class WorkoutProvider extends ChangeNotifier {
         normalizedDate.month == normalizedToday.month &&
         normalizedDate.day == normalizedToday.day;
 
+    final dateChanged =
+        _lastFetchedDate == null ||
+        _lastFetchedDate!.year != normalizedDate.year ||
+        _lastFetchedDate!.month != normalizedDate.month ||
+        _lastFetchedDate!.day != normalizedDate.day;
+
     _selectedDate = normalizedDate;
-    debugPrint('normalizedDate: $normalizedDate');
-    // Fast path: load cached workout for today to avoid extra API calls.
-    if (isToday && !force) {
-      debugPrint('isToday: $isToday');
-      final dateKey = _dateKey(normalizedDate);
-      final cachedJson = await LocalStorageService.getWorkoutCache(dateKey);
-      if (cachedJson != null && cachedJson.isNotEmpty) {
-        try {
-          final decoded = jsonDecode(cachedJson);
-          if (decoded is Map<String, dynamic>) {
-            final response = WorkoutDayResponseModel.fromJson(decoded);
-            _workouts = response.progress;
-            _isRestDay = response.isRestDay;
-            _dayTitle = response.dayTitle;
-            _lastFetchedDate = normalizedDate;
-            _errorMessage = null;
-            notifyListeners();
-            return;
-          } else if (decoded is List) {
-            _workouts = decoded
-                .whereType<Map<String, dynamic>>()
-                .map(WorkoutExerciseModel.fromJson)
-                .toList();
-            _isRestDay = false;
-            _dayTitle = null;
-            _lastFetchedDate = normalizedDate;
-            _errorMessage = null;
-            notifyListeners();
-            return;
+    
+    // Clear previous state and show loading if date changed to avoid showing stale data
+    if (dateChanged) {
+      _workouts = [];
+      _isRestDay = false;
+      _dayTitle = null;
+      _errorMessage = null;
+      _isLoading = true;
+      notifyListeners();
+    }
+
+    // 1. Try to load from memory/cache first if not forced
+    if (!force) {
+      // If date didn't change and we have workouts, we already have it in memory
+      if (!dateChanged && _workouts.isNotEmpty) {
+        // Continue to fetch in background to get latest
+      } else {
+        // Try local cache
+        final dateKey = _dateKey(normalizedDate);
+        final cachedJson = await LocalStorageService.getWorkoutCache(dateKey);
+        if (cachedJson != null && cachedJson.isNotEmpty) {
+          try {
+            final decoded = jsonDecode(cachedJson);
+            if (decoded is Map<String, dynamic>) {
+              final response = WorkoutDayResponseModel.fromJson(decoded);
+              _workouts = response.progress;
+              _isRestDay = response.isRestDay;
+              _dayTitle = response.dayTitle;
+              _errorMessage = null;
+              // We don't reset _isLoading here because we still want to fetch latest from network
+              notifyListeners();
+            }
+          } catch (_) {
+            // Ignore cache parse errors
           }
-        } catch (_) {
-          // Ignore cache parse errors and fall back to API.
         }
       }
     }
-    debugPrint('normalizedDate lastFetchedDate: $_lastFetchedDate');
+
+    // 2. Decide if we should skip the network call
+    // We only skip if NOT forced, NOT today, and we already have it in memory
     final shouldSkip =
         !force &&
-        _lastFetchedDate != null &&
-        _lastFetchedDate!.year == normalizedDate.year &&
-        _lastFetchedDate!.month == normalizedDate.month &&
-        _lastFetchedDate!.day == normalizedDate.day;
+        !isToday &&
+        !dateChanged &&
+        _workouts.isNotEmpty;
 
     if (shouldSkip) {
+      _isLoading = false;
       notifyListeners();
       return;
     }
 
+    // 3. Perform network fetch
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
-    debugPrint('shouldSkip: $shouldSkip');
+
     try {
-      final response = await _apiService.getWorkoutProgressByDate(normalizedDate);
+      final response =
+          await _apiService.getWorkoutProgressByDate(normalizedDate);
       _workouts = response.progress;
       _isRestDay = response.isRestDay;
       _dayTitle = response.dayTitle;
       _lastFetchedDate = normalizedDate;
+      _errorMessage = null;
 
-      // Cache today only (per UX/performance requirement).
+      // Cache for today (or always cache for better offline support)
       if (isToday) {
         final dateKey = _dateKey(normalizedDate);
         final cacheJson = jsonEncode(response.toJson());

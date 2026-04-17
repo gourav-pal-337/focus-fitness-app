@@ -339,8 +339,8 @@ class DateTimeUtils {
       hour = 0;
     }
 
-    // Create DateTime for start time in UTC
-    final startDateTime = DateTime.utc(
+    // Create DateTime for start time in local time
+    final startDateTime = DateTime(
       dateInfo.dateTime.year,
       dateInfo.dateTime.month,
       dateInfo.dateTime.day,
@@ -351,9 +351,9 @@ class DateTimeUtils {
     // Create DateTime for end time (start + duration)
     final endDateTime = startDateTime.add(Duration(minutes: durationMinutes));
 
-    // Convert to ISO 8601 format (already in UTC)
-    final startTime = startDateTime.toIso8601String();
-    final endTime = endDateTime.toIso8601String();
+    // Convert to ISO 8601 format in UTC
+    final startTime = startDateTime.toUtc().toIso8601String();
+    final endTime = endDateTime.toUtc().toIso8601String();
 
     return {'startTime': startTime, 'endTime': endTime};
   }

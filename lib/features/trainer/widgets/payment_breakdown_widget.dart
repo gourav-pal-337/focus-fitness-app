@@ -6,15 +6,18 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../provider/system_settings_provider.dart';
+import '../data/models/trainer_profile_response_model.dart';
 
 class PaymentBreakdownWidget extends StatefulWidget {
   final double sessionPrice;
   final String? currency;
+  final VatConfig? vatConfig;
 
   const PaymentBreakdownWidget({
     super.key,
     required this.sessionPrice,
     this.currency,
+    this.vatConfig,
   });
 
   @override
@@ -44,27 +47,40 @@ class _PaymentBreakdownWidgetState extends State<PaymentBreakdownWidget> {
         }
 
         // 1. Calculate Service Fee
-        final serviceFeeValue = settings.platformFeeType == 'fixed'
-            ? settings.platformFee
-            : (widget.sessionPrice * (settings.platformFee / 100));
+        final serviceFeeValue =
+            settings.platformFeeType == 'fixed'
+                ? settings.platformFee
+                : (widget.sessionPrice * (settings.platformFee / 100));
 
         final displayPlatformFeeValue = CurrencyFormatter.format(
           serviceFeeValue,
           settings.platformFeeCurrency,
         );
-        final displayPlatformFeeRate = settings.platformFeeType == 'fixed'
-            ? ''
-            : ' (${settings.platformFee.toStringAsFixed(0)}%)';
+        final displayPlatformFeeRate =
+            settings.platformFeeType == 'fixed'
+                ? ''
+                : ' (${settings.platformFee.toStringAsFixed(0)}%)';
 
-        // 2. Calculate VAT (always percentage)
-        final vatValue = widget.sessionPrice * (settings.vatTaxPercent / 100);
+        // 2. Calculate VAT
+        final bool showVat = widget.vatConfig?.showVatLine ?? true;
+        final double vatPercent =
+            widget.vatConfig != null
+                ? (widget.vatConfig!.mode == 'percentage'
+                    ? widget.vatConfig!.percent
+                    : 0.0)
+                : settings.vatTaxPercent;
+
+        final vatValue = widget.sessionPrice * (vatPercent / 100);
         final displayVatValue = CurrencyFormatter.format(
           vatValue,
           settings.platformFeeCurrency,
         );
 
         // 3. Calculate Total
-        final totalCharged = provider.calculateTotalAmount(widget.sessionPrice);
+        final totalCharged = provider.calculateTotalAmount(
+          widget.sessionPrice,
+          vatPercent: vatPercent,
+        );
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,12 +105,14 @@ class _PaymentBreakdownWidgetState extends State<PaymentBreakdownWidget> {
               value: displayPlatformFeeValue,
               isSubText: true,
             ),
-            SizedBox(height: AppSpacing.sm),
-            _PaymentRow(
-              label: 'Tax (VAT ${settings.vatTaxPercent.toStringAsFixed(0)}%)',
-              value: displayVatValue,
-              isSubText: true,
-            ),
+            if (showVat) ...[
+              SizedBox(height: AppSpacing.sm),
+              _PaymentRow(
+                label: 'Tax (VAT ${vatPercent.toStringAsFixed(0)}%)',
+                value: displayVatValue,
+                isSubText: true,
+              ),
+            ],
             SizedBox(height: AppSpacing.md),
             const Divider(color: AppColors.grey75),
             SizedBox(height: AppSpacing.md),

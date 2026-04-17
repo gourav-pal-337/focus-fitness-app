@@ -11,6 +11,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/buttons/custom_bottom.dart';
 import '../../../core/widgets/custom_app_bar.dart';
+import '../provider/trainer_profile_provider.dart';
 import '../provider/payment_method_provider.dart';
 import '../provider/system_settings_provider.dart';
 import '../widgets/payment_verification_sheet.dart';
@@ -20,7 +21,7 @@ import '../../subscriptions/data/repository/subscription_repository.dart';
 import '../../authentication/data/repository/auth_repository.dart'
     show ResultExtension;
 
-class PaymentMethodScreen extends StatelessWidget {
+class PaymentMethodScreen extends StatefulWidget {
   const PaymentMethodScreen({
     super.key,
     this.amount = 100.00,
@@ -61,7 +62,39 @@ class PaymentMethodScreen extends StatelessWidget {
   final String? currency;
 
   @override
+  State<PaymentMethodScreen> createState() => _PaymentMethodScreenState();
+}
+
+class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _setInitialPaymentMethod();
+  }
+
+  void _setInitialPaymentMethod() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final trainerProvider = context.read<TrainerProfileProvider>();
+      final paymentProvider = context.read<PaymentMethodProvider>();
+      final trainer = trainerProvider.trainer;
+
+      if (trainer != null) {
+        if (trainer.isStripeConnected) {
+          paymentProvider.selectPaymentType(PaymentType.creditCard);
+        } else if (trainer.isPayPalConnected) {
+          paymentProvider.selectPaymentType(PaymentType.paypal);
+        }
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final trainerProvider = context.watch<TrainerProfileProvider>();
+    final trainer = trainerProvider.trainer;
+    final isStripeConnected = trainer?.isStripeConnected ?? false;
+    final isPayPalConnected = trainer?.isPayPalConnected ?? false;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
@@ -77,57 +110,83 @@ class PaymentMethodScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _PaymentOption(
-                      title: 'Paypal',
-                      subtitle: 'email@website.com',
-                      paymentType: PaymentType.paypal,
-                      trainerId: trainerId,
-                      sessionPlanId: sessionPlanId,
-                      dateId: dateId,
-                      timeSlot: timeSlot,
-                      durationMinutes: durationMinutes,
-                      availableDates: availableDates,
-                      amount: amount,
-                      isSubscription: isSubscription,
-                      planType: planType,
-                    ),
-                    _PaymentOption(
-                      title: 'Stripe',
-                      subtitle: 'Credit Card / Digital Wallet',
-                      paymentType: PaymentType
-                          .creditCard, // Use creditCard internally for Stripe
-                      trainerId: trainerId,
-                      sessionPlanId: sessionPlanId,
-                      dateId: dateId,
-                      timeSlot: timeSlot,
-                      durationMinutes: durationMinutes,
-                      availableDates: availableDates,
-                      amount: amount,
-                      isSubscription: isSubscription,
-                      planType: planType,
-                    ),
+                    if (!isPayPalConnected && !isStripeConnected)
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 40.h),
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.payments_outlined,
+                                color: AppColors.grey400,
+                                size: 64.sp,
+                              ),
+
+                              SizedBox(height: 16.h),
+                              Text(
+                                "No connected payment account\nfound for this trainer.",
+                                textAlign: TextAlign.center,
+                                style: AppTextStyle.text16Medium.copyWith(
+                                  color: AppColors.grey400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    if (isPayPalConnected)
+                      _PaymentOption(
+                        title: 'Paypal',
+                        subtitle: 'Pay securely with your PayPal account',
+                        paymentType: PaymentType.paypal,
+                        trainerId: widget.trainerId,
+                        sessionPlanId: widget.sessionPlanId,
+                        dateId: widget.dateId,
+                        timeSlot: widget.timeSlot,
+                        durationMinutes: widget.durationMinutes,
+                        availableDates: widget.availableDates,
+                        amount: widget.amount,
+                        isSubscription: widget.isSubscription,
+                        planType: widget.planType,
+                      ),
+                    if (isStripeConnected)
+                      _PaymentOption(
+                        title: 'Stripe',
+                        subtitle: 'Credit Card / Digital Wallet',
+                        paymentType: PaymentType.creditCard,
+                        trainerId: widget.trainerId,
+                        sessionPlanId: widget.sessionPlanId,
+                        dateId: widget.dateId,
+                        timeSlot: widget.timeSlot,
+                        durationMinutes: widget.durationMinutes,
+                        availableDates: widget.availableDates,
+                        amount: widget.amount,
+                        isSubscription: widget.isSubscription,
+                        planType: widget.planType,
+                      ),
                   ],
                 ),
               ),
             ),
-            _PayButton(
-              amount: amount,
-              baseAmount: baseAmount,
-              trainerId: trainerId,
-              sessionPlanId: sessionPlanId,
-              dateId: dateId,
-              timeSlot: timeSlot,
-              durationMinutes: durationMinutes,
-              availableDates: availableDates,
-              isSubscription: isSubscription,
-              planType: planType,
-              trainerName: trainerName,
-              sessionDate: sessionDate,
-              sessionTime: sessionTime,
-              sessionStartTime: sessionStartTime,
-              mode: mode,
-              currency: currency,
-            ),
+            if (isPayPalConnected || isStripeConnected)
+              _PayButton(
+                amount: widget.amount,
+                baseAmount: widget.baseAmount,
+                trainerId: widget.trainerId,
+                sessionPlanId: widget.sessionPlanId,
+                dateId: widget.dateId,
+                timeSlot: widget.timeSlot,
+                durationMinutes: widget.durationMinutes,
+                availableDates: widget.availableDates,
+                isSubscription: widget.isSubscription,
+                planType: widget.planType,
+                trainerName: widget.trainerName,
+                sessionDate: widget.sessionDate,
+                sessionTime: widget.sessionTime,
+                sessionStartTime: widget.sessionStartTime,
+                mode: widget.mode,
+                currency: widget.currency,
+              ),
           ],
         ),
       ),

@@ -5,6 +5,8 @@ import '../utils/date_time_utils.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
 import '../data/models/payment_booking_models.dart';
+import '../../../core/service/local_storage_service.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 enum PaymentType { paypal, applePay, creditCard }
 
@@ -62,13 +64,20 @@ class PaymentMethodProvider extends ChangeNotifier {
         durationMinutes: durationMinutes,
       );
 
+      // Get timezone
+      String? timezone = await LocalStorageService.getTimezone();
+      if (timezone == null || timezone.isEmpty) {
+        final info = await FlutterTimezone.getLocalTimezone();
+        timezone = info.identifier;
+      }
+
       // Create request model
       final request = BookSessionRequestModel(
         trainerId: trainerId,
         sessionPlanId: sessionPlanId,
         startTime: timestamps['startTime']!,
         endTime: timestamps['endTime']!,
-        timezone: 'UTC',
+        timezone: timezone ?? 'UTC',
         notes: notes,
         mode: mode,
       );
@@ -142,6 +151,13 @@ class PaymentMethodProvider extends ChangeNotifier {
         durationMinutes: durationMinutes,
       );
 
+      // Get timezone
+      String? timezone = await LocalStorageService.getTimezone();
+      if (timezone == null || timezone.isEmpty) {
+        final info = await FlutterTimezone.getLocalTimezone();
+        timezone = info.identifier;
+      }
+
       // Create request model
       final request = InitiatePaymentRequestModel(
         trainerId: trainerId,
@@ -149,7 +165,7 @@ class PaymentMethodProvider extends ChangeNotifier {
         startTime: timestamps['startTime']!,
         endTime: timestamps['endTime']!,
         provider: provider,
-        timezone: 'UTC',
+        timezone: timezone ?? 'UTC',
         notes: notes,
         serviceFee: serviceFee,
         vatAmount: vatAmount,

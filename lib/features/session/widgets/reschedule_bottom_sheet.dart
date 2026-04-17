@@ -72,7 +72,8 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
           Expanded(
             child: provider.isLoadingAvailability
                 ? const Center(child: CircularProgressIndicator())
-                : provider.availabilityError != null
+                : (provider.availabilityError != null &&
+                        provider.availability.isEmpty)
                 ? _buildError(provider.availabilityError!)
                 : _showSummary
                 ? _buildSummaryOverlay()
@@ -236,6 +237,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                     _selectedDate = dateStr;
                     _selectedSlot = null; // Reset slot when date changes
                   });
+                  provider.clearAvailabilityError();
                 },
                 child: Container(
                   width: 78.w,
@@ -359,7 +361,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
       separatorBuilder: (context, index) => SizedBox(width: AppSpacing.sm),
       itemBuilder: (context, index) {
         final slot = filteredSlots[index];
-        final startTime = DateTime.parse(slot.startTime);
+        final startTime = DateTime.parse(slot.startTime).toLocal();
         final timeStr = DateFormat('hh:mm a').format(startTime);
         final isSelected = _selectedSlot == slot;
 
@@ -372,6 +374,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
             setState(() {
               _selectedSlot = slot;
             });
+            provider.clearAvailabilityError();
           },
           child: Container(
             padding: EdgeInsets.symmetric(
@@ -399,28 +402,62 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
   }
 
   Widget _buildNextButton() {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: CustomButton(
-          text: 'Continue',
-          onPressed: () {
-            setState(() {
-              _showSummary = true;
-            });
-          },
-          borderRadius: 10,
-          width: double.infinity,
-        ),
-      ),
+    return Consumer<SessionDetailsProvider>(
+      builder: (context, provider, _) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (provider.rescheduleCheckError != null)
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 8.h),
+                    child: Text(
+                      provider.rescheduleCheckError!,
+                      style: AppTextStyle.text12Medium.copyWith(
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                CustomButton(
+                  text: provider.isCheckingAvailability
+                      ? 'Checking...'
+                      : 'Continue',
+                  isLoading: provider.isCheckingAvailability,
+                  onPressed: () async {
+                    if (_selectedSlot == null) return;
+
+                    final isAvailable =
+                        await provider.checkRescheduleAvailability(
+                          startTime: _selectedSlot!.startTime,
+                          endTime: _selectedSlot!.endTime,
+                        );
+
+                    if (isAvailable) {
+                      setState(() {
+                        _showSummary = true;
+                      });
+                    }
+                  },
+                  borderRadius: 10,
+                  width: double.infinity,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildSummaryOverlay() {
-    final originalStart = DateTime.parse(widget.session.booking!.startTime);
-    final originalEnd = DateTime.parse(widget.session.booking!.endTime);
-    final newStart = DateTime.parse(_selectedSlot!.startTime);
+    final originalStart =
+        DateTime.parse(widget.session.booking!.startTime).toLocal();
+    final originalEnd =
+        DateTime.parse(widget.session.booking!.endTime).toLocal();
+    final newStart = DateTime.parse(_selectedSlot!.startTime).toLocal();
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(AppSpacing.screenPadding.left),
@@ -491,7 +528,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                   title: 'NEW SCHEDULE',
                   date: DateFormat('EEEE, MMM dd').format(newStart),
                   time:
-                      '${DateFormat('hh:mm a').format(newStart)} - ${DateFormat('hh:mm a').format(DateTime.parse(_selectedSlot!.endTime))}',
+                      '${DateFormat('hh:mm a').format(newStart)} - ${DateFormat('hh:mm a').format(DateTime.parse(_selectedSlot!.endTime).toLocal())}',
                   icon: Icons.event_available_rounded,
                   isPrimary: true,
                 ),

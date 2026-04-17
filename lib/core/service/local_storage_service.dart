@@ -24,6 +24,7 @@ class LocalStorageService {
   static const String _recentHotelSearchesKey = 'recentHotelSearches';
   static const String _twoFactorAuthEnabled = 'twoFactorAuthEnabled';
   static const String _userKey = 'user_data';
+  static const String _timezoneKey = 'timezone';
 
   final EncryptedSharedPreferences _prefs;
 
@@ -265,6 +266,14 @@ class LocalStorageService {
       log(e.toString());
       return false;
     }
+  }
+
+  static Future<String?> getTimezone() async {
+    return await _prefsInstance.getString(_timezoneKey);
+  }
+
+  static Future<void> setTimezone(String timezone) async {
+    await _prefsInstance.setString(_timezoneKey, timezone);
   }
 
   static Future<bool> clearAll({bool shouldPop = true}) async {

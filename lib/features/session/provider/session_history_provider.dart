@@ -5,6 +5,7 @@ import '../data/repository/booking_repository.dart';
 import '../widgets/session_card.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
+import '../../../../core/utils/time_utils.dart';
 
 enum SessionTab { all, upcoming, past, cancelled }
 
@@ -92,26 +93,15 @@ class SessionHistoryProvider extends ChangeNotifier {
 
   /// Map BookingModel to SessionData
   SessionData _mapBookingToSessionData(BookingModel booking) {
-    // Parse start time
-    final startTime = DateTime.parse(booking.startTime);
-
-    // Format date
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    final dateStr =
-        '${months[startTime.month - 1]} ${startTime.day}, ${startTime.year}';
+    // Format date and time using TimeUtils
+    final dateStr = TimeUtils.formatToLocal(
+      booking.startTime,
+      format: 'MMM dd, yyyy',
+    );
+    final timeStr = TimeUtils.formatToLocal(
+      booking.startTime,
+      format: 'hh:mm a',
+    );
 
     // Determine status
     SessionStatus status;
@@ -130,7 +120,7 @@ class SessionHistoryProvider extends ChangeNotifier {
     }
 
     // Get trainer name and image
-    final trainerName = booking.trainer?.displayName ?? 'Trainer';
+    final trainerName = booking.trainer?.fullName ?? 'Trainer';
 
     // Handle profile photo URL
     String trainerImageUrl = booking.trainer?.profilePhoto ?? '';
@@ -144,14 +134,6 @@ class SessionHistoryProvider extends ChangeNotifier {
     final sessionType = booking.sessionPlan?.title ?? 'Session';
     final durationMinutes = booking.sessionPlan?.durationMinutes ?? 60;
     final duration = '${durationMinutes}min';
-
-    // Format time
-    final hour = startTime.hour > 12
-        ? startTime.hour - 12
-        : (startTime.hour == 0 ? 12 : startTime.hour);
-    final period = startTime.hour >= 12 ? 'PM' : 'AM';
-    final minute = startTime.minute.toString().padLeft(2, '0');
-    final timeStr = '$hour:$minute $period';
 
     return SessionData(
       trainerName: trainerName,

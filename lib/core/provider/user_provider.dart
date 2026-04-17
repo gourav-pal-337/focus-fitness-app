@@ -5,6 +5,9 @@ import '../../features/authentication/data/models/register_response_model.dart';
 import '../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
 import '../../features/user/data/repository/user_repository.dart';
+import '../../features/profile/data/services/profile_api_service.dart';
+import '../../features/profile/data/models/update_client_profile_request_model.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import '../service/local_storage_service.dart';
 
 /// Global user provider to access user information throughout the app
@@ -14,6 +17,7 @@ class UserProvider extends ChangeNotifier {
   String? _error;
 
   final UserRepository _userRepository = UserRepository();
+  final ProfileApiService _profileApiService = ProfileApiService();
 
   UserModel? get user => _user;
   bool get isLoading => _isLoading;
@@ -35,6 +39,8 @@ class UserProvider extends ChangeNotifier {
           print("user details : ${_user}");
           if (_user != null) {
             await LocalStorageService.saveUser(_user!);
+            // Sync timezone after successful login/fetch
+            syncTimezone();
           }
           _isLoading = false;
           _error = null;
@@ -98,6 +104,19 @@ class UserProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint("Error getting FCM token: $e");
       return null;
+    }
+  }
+
+  /// Sync device timezone with backend
+  Future<void> syncTimezone() async {
+    try {
+      final TimezoneInfo timezone = await FlutterTimezone.getLocalTimezone();
+      debugPrint("Syncing timezone: $timezone");
+      await _profileApiService.updateClientProfile(
+        UpdateClientProfileRequestModel(timezone: timezone.identifier),
+      );
+    } catch (e) {
+      debugPrint("Error syncing timezone: $e");
     }
   }
 

@@ -14,6 +14,7 @@ import '../providers/workout_provider.dart' as api_workout_provider;
 import '../providers/exercise_provider.dart';
 import '../provider/workout_provider.dart' as local_workout_provider;
 import '../widgets/exercise_card.dart';
+import '../widgets/loading_shimmer.dart';
 
 class ExercisesScreen extends StatefulWidget {
   const ExercisesScreen({
@@ -45,15 +46,15 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
     super.initState();
     _provider = ExerciseProvider();
     _workoutProvider = api_workout_provider.WorkoutProvider();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.fromAssignedWorkout) {
-        final date = widget.workoutDate ?? DateTime.now();
-        _workoutProvider.fetchWorkoutByDate(date);
-      } else {
-        _provider.fetchCategories();
-        _provider.fetchExercises();
-      }
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   if (widget.fromAssignedWorkout) {
+    //     final date = widget.workoutDate ?? DateTime.now();
+    //     _workoutProvider.fetchWorkoutByDate(date);
+    //   } else {
+    //     _provider.fetchCategories();
+    //     _provider.fetchExercises();
+    //   }
+    // });
   }
 
   @override
@@ -76,9 +77,7 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
         body: SafeArea(
           child: Column(
             children: [
-              const CustomAppBar(
-                title: 'Exercises',
-              ),
+              const CustomAppBar(title: 'Exercises'),
               SizedBox(height: AppSpacing.md),
               if (!widget.fromAssignedWorkout)
                 Padding(
@@ -91,22 +90,21 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
               if (!widget.fromAssignedWorkout)
                 _CategoryFilter(provider: _provider),
               Expanded(
-                child: Consumer2<api_workout_provider.WorkoutProvider,
-                    ExerciseProvider>(
+                child: Consumer2<api_workout_provider.WorkoutProvider, ExerciseProvider>(
                   builder: (context, workoutProvider, exerciseProvider, _) {
                     if (widget.fromAssignedWorkout) {
                       if (workoutProvider.isLoading) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
+                        return const LoadingShimmer();
                       }
 
                       final assignedCategoryId = widget.assignedCategoryId;
-                      final assignedExercises = workoutProvider.workouts.where(
-                        (w) =>
-                            assignedCategoryId != null &&
-                            w.category?.id == assignedCategoryId,
-                      ).toList();
+                      final assignedExercises = workoutProvider.workouts
+                          .where(
+                            (w) =>
+                                assignedCategoryId != null &&
+                                w.category?.id == assignedCategoryId,
+                          )
+                          .toList();
 
                       return assignedExercises.isEmpty
                           ? Center(
@@ -125,20 +123,21 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                                 padding: EdgeInsets.only(bottom: AppSpacing.xl),
                                 gridDelegate:
                                     SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: AppSpacing.md,
-                                  mainAxisSpacing: AppSpacing.md,
-                                  childAspectRatio: 6 / 5,
-                                ),
+                                      crossAxisCount: 2,
+                                      crossAxisSpacing: AppSpacing.md,
+                                      mainAxisSpacing: AppSpacing.md,
+                                      childAspectRatio: 6 / 5,
+                                    ),
                                 itemCount: assignedExercises.length,
                                 itemBuilder: (context, index) {
                                   final item = assignedExercises[index];
-                                  final dateMillis =
-                                      widget.workoutDate?.millisecondsSinceEpoch;
+                                  final dateMillis = widget
+                                      .workoutDate
+                                      ?.millisecondsSinceEpoch;
                                   final imageUrl =
                                       item.imageUrl ??
-                                          item.category?.imageUrl ??
-                                          _fallbackExerciseImageUrl;
+                                      item.category?.imageUrl ??
+                                      _fallbackExerciseImageUrl;
 
                                   return ExerciseCard(
                                     name: item.exerciseName,
@@ -154,8 +153,9 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                             );
                     }
 
-                    if (workoutProvider.isLoading || exerciseProvider.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                    if (workoutProvider.isLoading ||
+                        exerciseProvider.isLoading) {
+                      return const LoadingShimmer();
                     }
 
                     final exercisesToShow = _resolveExercisesToShow(
@@ -180,11 +180,11 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                               padding: EdgeInsets.only(bottom: AppSpacing.xl),
                               gridDelegate:
                                   SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: AppSpacing.md,
-                                mainAxisSpacing: AppSpacing.md,
-                                childAspectRatio: 6 / 5,
-                              ),
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: AppSpacing.md,
+                                    mainAxisSpacing: AppSpacing.md,
+                                    childAspectRatio: 6 / 5,
+                                  ),
                               itemCount: exercisesToShow.length,
                               itemBuilder: (context, index) {
                                 final exercise = exercisesToShow[index];
@@ -192,22 +192,23 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                                   name: exercise.name,
                                   imageUrl: exercise.imageUrl,
                                   onTap: () {
-                                    final dateMillis =
-                                        widget.workoutDate?.millisecondsSinceEpoch;
+                                    final dateMillis = widget
+                                        .workoutDate
+                                        ?.millisecondsSinceEpoch;
 
                                     if (widget.fromWorkoutProgress &&
                                         widget.workoutDate != null) {
                                       final workoutProgressProvider =
-                                          local_workout_provider
-                                              .WorkoutProgressProvider();
-                                      workoutProgressProvider.addExerciseToWorkout(
-                                        widget.workoutDate!,
-                                        local_workout_provider.Exercise(
-                                          id: exercise.id,
-                                          name: exercise.name,
-                                          imageUrl: exercise.imageUrl,
-                                        ),
-                                      );
+                                          local_workout_provider.WorkoutProgressProvider();
+                                      workoutProgressProvider
+                                          .addExerciseToWorkout(
+                                            widget.workoutDate!,
+                                            local_workout_provider.Exercise(
+                                              id: exercise.id,
+                                              name: exercise.name,
+                                              imageUrl: exercise.imageUrl,
+                                            ),
+                                          );
                                       context.pop();
                                       return;
                                     }
@@ -281,11 +282,7 @@ class _SearchBar extends StatelessWidget {
           hintStyle: AppTextStyle.text14Regular.copyWith(
             color: AppColors.grey400,
           ),
-          prefixIcon: Icon(
-            Icons.search,
-            size: 20.sp,
-            color: AppColors.grey400,
-          ),
+          prefixIcon: Icon(Icons.search, size: 20.sp, color: AppColors.grey400),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
@@ -313,7 +310,9 @@ class _CategoryFilter extends StatelessWidget {
     return SizedBox(
       height: 36,
       child: ListView.separated(
-        padding: EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding.left),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.screenPadding.left,
+        ),
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) {
           final category = categories[index];
@@ -332,4 +331,3 @@ class _CategoryFilter extends StatelessWidget {
     );
   }
 }
-

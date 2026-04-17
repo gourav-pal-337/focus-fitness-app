@@ -14,6 +14,9 @@ import '../../../core/widgets/buttons/custom_bottom.dart';
 import '../../../core/widgets/date_time_bar.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../../../routes/app_router.dart';
+import '../../../core/utils/time_utils.dart';
+import '../../trainer/provider/trainer_profile_provider.dart';
+import '../../trainer/utils/date_time_utils.dart';
 import '../provider/session_details_provider.dart';
 import '../widgets/session_card.dart' show SessionData, SessionStatus;
 import '../widgets/session_status_badge.dart';
@@ -161,19 +164,16 @@ class _DateTimeBar extends StatelessWidget {
 
 String gettime(SessionData session) {
   if (session.booking == null) return "";
-  DateTime startTime = DateTime.parse(session.booking!.startTime);
-  DateTime endTime = DateTime.parse(session.booking!.endTime);
+  final startStr = TimeUtils.formatToLocal(
+    session.booking!.startTime,
+    format: 'hh:mm a',
+  );
+  final endStr = TimeUtils.formatToLocal(
+    session.booking!.endTime,
+    format: 'hh:mm a',
+  );
 
-  String format(DateTime time) {
-    final hour = time.hour > 12
-        ? time.hour - 12
-        : (time.hour == 0 ? 12 : time.hour);
-    final period = time.hour >= 12 ? 'PM' : 'AM';
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute $period';
-  }
-
-  return "${format(startTime)} - ${format(endTime)}";
+  return "$startStr - $endStr";
 }
 
 class _PaymentDetailsSection extends StatelessWidget {
@@ -246,18 +246,27 @@ class _PaymentDetailsSection extends StatelessWidget {
             children: [
               _PaymentDetailRow(
                 label: 'Session Amount',
-                value: CurrencyFormatter.format(payment.sessionFee, payment.currency),
+                value: CurrencyFormatter.format(
+                  payment.sessionFee,
+                  payment.currency,
+                ),
               ),
               SizedBox(height: AppSpacing.sm),
               _PaymentDetailRow(
                 label: 'Platform Fee',
-                value: CurrencyFormatter.format(payment.platformFee, payment.currency),
+                value: CurrencyFormatter.format(
+                  payment.platformFee,
+                  payment.currency,
+                ),
                 isSubText: true,
               ),
               SizedBox(height: AppSpacing.sm),
               _PaymentDetailRow(
                 label: 'VAT Amount',
-                value: CurrencyFormatter.format(payment.vatAmount, payment.currency),
+                value: CurrencyFormatter.format(
+                  payment.vatAmount,
+                  payment.currency,
+                ),
                 isSubText: true,
               ),
               SizedBox(height: AppSpacing.md),
@@ -265,18 +274,73 @@ class _PaymentDetailsSection extends StatelessWidget {
               SizedBox(height: AppSpacing.md),
               _PaymentDetailRow(
                 label: 'Total Paid',
-                value: CurrencyFormatter.format(payment.totalAmount, payment.currency),
+                value: CurrencyFormatter.format(
+                  payment.totalAmount,
+                  payment.currency,
+                ),
                 isTotal: true,
               ),
               SizedBox(height: AppSpacing.md),
               const Divider(color: AppColors.grey100),
               SizedBox(height: AppSpacing.md),
-              _PaymentDetailRow(
-                label: 'Status',
-                value: payment.paymentStatus.toUpperCase(),
-                valueColor: payment.paymentStatus == 'paid'
-                    ? Colors.green
-                    : Colors.orange,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Status',
+                    style: AppTextStyle.text14Regular.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Text(
+                        payment.paymentStatus.toUpperCase(),
+                        style: AppTextStyle.text14Medium.copyWith(
+                          color: payment.paymentStatus == 'paid'
+                              ? Colors.green
+                              : Colors.orange,
+                        ),
+                      ),
+                      if (payment.paymentStatus.toLowerCase() == 'unpaid') ...[
+                        SizedBox(width: AppSpacing.sm),
+                        GestureDetector(
+                          onTap: provider.isPreparingPayment
+                              ? null
+                              : () => _onPayNow(context),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 2.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20.r),
+                              border: Border.all(
+                                color: AppColors.primary.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: provider.isPreparingPayment
+                                ? SizedBox(
+                                    width: 12.w,
+                                    height: 12.w,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: AppColors.primary,
+                                    ),
+                                  )
+                                : Text(
+                                    'Pay Now',
+                                    style: AppTextStyle.text12SemiBold.copyWith(
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
               ),
               SizedBox(height: AppSpacing.sm),
               _PaymentDetailRow(
@@ -296,6 +360,76 @@ class _PaymentDetailsSection extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _onPayNow(BuildContext context) async {
+    final booking = session.booking;
+    if (booking == null) return;
+
+    final provider = context.read<SessionDetailsProvider>();
+    final payment = provider.payment;
+    if (payment == null) return;
+
+    provider.setIsPreparingPayment(true);
+
+    try {
+      // Fetch trainer profile first to ensure connect status is known
+      final trainerProvider = context.read<TrainerProfileProvider>();
+      await trainerProvider.fetchTrainerProfile(booking.trainerId);
+
+      if (!context.mounted) {
+        provider.setIsPreparingPayment(false);
+        return;
+      }
+
+      // Extract details for PaymentMethodScreen
+      final startDateTime = DateTime.parse(booking.startTime).toLocal();
+      final dateId =
+          "${startDateTime.year}-${startDateTime.month.toString().padLeft(2, '0')}-${startDateTime.day.toString().padLeft(2, '0')}";
+      final timeSlot = DateTimeUtils.formatTime(
+        startDateTime.hour,
+        startDateTime.minute,
+      );
+
+      final sessionPlan = booking.sessionPlan;
+      final durationMinutes = sessionPlan?.durationMinutes ?? 60;
+
+      final trainerName = booking.trainer?.displayName ?? session.trainerName;
+      final sessionDate = TimeUtils.formatToLocal(
+        booking.startTime,
+        format: 'MMM dd, yyyy',
+      );
+      final sessionTime =
+          "${TimeUtils.formatToLocal(booking.startTime, format: 'hh:mm a')} - ${TimeUtils.formatToLocal(booking.endTime, format: 'hh:mm a')}";
+
+      // Construct path with query parameters
+      final path = Uri(
+        path: '/payment-method',
+        queryParameters: {
+          'amount': payment.totalAmount.toString(),
+          'baseAmount': payment.sessionFee.toString(),
+          'trainerId': booking.trainerId,
+          'sessionPlanId': booking.sessionPlanId ?? '',
+          'dateId': dateId,
+          'timeSlot': timeSlot,
+          'durationMinutes': durationMinutes.toString(),
+          'trainerName': trainerName,
+          'sessionDate': sessionDate,
+          'sessionTime': sessionTime,
+          'sessionStartTime': booking.startTime, // ISO string
+          'currency': payment.currency,
+        },
+      ).toString();
+
+      provider.setIsPreparingPayment(false);
+      context.push(path);
+    } catch (e) {
+      provider.setIsPreparingPayment(false);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
   }
 }
 
@@ -503,65 +637,67 @@ class _ActionButton extends StatelessWidget {
             final isCancelling = provider.isCancelling;
             final historyProvider = context.read<SessionHistoryProvider>();
 
-            return Column(
-              mainAxisSize: MainAxisSize.min,
+            return Row(
               children: [
-                CustomButton(
-                  text: isCancelling ? 'Canceling...' : 'Cancel Session',
-                  type: ButtonType.filled,
-                  isLoading: isCancelling || historyProvider.isLoading,
-                  onPressed: () {
-                    CancelSessionDialog.show(
-                      context: context,
-                      trainerName: session.trainerName,
-                      onConfirm: () async {
-                        if (session.bookingId != null) {
-                          if (context.mounted) {
-                            SessionCancelledDialog.show(
-                              context: context,
-                              onOk: () async {
-                                final success = await provider.cancelSession(
-                                  session.bookingId!,
-                                );
-                                if (success && context.mounted) {
-                                  await historyProvider.fetchBookings();
-                                  context.go(HomeRoute.path);
-                                }
-                              },
-                            );
+                Expanded(
+                  child: CustomButton(
+                    text: isCancelling ? 'Canceling...' : 'Cancel',
+                    type: ButtonType.filled,
+                    isLoading: isCancelling || historyProvider.isLoading,
+                    onPressed: () {
+                      CancelSessionDialog.show(
+                        context: context,
+                        trainerName: session.trainerName,
+                        onConfirm: () async {
+                          if (session.bookingId != null) {
+                            if (context.mounted) {
+                              SessionCancelledDialog.show(
+                                context: context,
+                                onOk: () async {
+                                  final success = await provider.cancelSession(
+                                    session.bookingId!,
+                                  );
+                                  if (success && context.mounted) {
+                                    await historyProvider.fetchBookings();
+                                    context.go(HomeRoute.path);
+                                  }
+                                },
+                              );
+                            }
+                          } else {
+                            context.pop();
                           }
-                        } else {
-                          context.pop();
+                        },
+                      );
+                    },
+                    height: 48.h,
+                    backgroundColor: AppColors.primary,
+                    textColor: AppColors.background,
+                    borderRadius: 12.r,
+                  ),
+                ),
+                SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Container(
+                    height: 48.h,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
+                      color: AppColors.primary.withValues(alpha: 0.05),
+                    ),
+                    child: CustomButton(
+                      text: 'Reschedule',
+                      type: ButtonType.text,
+                      onPressed: () {
+                        if (session.bookingId != null) {
+                          _showRescheduleBottomSheet(context, session);
                         }
                       },
-                    );
-                  },
-                  width: double.infinity,
-                  backgroundColor: AppColors.primary,
-                  textColor: AppColors.background,
-                  borderRadius: 12.r,
-                ),
-                SizedBox(height: AppSpacing.md),
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                      width: 1.5,
+                      textColor: AppColors.primary,
                     ),
-                    color: AppColors.primary.withValues(alpha: 0.05),
-                  ),
-                  child: CustomButton(
-                    text: 'Reschedule Session',
-                    type: ButtonType.text,
-                    onPressed: () {
-                      if (session.bookingId != null) {
-                        _showRescheduleBottomSheet(context, session);
-                      }
-                    },
-                    textColor: AppColors.primary,
-                    width: double.infinity,
                   ),
                 ),
               ],

@@ -28,6 +28,7 @@ class ClientProfileModel {
     this.notes,
     this.tags,
     this.profilePicture,
+    this.timezone,
   });
 
   final String id;
@@ -57,6 +58,7 @@ class ClientProfileModel {
   final String createdAt;
   final String updatedAt;
   final String? profilePicture;
+  final String? timezone;
 
   factory ClientProfileModel.fromJson(Map<String, dynamic> json) {
     return ClientProfileModel(
@@ -98,6 +100,7 @@ class ClientProfileModel {
       createdAt: json['createdAt'] as String? ?? '',
       updatedAt: json['updatedAt'] as String? ?? '',
       profilePicture: json['profilePicture'] as String? ?? json['profilePhoto'] as String?,
+      timezone: json['timezone'] as String?,
     );
   }
 
@@ -129,6 +132,7 @@ class ClientProfileModel {
     String? createdAt,
     String? updatedAt,
     String? profilePicture,
+    String? timezone,
   }) {
     return ClientProfileModel(
       id: id ?? this.id,
@@ -158,6 +162,7 @@ class ClientProfileModel {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       profilePicture: profilePicture ?? this.profilePicture,
+      timezone: timezone ?? this.timezone,
     );
   }
 }

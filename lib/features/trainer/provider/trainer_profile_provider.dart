@@ -7,6 +7,8 @@ import '../../session/data/models/reschedule_models.dart';
 import '../utils/date_time_utils.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
+import '../../../core/service/local_storage_service.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 enum SessionType { online, inPerson }
 
@@ -78,7 +80,7 @@ class TrainerProfileProvider extends ChangeNotifier {
     );
 
     final slots = dayAvail.availableSlots.map((slot) {
-      final dateTime = DateTime.parse(slot.startTime);
+      final dateTime = DateTime.parse(slot.startTime).toLocal();
       return DateTimeUtils.formatTime(dateTime.hour, dateTime.minute);
     }).toList();
 
@@ -197,7 +199,7 @@ class TrainerProfileProvider extends ChangeNotifier {
           _isSlotAvailable = !response.hasBooking;
           if (response.hasBooking) {
             _availabilityCheckError =
-                'This slot is no longer available. Please choose another time.';
+                'This time slot is already booked. Please choose another time.';
           }
           notifyListeners();
           return _isSlotAvailable;
@@ -264,7 +266,7 @@ class TrainerProfileProvider extends ChangeNotifier {
       );
 
       final matchingSlot = dayAvail.availableSlots.firstWhere((slot) {
-        final dateTime = DateTime.parse(slot.startTime);
+        final dateTime = DateTime.parse(slot.startTime).toLocal();
         final formatted = DateTimeUtils.formatTime(
           dateTime.hour,
           dateTime.minute,
@@ -397,13 +399,20 @@ class TrainerProfileProvider extends ChangeNotifier {
 
       debugPrint("timestamps : ${timestamps}");
 
+      // Get timezone
+      String? timezone = await LocalStorageService.getTimezone();
+      if (timezone == null || timezone.isEmpty) {
+        final info = await FlutterTimezone.getLocalTimezone();
+        timezone = info.identifier;
+      }
+
       // Create request model
       final request = BookSessionRequestModel(
         trainerId: _trainer!.id,
         sessionPlanId: _selectedSessionPlan!.id,
         startTime: timestamps['startTime']!,
         endTime: timestamps['endTime']!,
-        timezone: 'UTC', // You can get this from device timezone if needed
+        timezone: timezone ?? 'UTC',
         notes: notes,
         mode: _sessionType.name,
       );
