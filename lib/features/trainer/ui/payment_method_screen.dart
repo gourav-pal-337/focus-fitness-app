@@ -94,7 +94,8 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     final trainer = trainerProvider.trainer;
     final isStripeConnected = trainer?.isStripeConnected ?? false;
     final isPayPalConnected = trainer?.isPayPalConnected ?? false;
-
+    log("isStripeConnected: $isStripeConnected");
+    log("isPayPalConnected: $isPayPalConnected");
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(

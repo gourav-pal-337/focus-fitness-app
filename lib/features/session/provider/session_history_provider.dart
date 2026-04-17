@@ -37,6 +37,9 @@ class SessionHistoryProvider extends ChangeNotifier {
   void selectTab(SessionTab tab) {
     if (_selectedTab == tab) return;
     _selectedTab = tab;
+    // Clear data and set loading to prevent showing stale results
+    _allBookings = [];
+    _isLoading = true;
     notifyListeners();
     fetchBookings();
   }

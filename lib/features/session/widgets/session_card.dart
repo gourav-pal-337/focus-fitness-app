@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/show_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -104,19 +105,16 @@ class SessionCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 30.r,
-                  backgroundColor: AppColors.grey200,
-                  backgroundImage: session.trainerImageUrl.isNotEmpty
-                      ? NetworkImage(session.trainerImageUrl)
-                      : null,
-                  child: session.trainerImageUrl.isEmpty
-                      ? Icon(
-                          Icons.person,
-                          size: 24.sp,
-                          color: AppColors.grey400,
-                        )
-                      : null,
+                ShowImage(
+                  imageUrl: session.trainerImageUrl,
+                  width: 60.r,
+                  height: 60.r,
+                  isCircle: true,
+                  errorWidget: Icon(
+                    Icons.person,
+                    size: 24.sp,
+                    color: AppColors.grey400,
+                  ),
                 ),
                 SizedBox(width: AppSpacing.md),
                 Expanded(

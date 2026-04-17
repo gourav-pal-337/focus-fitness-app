@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/show_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -362,16 +364,16 @@ class _PulseAvatarState extends State<_PulseAvatar>
                 ),
               ],
             ),
-            child: CircleAvatar(
-              radius: 45.r,
-              backgroundColor: AppColors.grey200,
-              backgroundImage:
-                  widget.imageUrl != null && widget.imageUrl!.isNotEmpty
-                  ? NetworkImage(widget.imageUrl!)
-                  : null,
-              child: widget.imageUrl == null || widget.imageUrl!.isEmpty
-                  ? Icon(Icons.person, color: AppColors.grey400, size: 40.r)
-                  : null,
+            child: ShowImage(
+              imageUrl: widget.imageUrl,
+              width: 90.r,
+              height: 90.r,
+              isCircle: true,
+              errorWidget: Icon(
+                Icons.person,
+                color: AppColors.grey400,
+                size: 40.r,
+              ),
             ),
           ),
         );
@@ -385,14 +387,17 @@ class _LoadingNudge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: 180.h,
-      decoration: BoxDecoration(
-        color: AppColors.grey50,
-        borderRadius: BorderRadius.circular(32.r),
+    return Shimmer.fromColors(
+      baseColor: AppColors.grey75,
+      highlightColor: Colors.white,
+      child: Container(
+        width: double.infinity,
+        height: 160.h,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(32.r),
+        ),
       ),
-      child: const Center(child: CircularProgressIndicator(strokeWidth: 3)),
     );
   }
 }

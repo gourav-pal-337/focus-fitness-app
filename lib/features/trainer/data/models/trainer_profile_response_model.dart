@@ -63,11 +63,16 @@ class TrainerProfileInfo {
   final VatConfig? vatConfig;
 
   factory TrainerProfileInfo.fromJson(Map<String, dynamic> json) {
+    debugPrint(
+      "connection ${json['isStripeConnected']}  ${json['isPayPalConnected']}",
+    );
     return TrainerProfileInfo(
       id: json['_id'] as String? ?? '',
       fullName: json['fullName'] as String?,
       preferredName: json['preferredName'] as String?,
-      profilePhoto: json['profilePhoto'] as String?,
+      profilePhoto:
+          // "",
+          json['profilePhoto'] as String?,
       avgRating: json['avgRating'] != null
           ? (json['avgRating'] as num).toDouble()
           : null,

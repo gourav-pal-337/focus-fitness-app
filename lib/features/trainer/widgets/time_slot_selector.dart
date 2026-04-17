@@ -51,8 +51,7 @@ class TimeSlotSelector extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             itemCount: availableTimeSlots.length,
             padding: EdgeInsets.only(left: AppSpacing.screenPadding.left),
-            separatorBuilder: (context, index) =>
-                SizedBox(width: AppSpacing.sm),
+            separatorBuilder: (context, index) => SizedBox(width: 0),
             itemBuilder: (context, index) {
               final timeSlot = availableTimeSlots[index];
 
@@ -66,7 +65,7 @@ class TimeSlotSelector extends StatelessWidget {
                 '${provider.selectedDate} $timeSlot',
               );
               if (!isSlotAvailable) {
-                return const SizedBox.shrink();
+                return SizedBox();
               }
               return _TimeSlotButton(
                 timeSlot: timeSlot,
@@ -104,6 +103,7 @@ class _TimeSlotButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        margin: EdgeInsets.only(right: AppSpacing.sm),
         padding: EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.sm,

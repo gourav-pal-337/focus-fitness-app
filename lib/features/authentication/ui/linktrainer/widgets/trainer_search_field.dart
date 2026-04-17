@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:focus_fitness/core/widgets/show_image.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -221,22 +222,16 @@ class _SelectedTrainerBox extends StatelessWidget {
       child: Row(
         children: [
           // Profile Photo
-          Container(
+          ShowImage(
+            imageUrl: trainer.profilePhoto,
             width: 40.w,
             height: 40.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.grey200,
-              image: trainer.profilePhoto != null
-                  ? DecorationImage(
-                      image: NetworkImage(trainer.profilePhoto!),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
+            isCircle: true,
+            errorWidget: Icon(
+              Icons.person,
+              size: 28.sp,
+              color: AppColors.grey400,
             ),
-            child: trainer.profilePhoto == null
-                ? Icon(Icons.person, size: 28.sp, color: AppColors.grey400)
-                : null,
           ),
           SizedBox(width: AppSpacing.md),
           // Trainer Info
@@ -290,28 +285,22 @@ class _TrainerDropdownItem extends StatelessWidget {
         padding: EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withOpacity(0.1)
+              ? AppColors.primary.withValues(alpha: 0.1)
               : Colors.transparent,
         ),
         child: Row(
           children: [
             // Profile Photo
-            Container(
+            ShowImage(
+              imageUrl: trainer.profilePhoto,
               width: 40.w,
               height: 40.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.grey200,
-                image: trainer.profilePhoto != null
-                    ? DecorationImage(
-                        image: NetworkImage(trainer.profilePhoto!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+              isCircle: true,
+              errorWidget: Icon(
+                Icons.person,
+                size: 24.sp,
+                color: AppColors.grey400,
               ),
-              child: trainer.profilePhoto == null
-                  ? Icon(Icons.person, size: 24.sp, color: AppColors.grey400)
-                  : null,
             ),
             SizedBox(width: AppSpacing.md),
             // Trainer Info

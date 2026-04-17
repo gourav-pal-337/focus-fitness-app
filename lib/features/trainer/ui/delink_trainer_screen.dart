@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/show_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -78,15 +79,16 @@ class _TrainerInfoSection extends StatelessWidget {
 
     return Row(
       children: [
-        CircleAvatar(
-          radius: 28.r,
-          backgroundColor: AppColors.grey200,
-          backgroundImage: trainer.profilePhoto != null
-              ? NetworkImage(trainer.profilePhoto!)
-              : null,
-          child: trainer.profilePhoto == null
-              ? Icon(Icons.person, size: 30.sp, color: AppColors.grey400)
-              : null,
+        ShowImage(
+          imageUrl: trainer.profilePhoto,
+          width: 56.r,
+          height: 56.r,
+          isCircle: true,
+          errorWidget: Icon(
+            Icons.person,
+            size: 30.sp,
+            color: AppColors.grey400,
+          ),
         ),
         SizedBox(width: AppSpacing.md),
         Expanded(

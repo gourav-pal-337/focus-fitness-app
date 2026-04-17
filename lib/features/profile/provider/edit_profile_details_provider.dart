@@ -94,8 +94,8 @@ class EditProfileDetailsProvider extends ChangeNotifier {
     }
 
     final dobStr = _getValue('DOB');
-    final heightStr = _getValue('Height');
-    final weightStr = _getValue('Weight');
+    final heightStr = _getValue('Height(cm)');
+    final weightStr = _getValue('Weight(kg)');
     final fitnessLevel = _getValue('Fitness Level');
 
     // Parse DOB - if it's in display format, convert to ISO format

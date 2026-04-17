@@ -13,6 +13,7 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/custom_app_bar.dart';
+import '../../../core/widgets/loading/background_refresh_indicator.dart';
 import '../widgets/fitness_goals_section.dart';
 import '../widgets/personal_details_section.dart';
 import '../widgets/profile_header_section.dart';
@@ -83,13 +84,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            CustomAppBar(
-              // onBack: () {
-              //   // context.go(HomeRoute.path);
-              //   context.pop();
-              // },
-              title: 'Profile',
-              // centerTitle: true,
+            Consumer2<ClientProfileProvider, LinkedTrainerProvider>(
+              builder: (context, profileProvider, trainerProvider, _) {
+                final isRefreshing = profileProvider.isLoading || trainerProvider.isLoading;
+                return CustomAppBar(
+                  title: 'Profile',
+                  actions: [
+                    BackgroundRefreshIndicator(isRefreshing: isRefreshing),
+                  ],
+                );
+              },
             ),
             Expanded(
               child: RefreshIndicator(

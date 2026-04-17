@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/core/widgets/show_image.dart';
 import 'package:focus_fitness/features/trainer/data/models/trainer_referral_response_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -105,19 +107,16 @@ class TrainerConnectionCard extends StatelessWidget {
                 },
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      radius: 26.r,
-                      backgroundColor: AppColors.grey200,
-                      backgroundImage: trainer.profilePhoto != null
-                          ? NetworkImage(trainer.profilePhoto!)
-                          : null,
-                      child: trainer.profilePhoto == null
-                          ? Icon(
-                              Icons.person,
-                              size: 24.sp,
-                              color: AppColors.grey400,
-                            )
-                          : null,
+                    ShowImage(
+                      imageUrl: trainer.profilePhoto,
+                      width: 52.r,
+                      height: 52.r,
+                      isCircle: true,
+                      errorWidget: Icon(
+                        Icons.person,
+                        size: 24.sp,
+                        color: AppColors.grey400,
+                      ),
                     ),
                     SizedBox(width: AppSpacing.md),
                     Expanded(

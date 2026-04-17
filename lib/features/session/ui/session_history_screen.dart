@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/custom_sliver_app_bar.dart';
+import '../../../core/widgets/loading/background_refresh_indicator.dart';
 import '../provider/session_history_provider.dart';
 import '../widgets/session_card.dart';
 import '../widgets/session_tab_bar.dart';
@@ -43,109 +44,107 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
       },
       child: Scaffold(
         backgroundColor: AppColors.background,
-        body: CustomScrollView(
-          slivers: [
-            CustomSliverAppBar(
-              onBack: () {
-                context.go(HomeRoute.path);
-              },
-              title: 'Session History',
-              backgroundImage:
-                  'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800',
-              // actions: [
-              //   IconButton(
-              //     icon: Icon(
-              //       Icons.more_vert,
-              //       size: 24.sp,
-              //       color: AppColors.background,
-              //     ),
-              //     onPressed: () {
-              //       // TODO: Handle menu
-              //     },
-              //   ),
-              // ],
-            ),
-            SliverPersistentHeader(
-              pinned: true,
-
-              // floating: true,
-              delegate: _TabBarDelegate(child: const SessionTabBar()),
-            ),
-            SliverPadding(
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.screenPadding.left,
-                vertical: AppSpacing.md,
-              ),
-              sliver: Consumer<SessionHistoryProvider>(
-                builder: (context, provider, child) {
-                  if (provider.isLoading) {
-                    return SliverList.separated(
-                      itemCount: 5,
-                      separatorBuilder: (context, index) => Padding(
-                        padding: EdgeInsets.symmetric(vertical: 15.h),
-                        child: Divider(color: AppColors.grey300, height: 1),
-                      ),
-                      itemBuilder: (context, index) {
-                        return const SessionCardSkeleton();
-                      },
-                    );
-                  }
-
-                  if (provider.error != null) {
-                    return SliverFillRemaining(
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              provider.error!,
-                              style: AppTextStyle.text14Regular.copyWith(
-                                color: AppColors.grey400,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: AppSpacing.md),
-                            TextButton(
-                              onPressed: () => provider.refresh(),
-                              child: Text('Retry'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-
-                  final sessions = provider.sessions;
-
-                  if (sessions.isEmpty) {
-                    return SliverFillRemaining(
-                      child: Center(
-                        child: Text(
-                          'No sessions found',
-                          style: AppTextStyle.text14Regular.copyWith(
-                            color: AppColors.grey400,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-
-                  return SliverList.separated(
-                    itemCount: sessions.length,
-                    separatorBuilder: (context, index) => Padding(
-                      padding: EdgeInsets.symmetric(vertical: 15.h),
-                      child: Divider(color: AppColors.grey300, height: 1),
+        body: Consumer<SessionHistoryProvider>(
+          builder: (context, provider, child) {
+            return CustomScrollView(
+              slivers: [
+                CustomSliverAppBar(
+                  onBack: () {
+                    context.go(HomeRoute.path);
+                  },
+                  title: 'Session History',
+                  backgroundImage:
+                      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800',
+                  actions: [
+                    BackgroundRefreshIndicator(
+                      isRefreshing:
+                          provider.isLoading && provider.sessions.isNotEmpty,
                     ),
-                    itemBuilder: (context, index) {
-                      return SessionCard(session: sessions[index]);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
+                  ],
+                ),
+                SliverPersistentHeader(
+                  pinned: true,
+
+                  // floating: true,
+                  delegate: _TabBarDelegate(child: const SessionTabBar()),
+                ),
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenPadding.left,
+                    vertical: AppSpacing.md,
+                  ),
+                  sliver: _buildSliverList(provider),
+                ),
+              ],
+            );
+          },
         ),
       ),
+    );
+  }
+
+  Widget _buildSliverList(SessionHistoryProvider provider) {
+    if (provider.isLoading && provider.sessions.isEmpty) {
+      return SliverList.separated(
+        itemCount: 5,
+        separatorBuilder: (context, index) => Padding(
+          padding: EdgeInsets.symmetric(vertical: 15.h),
+          child: Divider(color: AppColors.grey300, height: 1),
+        ),
+        itemBuilder: (context, index) {
+          return const SessionCardSkeleton();
+        },
+      );
+    }
+
+    if (provider.error != null) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                provider.error!,
+                style: AppTextStyle.text14Regular.copyWith(
+                  color: AppColors.grey400,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: AppSpacing.md),
+              TextButton(
+                onPressed: () => provider.refresh(),
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final sessions = provider.sessions;
+
+    if (sessions.isEmpty) {
+      return SliverFillRemaining(
+        child: Center(
+          child: Text(
+            'No sessions found',
+            style: AppTextStyle.text14Regular.copyWith(
+              color: AppColors.grey400,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SliverList.separated(
+      itemCount: sessions.length,
+      separatorBuilder: (context, index) => Padding(
+        padding: EdgeInsets.symmetric(vertical: 15.h),
+        child: Divider(color: AppColors.grey300, height: 1),
+      ),
+      itemBuilder: (context, index) {
+        return SessionCard(session: sessions[index]);
+      },
     );
   }
 }

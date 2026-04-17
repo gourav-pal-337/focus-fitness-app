@@ -160,6 +160,12 @@ class _EditProfileDetailsScreenState extends State<EditProfileDetailsScreen> {
           countryCode: request.countryCode ?? profileProvider.profile!.countryCode,
           dateOfBirth: request.dateOfBirth ?? profileProvider.profile!.dateOfBirth,
           gender: request.gender ?? profileProvider.profile!.gender,
+          height: request.height ?? profileProvider.profile!.height,
+          weight: request.weight ?? profileProvider.profile!.weight,
+          fitnessLevel: request.fitnessLevel ?? profileProvider.profile!.fitnessLevel,
+          weightGoal: request.weightGoal ?? profileProvider.profile!.weightGoal,
+          bodyType: request.bodyType ?? profileProvider.profile!.bodyType,
+          performanceGoal: request.performanceGoal ?? profileProvider.profile!.performanceGoal,
         );
         profileProvider.updateProfile(updatedProfile);
       }

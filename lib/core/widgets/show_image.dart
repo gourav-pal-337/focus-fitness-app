@@ -27,8 +27,36 @@ class ShowImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Shared container styling
+    BoxDecoration? decoration;
+    if (isCircle) {
+      decoration = const BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.grey200,
+      );
+    } else if (borderRadius != null && borderRadius! > 0) {
+      decoration = BoxDecoration(
+        color: AppColors.grey200,
+        borderRadius: BorderRadius.circular(borderRadius!),
+      );
+    }
+
+    // Helper to wrap widgets in the consistent shape/size
+    Widget wrapInShape(Widget child) {
+      if (decoration != null) {
+        return Container(
+          width: width,
+          height: height,
+          decoration: decoration,
+          clipBehavior: Clip.antiAlias,
+          child: Center(child: child),
+        );
+      }
+      return SizedBox(width: width, height: height, child: child);
+    }
+
     if (imageUrl == null || imageUrl!.isEmpty) {
-      return errorWidget ?? const SizedBox.shrink();
+      return wrapInShape(errorWidget ?? const Icon(Icons.error_outline));
     }
 
     Widget image = CachedNetworkImage(
@@ -44,13 +72,9 @@ class ShowImage extends StatelessWidget {
             child: Container(
               width: width,
               height: height,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
-                borderRadius: isCircle
-                    ? null
-                    : BorderRadius.circular(borderRadius ?? 0),
-              ),
+              decoration:
+                  decoration?.copyWith(color: Colors.white) ??
+                  const BoxDecoration(color: Colors.white),
             ),
           ),
       errorWidget: (context, url, error) =>
@@ -58,16 +82,13 @@ class ShowImage extends StatelessWidget {
     );
 
     if (isCircle) {
-      return ClipOval(child: image);
+      return wrapInShape(image);
     }
 
     if (borderRadius != null && borderRadius! > 0) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius!),
-        child: image,
-      );
+      return wrapInShape(image);
     }
 
-    return image;
+    return SizedBox(width: width, height: height, child: image);
   }
 }

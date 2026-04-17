@@ -11,6 +11,8 @@ import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/widgets/loading/background_refresh_indicator.dart';
+import '../../trainer/provider/linked_trainer_provider.dart';
 import '../../../routes/app_router.dart';
 
 class PinnedHomeHeader extends StatelessWidget {
@@ -18,15 +20,11 @@ class PinnedHomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final authProv = Provider.of<ClientProfileProvider>(context, listen: false);
-
-    // final userProvider = Provider.of<UserProvider>(context, listen: false);
-
-    // final user = userProvider.user;
-
-    return Consumer2<ClientProfileProvider, UserProvider>(
-      builder: (context, authProv, userProvider, _) {
+    return Consumer3<ClientProfileProvider, UserProvider, LinkedTrainerProvider>(
+      builder: (context, authProv, userProvider, trainerProvider, _) {
         final user = userProvider.user;
+        final isRefreshing = (userProvider.isLoading && user != null) ||
+            (trainerProvider.isLoading && trainerProvider.trainer != null);
 
         return Container(
           color: AppColors.background,
@@ -34,7 +32,6 @@ class PinnedHomeHeader extends StatelessWidget {
             left: AppSpacing.screenPadding.left,
             right: AppSpacing.screenPadding.right,
             top: AppSpacing.screenPadding.top,
-            // bottom: AppSpacing.md,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -67,6 +64,7 @@ class PinnedHomeHeader extends StatelessWidget {
               ),
               Row(
                 children: [
+                  BackgroundRefreshIndicator(isRefreshing: isRefreshing),
                   GestureDetector(
                     onTap: () {
                       context.push(NotificationsRoute.path);

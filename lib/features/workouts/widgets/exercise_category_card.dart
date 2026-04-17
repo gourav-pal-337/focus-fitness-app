@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/show_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -39,19 +40,17 @@ class ExerciseCategoryCard extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              Image.network(
-                imageUrl,
+              ShowImage(
+                imageUrl: imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: AppColors.grey75,
-                    child: Icon(
-                      Icons.fitness_center,
-                      size: 48.sp,
-                      color: AppColors.grey400,
-                    ),
-                  );
-                },
+                errorWidget: Container(
+                  color: AppColors.grey75,
+                  child: Icon(
+                    Icons.fitness_center,
+                    size: 48.sp,
+                    color: AppColors.grey400,
+                  ),
+                ),
               ),
               Container(
                 decoration: BoxDecoration(

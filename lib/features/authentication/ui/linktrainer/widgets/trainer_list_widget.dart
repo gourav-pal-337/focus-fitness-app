@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/show_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
@@ -97,27 +98,16 @@ class _TrainerListItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Profile Photo
-            Container(
+            ShowImage(
+              imageUrl: trainer.profilePhoto,
               width: 50.w,
               height: 50.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.grey200,
-                image: trainer.profilePhoto != null
-                    ? DecorationImage(
-                        image: NetworkImage(trainer.profilePhoto!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+              isCircle: true,
+              errorWidget: Icon(
+                Icons.person,
+                size: 24.sp,
+                color: AppColors.grey400,
               ),
-              child: trainer.profilePhoto == null
-                  ? Icon(
-                      Icons.person,
-                      size: 24.sp,
-                      color: AppColors.grey400,
-                    )
-                  : null,
             ),
             SizedBox(width: AppSpacing.md),
             // Trainer Info

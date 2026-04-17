@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/show_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_fitness/features/trainer/provider/linked_trainer_provider.dart';
 import 'package:focus_fitness/features/trainer/provider/trainer_profile_provider.dart';
@@ -100,15 +101,16 @@ class TrainerProfileHeader extends StatelessWidget {
           left: 0,
           right: 0,
           child: Center(
-            child: CircleAvatar(
-              radius: 40.r,
-              backgroundColor: AppColors.grey200,
-              backgroundImage: trainerImageUrl != null
-                  ? NetworkImage(trainerImageUrl!)
-                  : null,
-              child: trainerImageUrl == null
-                  ? Icon(Icons.person, size: 40.sp, color: AppColors.grey400)
-                  : null,
+            child: ShowImage(
+              imageUrl: trainerImageUrl,
+              width: 80.r,
+              height: 80.r,
+              isCircle: true,
+              errorWidget: Icon(
+                Icons.person,
+                size: 40.sp,
+                color: AppColors.grey400,
+              ),
             ),
           ),
         ),

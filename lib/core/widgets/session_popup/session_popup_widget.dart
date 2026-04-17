@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/show_image.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -335,22 +336,20 @@ class SessionBottomSheetContent extends StatelessWidget {
           // Trainer profile picture (behind, slightly to left)
           Positioned(
             left: 0,
-            child: Container(
+            child: ShowImage(
+              imageUrl: data.trainerImageUrl,
               width: 80.w,
               height: 80.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFE91E63), // Pink/purple background
-                image: data.trainerImageUrl != null
-                    ? DecorationImage(
-                        image: NetworkImage(data.trainerImageUrl!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+              isCircle: true,
+              errorWidget: Container(
+                width: 80.w,
+                height: 80.w,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color(0xFFE91E63),
+                ),
+                child: Icon(Icons.person, size: 30.sp, color: AppColors.background),
               ),
-              child: data.trainerImageUrl == null
-                  ? Icon(Icons.person, size: 30.sp, color: AppColors.background)
-                  : null,
             ),
           ),
           // User emoji/avatar (in front, slightly to right)

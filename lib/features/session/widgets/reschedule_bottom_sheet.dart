@@ -73,7 +73,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
             child: provider.isLoadingAvailability
                 ? const Center(child: CircularProgressIndicator())
                 : (provider.availabilityError != null &&
-                        provider.availability.isEmpty)
+                      provider.availability.isEmpty)
                 ? _buildError(provider.availabilityError!)
                 : _showSummary
                 ? _buildSummaryOverlay()
@@ -358,10 +358,10 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
       padding: EdgeInsets.only(left: AppSpacing.screenPadding.left),
       scrollDirection: Axis.horizontal,
       itemCount: filteredSlots.length,
-      separatorBuilder: (context, index) => SizedBox(width: AppSpacing.sm),
+      separatorBuilder: (context, index) => SizedBox(width: 0),
       itemBuilder: (context, index) {
         final slot = filteredSlots[index];
-        final startTime = DateTime.parse(slot.startTime).toLocal();
+        final startTime = DateTime.parse(slot.startTime);
         final timeStr = DateFormat('hh:mm a').format(startTime);
         final isSelected = _selectedSlot == slot;
 
@@ -377,6 +377,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
             provider.clearAvailabilityError();
           },
           child: Container(
+            margin: EdgeInsets.only(right: AppSpacing.sm),
             padding: EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
               vertical: AppSpacing.sm,
@@ -429,8 +430,8 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                   onPressed: () async {
                     if (_selectedSlot == null) return;
 
-                    final isAvailable =
-                        await provider.checkRescheduleAvailability(
+                    final isAvailable = await provider
+                        .checkRescheduleAvailability(
                           startTime: _selectedSlot!.startTime,
                           endTime: _selectedSlot!.endTime,
                         );
@@ -453,10 +454,12 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
   }
 
   Widget _buildSummaryOverlay() {
-    final originalStart =
-        DateTime.parse(widget.session.booking!.startTime).toLocal();
-    final originalEnd =
-        DateTime.parse(widget.session.booking!.endTime).toLocal();
+    final originalStart = DateTime.parse(
+      widget.session.booking!.startTime,
+    ).toLocal();
+    final originalEnd = DateTime.parse(
+      widget.session.booking!.endTime,
+    ).toLocal();
     final newStart = DateTime.parse(_selectedSlot!.startTime).toLocal();
 
     return SingleChildScrollView(
@@ -528,7 +531,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                   title: 'NEW SCHEDULE',
                   date: DateFormat('EEEE, MMM dd').format(newStart),
                   time:
-                      '${DateFormat('hh:mm a').format(newStart)} - ${DateFormat('hh:mm a').format(DateTime.parse(_selectedSlot!.endTime).toLocal())}',
+                      '${DateFormat('hh:mm a').format(DateTime.parse(_selectedSlot!.startTime))} - ${DateFormat('hh:mm a').format(DateTime.parse(_selectedSlot!.endTime))}',
                   icon: Icons.event_available_rounded,
                   isPrimary: true,
                 ),
@@ -670,6 +673,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
       bookingId: widget.session.bookingId!,
       startTime: _selectedSlot!.startTime,
       endTime: _selectedSlot!.endTime,
+
       reason: _reasonController.text,
     );
 

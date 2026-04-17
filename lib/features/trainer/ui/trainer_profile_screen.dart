@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_fitness/features/home/widgets/trainer_summary_section.dart';
@@ -41,8 +43,14 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.scrollToBooking) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.trainerInfo?.id != null) {
+        context.read<TrainerProfileProvider>().fetchTrainerProfile(
+          widget.trainerInfo!.id,
+        );
+      }
+
+      if (widget.scrollToBooking) {
         // Increased delay and repeated check for content initialization
         Future.delayed(const Duration(milliseconds: 1000), () {
           if (mounted && _scrollController.hasClients) {
@@ -53,8 +61,8 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
             );
           }
         });
-      });
-    }
+      }
+    });
   }
 
   @override
@@ -65,10 +73,11 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) =>
-          TrainerProfileProvider()..fetchTrainerProfile(widget.trainerInfo!.id),
-      child: Scaffold(
+    final trainerProvider = context.read<TrainerProfileProvider>();
+    log("isStripeConnected: ${trainerProvider.trainer?.isStripeConnected}");
+    log("isPayPalConnected: ${trainerProvider.trainer?.isPayPalConnected}");
+
+    return Scaffold(
         backgroundColor: AppColors.background,
         body: CustomScrollView(
           controller: _scrollController,
@@ -160,8 +169,7 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
           ],
         ),
         bottomNavigationBar: _BookSessionButton(),
-      ),
-    );
+      );
   }
 }
 
@@ -414,8 +422,8 @@ class _BookSessionButton extends StatelessWidget {
                     final vatConfig = provider.trainer?.vatConfig;
                     final vatPercent = vatConfig != null
                         ? (vatConfig.mode == 'percentage'
-                            ? vatConfig.percent
-                            : 0.0)
+                              ? vatConfig.percent
+                              : 0.0)
                         : null;
 
                     final totalAmount = settingsProvider.calculateTotalAmount(
