@@ -9,23 +9,37 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../routes/app_router.dart';
 import '../models/exercise_model.dart';
 
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+
 class ExerciseVideoSection extends StatelessWidget {
-  const ExerciseVideoSection({
-    super.key,
-    required this.exercise,
-  });
+  const ExerciseVideoSection({super.key, required this.exercise});
 
   final ExerciseModel exercise;
 
+  String? _getThumbnailUrl() {
+    if (exercise.videoThumbnailUrl != null &&
+        exercise.videoThumbnailUrl!.isNotEmpty) {
+      return exercise.videoThumbnailUrl;
+    }
+
+    if (exercise.videoUrl != null) {
+      final videoId = YoutubePlayer.convertUrlToId(exercise.videoUrl!);
+      if (videoId != null) {
+        return 'https://img.youtube.com/vi/$videoId/hqdefault.jpg';
+      }
+    }
+
+    return exercise.imageUrl.isNotEmpty ? exercise.imageUrl : null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final thumbnailUrl = _getThumbnailUrl();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Divider(
-          color: AppColors.grey200,
-          thickness: 1,
-        ),
+        Divider(color: AppColors.grey200, thickness: 1),
         SizedBox(height: AppSpacing.sm),
         Text(
           'Watch Video',
@@ -48,24 +62,35 @@ class ExerciseVideoSection extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: AppRadius.medium,
-                  child: Image.network(
-                    exercise.videoThumbnailUrl ?? exercise.imageUrl,
-                    width: double.infinity,
-                    height: 200.h,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: double.infinity,
-                        height: 200.h,
-                        color: AppColors.grey75,
-                        child: Icon(
-                          Icons.play_circle_outline,
-                          size: 48.sp,
-                          color: AppColors.grey400,
+                  child: thumbnailUrl != null && thumbnailUrl.isNotEmpty
+                      ? Image.network(
+                          thumbnailUrl,
+                          width: double.infinity,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: double.infinity,
+                              height: double.infinity,
+                              color: AppColors.grey75,
+                              child: Icon(
+                                Icons.play_circle_outline,
+                                size: 48.sp,
+                                color: AppColors.grey400,
+                              ),
+                            );
+                          },
+                        )
+                      : Container(
+                          width: double.infinity,
+                          height: double.infinity,
+                          color: AppColors.grey75,
+                          child: Icon(
+                            Icons.play_circle_outline,
+                            size: 48.sp,
+                            color: AppColors.grey400,
+                          ),
                         ),
-                      );
-                    },
-                  ),
                 ),
                 Positioned.fill(
                   child: Center(
@@ -75,7 +100,10 @@ class ExerciseVideoSection extends StatelessWidget {
                       decoration: BoxDecoration(
                         // color: AppColors.background.withValues(alpha: 0.9),
                         shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.textPrimary, width: 2.w),
+                        border: Border.all(
+                          color: AppColors.textPrimary,
+                          width: 2.w,
+                        ),
                       ),
                       child: Icon(
                         Icons.play_arrow,
@@ -115,11 +143,7 @@ class ExerciseVideoSection extends StatelessWidget {
               ),
             ),
             SizedBox(width: AppSpacing.sm),
-            Icon(
-              Icons.access_time,
-              size: 10.sp,
-              color: AppColors.primary,
-            ),
+            Icon(Icons.access_time, size: 10.sp, color: AppColors.primary),
             SizedBox(width: AppSpacing.xs),
             Text(
               '${exercise.videoDurationMinutes ?? 0} min',
@@ -139,4 +163,3 @@ class ExerciseVideoSection extends StatelessWidget {
     return '${v[0].toUpperCase()}${v.substring(1)}';
   }
 }
-

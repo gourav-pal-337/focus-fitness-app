@@ -14,7 +14,7 @@ import '../provider/contact_support_provider.dart';
 import '../widgets/attach_screenshot_widget.dart';
 import '../widgets/description_input_field.dart';
 import '../widgets/issue_type_dropdown.dart';
-import '../widgets/subject_input_field.dart';
+import '../widgets/severity_dropdown.dart';
 
 class ContactSupportScreen extends StatelessWidget {
   const ContactSupportScreen({super.key});
@@ -30,7 +30,6 @@ class ContactSupportScreen extends StatelessWidget {
             children: [
               CustomAppBar(
                 title: 'Contact Support',
-
                 onBack: () {
                   context.pop();
                 },
@@ -47,58 +46,29 @@ class ContactSupportScreen extends StatelessWidget {
                         SizedBox(height: AppSpacing.lg),
                         const IssueTypeDropdown(),
                         SizedBox(height: AppSpacing.lg),
-                        const SubjectInputField(),
+                        const SeverityDropdown(),
                         SizedBox(height: AppSpacing.lg),
                         const DescriptionInputField(),
                         SizedBox(height: AppSpacing.lg),
                         const AttachScreenshotWidget(),
                         SizedBox(height: AppSpacing.md),
-                        Text(
-                          'Note: We usually respond within 24 hours.',
-                          style: AppTextStyle.text14Regular.copyWith(
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        SizedBox(height: AppSpacing.xl),
-                        Consumer<ContactSupportProvider>(
-                          builder: (context, provider, child) {
-                            if (provider.error != null) {
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text(provider.error!)),
-                                );
-                              });
-                            }
-
-                            return CustomButton(
-                              text: provider.isLoading
-                                  ? 'Submitting...'
-                                  : 'Submit Ticket',
-                              type: ButtonType.filled, // Assuming filled style
-                              onPressed: provider.isLoading
-                                  ? () {}
-                                  : () async {
-                                      final ticket = await provider
-                                          .submitTicket();
-                                      debugPrint(
-                                        'ticket: $ticket , ismounter ${context.mounted}',
-                                      );
-                                      if (ticket != null && context.mounted) {
-                                        context.push(
-                                          TicketSuccessRoute.path,
-                                          extra: ticket,
-                                        );
-                                      }
-                                    },
-                              textStyle: AppTextStyle.text16SemiBold.copyWith(
-                                color: AppColors.background,
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline_rounded,
+                              size: 16.sp,
+                              color: AppColors.primary,
+                            ),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Text(
+                                'Note: We usually respond within 24 hours.',
+                                style: AppTextStyle.text14Regular.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
-                              width: double.infinity,
-                              backgroundColor: AppColors.primary,
-                              textColor: AppColors.background,
-                              borderRadius: 12.r,
-                            );
-                          },
+                            ),
+                          ],
                         ),
                         SizedBox(height: AppSpacing.xl),
                       ],
@@ -108,6 +78,60 @@ class ContactSupportScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+        bottomNavigationBar: Consumer<ContactSupportProvider>(
+          builder: (context, provider, child) {
+            if (provider.error != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(provider.error!),
+                    backgroundColor: Colors.redAccent,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              });
+            }
+
+            return Container(
+              padding: EdgeInsets.only(
+                left: AppSpacing.screenPadding.left,
+                right: AppSpacing.screenPadding.right,
+                bottom: AppSpacing.lg,
+                top: AppSpacing.md,
+              ),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.textPrimary.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: CustomButton(
+                text: provider.isLoading ? 'Submitting...' : 'Submit Ticket',
+                type: ButtonType.filled,
+                onPressed: provider.isLoading
+                    ? () {}
+                    : () async {
+                        final ticket = await provider.submitTicket();
+                        if (ticket != null && context.mounted) {
+                          context.push(TicketSuccessRoute.path, extra: ticket);
+                        }
+                      },
+                textStyle: AppTextStyle.text16SemiBold.copyWith(
+                  color: AppColors.background,
+                ),
+                width: double.infinity,
+                height: 54.h,
+                backgroundColor: AppColors.primary,
+                textColor: AppColors.background,
+                borderRadius: 14.r,
+              ),
+            );
+          },
         ),
       ),
     );

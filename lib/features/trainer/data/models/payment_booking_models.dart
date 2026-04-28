@@ -59,6 +59,8 @@ class InitiatePaymentResponseModel {
   final String? paymentId;
   final String? provider;
   final Map<String, dynamic>? bookingPreview;
+
+  final Map<String, dynamic>? payment;
   final String? clientSecret;
   final String? customerId;
   final String? ephemeralKey;
@@ -70,6 +72,7 @@ class InitiatePaymentResponseModel {
     required this.success,
     this.paymentId,
     this.provider,
+    this.payment,
     this.bookingPreview,
     this.clientSecret,
     this.customerId,
@@ -83,6 +86,7 @@ class InitiatePaymentResponseModel {
     return InitiatePaymentResponseModel(
       success: json['success'] ?? false,
       paymentId: json['paymentId'] as String?,
+      payment: json['payment'] as Map<String, dynamic>?,
       provider: json['provider'] as String?,
       bookingPreview: json['bookingPreview'] as Map<String, dynamic>?,
       clientSecret: json['clientSecret'] as String?,

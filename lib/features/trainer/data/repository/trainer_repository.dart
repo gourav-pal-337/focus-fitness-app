@@ -275,4 +275,30 @@ class TrainerRepository {
       return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
+
+  /// Update payment status for a booking
+  Future<Result<bool>> updatePaymentStatus({
+    required String bookingId,
+    required String status,
+    String? providerStatus,
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      if (bookingId.trim().isEmpty) {
+        return Failure('Booking ID is required.', code: 400);
+      }
+
+      final response = await _apiService.updatePaymentStatus(
+        bookingId: bookingId,
+        status: status,
+        providerStatus: providerStatus,
+        metadata: metadata,
+      );
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
 }

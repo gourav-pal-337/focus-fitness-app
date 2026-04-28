@@ -8,6 +8,7 @@ class RegisterRequestModel {
     required this.countryCode,
     required this.phone,
     required this.password,
+    required this.isAcceptedTerms,
     this.referralCode,
   });
 
@@ -18,6 +19,7 @@ class RegisterRequestModel {
   final String countryCode;
   final String phone;
   final String password;
+  final bool isAcceptedTerms;
   final String? referralCode;
 
   Map<String, dynamic> toJson() {
@@ -29,6 +31,7 @@ class RegisterRequestModel {
       'countryCode': countryCode,
       'phone': phone,
       'password': password,
+      'isAcceptedTerms': isAcceptedTerms,
       if (referralCode != null && referralCode!.isNotEmpty)
         'referralCode': referralCode,
     };

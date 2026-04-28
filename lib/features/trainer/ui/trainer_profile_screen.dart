@@ -48,6 +48,7 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
         context.read<TrainerProfileProvider>().fetchTrainerProfile(
           widget.trainerInfo!.id,
         );
+        context.read<TrainerProfileProvider>().hideBookingView();
       }
 
       if (widget.scrollToBooking) {
@@ -78,98 +79,98 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
     log("isPayPalConnected: ${trainerProvider.trainer?.isPayPalConnected}");
 
     return Scaffold(
-        backgroundColor: AppColors.background,
-        body: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            SliverList(
-              delegate: SliverChildListDelegate([
-                TrainerProfileHeader(
-                  trainerImageUrl: widget.trainerInfo?.profilePhoto,
-                ),
-                SizedBox(height: 50.h),
-                Consumer<TrainerProfileProvider>(
-                  builder: (context, provider, _) {
-                    if (provider.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
+      backgroundColor: AppColors.background,
+      body: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          SliverList(
+            delegate: SliverChildListDelegate([
+              TrainerProfileHeader(
+                trainerImageUrl: widget.trainerInfo?.profilePhoto,
+              ),
+              SizedBox(height: 50.h),
+              Consumer<TrainerProfileProvider>(
+                builder: (context, provider, _) {
+                  if (provider.isLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                    if (provider.error != null) {
-                      return Center(
-                        child: Text(
-                          provider.error!,
-                          style: AppTextStyle.text14Regular.copyWith(
-                            color: AppColors.grey400,
-                          ),
+                  if (provider.error != null) {
+                    return Center(
+                      child: Text(
+                        provider.error!,
+                        style: AppTextStyle.text14Regular.copyWith(
+                          color: AppColors.grey400,
                         ),
-                      );
-                    }
-                    //                       const TrainerProfileScreen({
-                    //   super.key,
-                    //   required this.trainerId,
-                    //   this.trainerName = 'James Gustavsson',
-                    //   this.trainerSpecialty = 'HIIT & Cardio',
-                    //   this.trainerRating = 4.6,
-                    //   this.trainerImageUrl,
-                    // });
+                      ),
+                    );
+                  }
+                  //                       const TrainerProfileScreen({
+                  //   super.key,
+                  //   required this.trainerId,
+                  //   this.trainerName = 'James Gustavsson',
+                  //   this.trainerSpecialty = 'HIIT & Cardio',
+                  //   this.trainerRating = 4.6,
+                  //   this.trainerImageUrl,
+                  // });
 
-                    final trainer = provider.trainer;
-                    if (trainer == null) {
-                      return TrainerInfoSection(
-                        name: widget.trainerInfo?.fullName ?? "trainer",
-                        specialty: "HIIT & Cardio",
-                        rating: 0.0,
-                        imageUrl: widget.trainerInfo?.profilePhoto ?? "",
-                      );
-                    }
-
+                  final trainer = provider.trainer;
+                  if (trainer == null) {
                     return TrainerInfoSection(
-                      name: trainer.fullName ?? "trainer",
-                      specialty: trainer.expertiseAreas.isNotEmpty
-                          ? trainer.expertiseAreas.join(' & ')
-                          : "HIIT & Cardio",
-                      rating: trainer.avgRating ?? 0.0,
-                      imageUrl: trainer.profilePhoto ?? "",
+                      name: widget.trainerInfo?.fullName ?? "trainer",
+                      specialty: "HIIT & Cardio",
+                      rating: 0.0,
+                      imageUrl: widget.trainerInfo?.profilePhoto ?? "",
                     );
-                  },
-                ),
-                SizedBox(height: AppSpacing.xl),
-                Consumer<TrainerProfileProvider>(
-                  builder: (context, provider, _) {
-                    return AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 300),
-                      transitionBuilder:
-                          (Widget child, Animation<double> animation) {
-                            return SlideTransition(
-                              position:
-                                  Tween<Offset>(
-                                    begin: const Offset(1.0, 0.0),
-                                    end: Offset.zero,
-                                  ).animate(
-                                    CurvedAnimation(
-                                      parent: animation,
-                                      curve: Curves.easeInOut,
-                                    ),
+                  }
+
+                  return TrainerInfoSection(
+                    name: trainer.fullName ?? "trainer",
+                    specialty: trainer.expertiseAreas.isNotEmpty
+                        ? trainer.expertiseAreas.join(' & ')
+                        : "HIIT & Cardio",
+                    rating: trainer.avgRating ?? 0.0,
+                    imageUrl: trainer.profilePhoto ?? "",
+                  );
+                },
+              ),
+              SizedBox(height: AppSpacing.xl),
+              Consumer<TrainerProfileProvider>(
+                builder: (context, provider, _) {
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder:
+                        (Widget child, Animation<double> animation) {
+                          return SlideTransition(
+                            position:
+                                Tween<Offset>(
+                                  begin: const Offset(1.0, 0.0),
+                                  end: Offset.zero,
+                                ).animate(
+                                  CurvedAnimation(
+                                    parent: animation,
+                                    curve: Curves.easeInOut,
                                   ),
-                              child: child,
-                            );
-                          },
-                      child: provider.showBookingConfirmation
-                          ? _BookingContent(key: const ValueKey('booking'))
-                          : _ProfileContent(
-                              key: const ValueKey('profile'),
-                              hideSummary: widget.scrollToBooking,
-                            ),
-                    );
-                  },
-                ),
-                SizedBox(height: AppSpacing.xl),
-              ]),
-            ),
-          ],
-        ),
-        bottomNavigationBar: _BookSessionButton(),
-      );
+                                ),
+                            child: child,
+                          );
+                        },
+                    child: provider.showBookingConfirmation
+                        ? _BookingContent(key: const ValueKey('booking'))
+                        : _ProfileContent(
+                            key: const ValueKey('profile'),
+                            hideSummary: widget.scrollToBooking,
+                          ),
+                  );
+                },
+              ),
+              SizedBox(height: AppSpacing.xl),
+            ]),
+          ),
+        ],
+      ),
+      bottomNavigationBar: _BookSessionButton(),
+    );
   }
 }
 

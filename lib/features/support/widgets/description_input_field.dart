@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -19,28 +20,25 @@ class DescriptionInputField extends StatelessWidget {
           children: [
             Text(
               'Description',
-              style: AppTextStyle.text16Regular.copyWith(
-                color: AppColors.textPrimary,
+              style: AppTextStyle.text14Medium.copyWith(
+                color: AppColors.textSecondary,
               ),
             ),
-            SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.xs),
             Container(
               decoration: BoxDecoration(
-                color: AppColors.background,
-                borderRadius: AppRadius.small,
-                border: Border.all(
-                  color: AppColors.grey200,
-                  width: 1,
-                ),
+                color: AppColors.grey50,
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: AppColors.grey200, width: 1),
               ),
               child: TextField(
                 onChanged: provider.updateDescription,
-                maxLines: 6,
+                maxLines: 5,
                 style: AppTextStyle.text16Regular.copyWith(
                   color: AppColors.textPrimary,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Describe your problem in detail',
+                  hintText: 'Describe your problem in detail...',
                   hintStyle: AppTextStyle.text16Regular.copyWith(
                     color: AppColors.grey400,
                   ),
@@ -55,4 +53,3 @@ class DescriptionInputField extends StatelessWidget {
     );
   }
 }
-

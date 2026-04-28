@@ -102,7 +102,8 @@ class _ExerciseDetailsScreenState extends State<ExerciseDetailsScreen> {
                         SizedBox(height: AppSpacing.lg),
                         ExerciseOverviewSection(exercise: exercise),
                         SizedBox(height: AppSpacing.xl),
-                        if (exercise.videoThumbnailUrl != null) ...[
+                        if (exercise.videoUrl != null ||
+                            exercise.videoThumbnailUrl != null) ...[
                           ExerciseVideoSection(exercise: exercise),
                           SizedBox(height: AppSpacing.xl),
                         ],

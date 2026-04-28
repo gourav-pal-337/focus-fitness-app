@@ -349,21 +349,29 @@ class _PayButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<PaymentMethodProvider>();
     final settingsProvider = context.watch<SystemSettingsProvider>();
-    final selectedPaymentType = provider.selectedPaymentType;
+    final trainerProvider = context.watch<TrainerProfileProvider>();
 
+    final selectedPaymentType = provider.selectedPaymentType;
     final settings = settingsProvider.feeSettings;
+    final trainer = trainerProvider.trainer;
+    final vatConfig = trainer?.vatConfig;
 
     // Recalculate components to ensure accuracy and get the latest
     double serviceFee = 0;
     double vatAmount = 0;
     double totalChargedAmount = amount;
 
+    double vatPercent = settings?.vatTaxPercent ?? 0;
+    if (vatConfig != null) {
+      vatPercent = vatConfig.mode == 'percentage' ? vatConfig.percent : 0.0;
+    }
+
     if (settings != null) {
       serviceFee = settings.platformFeeType == 'fixed'
           ? settings.platformFee
           : (baseAmount * (settings.platformFee / 100));
 
-      vatAmount = baseAmount * (settings.vatTaxPercent / 100);
+      vatAmount = baseAmount * (vatPercent / 100);
       totalChargedAmount = baseAmount + serviceFee + vatAmount;
     }
 
@@ -581,24 +589,31 @@ class _PayButton extends StatelessWidget {
                     totalAmount: totalChargedAmount,
                     platformFeeValue: settings?.platformFee,
                     platformFeeType: settings?.platformFeeType,
-                    vatTaxPercent: settings?.vatTaxPercent,
+                    vatTaxPercent: vatPercent,
                     mode: mode,
                   );
 
-                  log(
-                    "initiateResponse : ${initiateResponse?.paymentIntentId} ",
-                  );
+                  log("initiateResponse : ${initiateResponse?.payment} ");
 
                   if (initiateResponse != null && initiateResponse.success) {
                     bool paymentCompleted = false;
-
+                    final bookingId =
+                        initiateResponse.payment?['bookingId'] as String?;
+                    print('bookingId :::: ${initiateResponse.payment}');
                     if (selectedPaymentType == PaymentType.creditCard) {
                       Stripe.publishableKey =
                           "pk_test_51T5N9X38afHUCI9lYRWGMYeJU4z9Y31rfNJJuoFB8N59qYZ72O9OZagxLJTQtgTXCiDmbkxgXB334LH7vcjZqyKP00fGNUhH0v";
                       await Stripe.instance.applySettings();
                       if (initiateResponse.clientSecret != null &&
                           initiateResponse.clientSecret!.isNotEmpty) {
+                        debugPrint('bookingId : $bookingId');
                         try {
+                          if (bookingId != null) {
+                            await provider.updatePaymentStatus(
+                              bookingId: bookingId,
+                              status: 'processing',
+                            );
+                          }
                           await Stripe.instance.initPaymentSheet(
                             paymentSheetParameters: SetupPaymentSheetParameters(
                               paymentIntentClientSecret:
@@ -612,6 +627,12 @@ class _PayButton extends StatelessWidget {
                           await Stripe.instance.presentPaymentSheet();
                           paymentCompleted = true;
                         } on StripeException catch (e) {
+                          if (bookingId != null) {
+                            await provider.updatePaymentStatus(
+                              bookingId: bookingId,
+                              status: 'failed',
+                            );
+                          }
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -622,6 +643,12 @@ class _PayButton extends StatelessWidget {
                           );
                           return;
                         } catch (e) {
+                          if (bookingId != null) {
+                            await provider.updatePaymentStatus(
+                              bookingId: bookingId,
+                              status: 'failed',
+                            );
+                          }
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('An error occurred: $e')),
@@ -633,6 +660,12 @@ class _PayButton extends StatelessWidget {
                       // Paypal
                       if (initiateResponse.checkoutUrl != null &&
                           initiateResponse.checkoutUrl!.isNotEmpty) {
+                        if (bookingId != null) {
+                          await provider.updatePaymentStatus(
+                            bookingId: bookingId,
+                            status: 'processing',
+                          );
+                        }
                         final result = await Navigator.push<bool>(
                           context,
                           MaterialPageRoute(
@@ -644,6 +677,13 @@ class _PayButton extends StatelessWidget {
 
                         if (result == true) {
                           paymentCompleted = true;
+                        } else {
+                          if (bookingId != null) {
+                            await provider.updatePaymentStatus(
+                              bookingId: bookingId,
+                              status: 'failed',
+                            );
+                          }
                         }
                       }
                     }

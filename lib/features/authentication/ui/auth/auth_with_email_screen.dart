@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
@@ -33,6 +34,8 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
   late final TextEditingController _passwordController;
   late final TextEditingController _confirmPasswordController;
   final _formKey = GlobalKey<FormState>();
+
+  bool _isAccepted = false;
 
   @override
   void initState() {
@@ -77,10 +80,14 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
         // TODO: Navigate to email verification screen
         // For now, navigate to home
 
-        context.go(HomeRoute.path);
+        if (mounted) {
+          context.go(HomeRoute.path);
+        }
       } else {
         // Navigate to home
-        context.go(HomeRoute.path);
+        if (mounted) {
+          context.go(HomeRoute.path);
+        }
       }
     } else if (authProvider.isError && mounted) {
       // Show error message
@@ -98,6 +105,16 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
       return;
     }
 
+    if (!_isAccepted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please accept Privacy Policy and Terms of Use'),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+      return;
+    }
+
     final authProvider = context.read<AuthProvider>();
     final userProvider = context.read<UserProvider>();
 
@@ -106,9 +123,10 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
       surname: '',
       fullName: authProvider.name.trim(),
       email: _emailController.text.trim(),
-      countryCode: '', // Added as per instruction
+      countryCode: '',
       phone: '',
       password: _passwordController.text.trim(),
+      isAcceptedTerms: _isAccepted,
       referralCode: authProvider.trainerId.isNotEmpty
           ? authProvider.trainerId
           : null,
@@ -119,12 +137,14 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
     if (authProvider.isRegisterSuccess && mounted) {
       await userProvider.fetchUserDetails();
       // Navigate based on registration success
-      if (authProvider.trainerId.isNotEmpty) {
-        // Trainer linked, go to onboarding
-        AppRouter.router.go(HomeRoute.path);
-      } else {
-        // No trainer, go to enter trainer ID
-        context.go(EnterTrainerIdRoute.path);
+      if (mounted) {
+        if (authProvider.trainerId.isNotEmpty) {
+          // Trainer linked, go to onboarding
+          AppRouter.router.go(HomeRoute.path);
+        } else {
+          // No trainer, go to enter trainer ID
+          context.go(EnterTrainerIdRoute.path);
+        }
       }
     } else if (authProvider.isError && mounted) {
       // Show error message
@@ -142,9 +162,10 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
     if (authProvider.isLoading) {
       return;
     }
-    print("google login....");
     await authProvider.signInWithGoogle();
-    _handleSocialAuthResult(authProvider);
+    if (mounted) {
+      _handleSocialAuthResult(authProvider);
+    }
   }
 
   Future<void> _handleAppleLogin() async {
@@ -152,9 +173,10 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
     if (authProvider.isLoading) {
       return;
     }
-    print("apple login....");
     await authProvider.signInWithApple();
-    _handleSocialAuthResult(authProvider);
+    if (mounted) {
+      _handleSocialAuthResult(authProvider);
+    }
   }
 
   Future<void> _handleSocialAuthResult(AuthProvider authProvider) async {
@@ -296,6 +318,75 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
                               ),
                             ),
                           ),
+                        ),
+                      ],
+                      if (!isLogin) ...[
+                        SizedBox(height: AppSpacing.sm),
+                        Row(
+                          children: [
+                            SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: Checkbox(
+                                value: _isAccepted,
+                                onChanged: (v) =>
+                                    setState(() => _isAccepted = v ?? false),
+                                activeColor: AppColors.primary,
+                                checkColor: AppColors.background,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () =>
+                                    setState(() => _isAccepted = !_isAccepted),
+                                child: RichText(
+                                  text: TextSpan(
+                                    text: 'I Accept ',
+                                    style: AppTextStyle.text12Regular.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    children: [
+                                      TextSpan(
+                                        text: 'Privacy Policy',
+                                        style: AppTextStyle.text12Regular
+                                            .copyWith(color: AppColors.primary),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            context.pushNamed(
+                                              LegalRoute.name,
+                                              queryParameters: {
+                                                'type': 'privacy_policy',
+                                                'title': 'Privacy Policy',
+                                              },
+                                            );
+                                          },
+                                      ),
+                                      const TextSpan(text: ' and '),
+                                      TextSpan(
+                                        text: 'Terms of Use.',
+                                        style: AppTextStyle.text12Regular
+                                            .copyWith(color: AppColors.primary),
+                                        recognizer: TapGestureRecognizer()
+                                          ..onTap = () {
+                                            context.pushNamed(
+                                              LegalRoute.name,
+                                              queryParameters: {
+                                                'type': 'client_terms_of_use',
+                                                'title': 'Terms of Use',
+                                              },
+                                            );
+                                          },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                       SizedBox(height: AppSpacing.lg * 1.5),

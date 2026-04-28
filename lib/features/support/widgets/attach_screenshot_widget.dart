@@ -23,11 +23,11 @@ class AttachScreenshotWidget extends StatelessWidget {
           children: [
             Text(
               'Attach Screenshot',
-              style: AppTextStyle.text16Regular.copyWith(
-                color: AppColors.textPrimary,
+              style: AppTextStyle.text14Medium.copyWith(
+                color: AppColors.textSecondary,
               ),
             ),
-            SizedBox(height: AppSpacing.sm),
+            SizedBox(height: AppSpacing.xs),
             GestureDetector(
               onTap: () async {
                 final ImagePicker picker = ImagePicker();
@@ -41,17 +41,21 @@ class AttachScreenshotWidget extends StatelessWidget {
               },
               child: Container(
                 width: double.infinity,
-                height: 200.h,
+                height: 160.h,
                 decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: AppRadius.small,
-                  border: Border.all(color: AppColors.grey200, width: 1),
+                  color: AppColors.grey50,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: AppColors.grey200,
+                    width: 1,
+                    style: BorderStyle.solid,
+                  ),
                 ),
                 child: provider.screenshotPath != null
                     ? Stack(
                         children: [
                           ClipRRect(
-                            borderRadius: AppRadius.small,
+                            borderRadius: BorderRadius.circular(11.r),
                             child: Image.file(
                               File(provider.screenshotPath!),
                               width: double.infinity,
@@ -60,8 +64,8 @@ class AttachScreenshotWidget extends StatelessWidget {
                             ),
                           ),
                           Positioned(
-                            top: AppSpacing.sm,
-                            right: AppSpacing.sm,
+                            top: 8.h,
+                            right: 8.w,
                             child: GestureDetector(
                               onTap: () {
                                 provider.updateScreenshotPath(null);
@@ -82,12 +86,29 @@ class AttachScreenshotWidget extends StatelessWidget {
                           ),
                         ],
                       )
-                    : Center(
-                        child: Icon(
-                          Icons.add_photo_alternate_outlined,
-                          size: 64.sp,
-                          color: AppColors.grey400,
-                        ),
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.cloud_upload_outlined,
+                            size: 48.sp,
+                            color: AppColors.primary.withOpacity(0.5),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            'Click to upload screenshot',
+                            style: AppTextStyle.text14Medium.copyWith(
+                              color: AppColors.grey400,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Text(
+                            'PNG, JPG up to 5MB',
+                            style: AppTextStyle.text12Regular.copyWith(
+                              color: AppColors.grey400,
+                            ),
+                          ),
+                        ],
                       ),
               ),
             ),

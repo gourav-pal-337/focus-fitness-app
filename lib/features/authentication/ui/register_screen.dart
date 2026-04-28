@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -36,6 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   String _countryCode = '+91';
   bool _isPhoneFocused = false;
+  bool _isAccepted = false;
 
   @override
   void dispose() {
@@ -48,6 +50,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (!_isAccepted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please accept Privacy Policy and Terms of Use'),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+      return;
+    }
 
     final authProvider = context.read<AuthProvider>();
 
@@ -62,6 +74,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       countryCode: _countryCode,
       phone: phoneNumber,
       password: _passwordController.text.trim(),
+      isAcceptedTerms: _isAccepted,
     );
 
     authProvider.setPendingRegisterRequest(request);
@@ -169,65 +182,92 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 SizedBox(height: AppSpacing.sm),
 
-                Focus(
-                  onFocusChange: (hasFocus) {
-                    setState(() {
-                      _isPhoneFocused = hasFocus;
-                    });
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: _isPhoneFocused
-                            ? AppColors.primary
-                            : AppColors.grey300,
-                        width: _isPhoneFocused ? 1.2 : 1,
-                      ),
-                      borderRadius: AppRadius.medium,
-                    ),
-                    child: Row(
+                FormField<String>(
+                  validator: (v) =>
+                      _phoneController.text.isEmpty ? 'Required' : null,
+                  builder: (state) {
+                    return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          height: 50,
-                          child: MyCountryCodePicker(
-                            selectedCode: _countryCode,
-                            selectedFlag: '🇮🇳',
-                            onCountryCodeTap: (code) {
-                              if (code != null) {
-                                setState(() {
-                                  _countryCode = code.dialCode;
-                                });
-                              }
-                            },
+                        Focus(
+                          onFocusChange: (hasFocus) {
+                            setState(() {
+                              _isPhoneFocused = hasFocus;
+                            });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: state.hasError
+                                    ? Colors.red
+                                    : (_isPhoneFocused
+                                          ? AppColors.primary
+                                          : AppColors.grey300),
+                                width: (state.hasError || _isPhoneFocused)
+                                    ? 1.2
+                                    : 1,
+                              ),
+                              borderRadius: AppRadius.medium,
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  height: 50,
+                                  child: MyCountryCodePicker(
+                                    selectedCode: _countryCode,
+                                    selectedFlag: '🇮🇳',
+                                    onCountryCodeTap: (code) {
+                                      if (code != null) {
+                                        setState(() {
+                                          _countryCode = code.dialCode;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: _phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    style: AppTextStyle.text16Regular.copyWith(
+                                      color: AppColors.textPrimary,
+                                    ),
+                                    cursorColor: AppColors.primary,
+                                    decoration: InputDecoration(
+                                      hintText: 'Phone Number',
+                                      hintStyle: AppTextStyle.text14Regular
+                                          .copyWith(color: AppColors.grey400),
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: AppSpacing.md,
+                                        vertical: 14.h,
+                                      ),
+                                    ),
+                                    onChanged: (v) => state.didChange(v),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _phoneController,
-                            keyboardType: TextInputType.phone,
-                            style: AppTextStyle.text16Regular.copyWith(
-                              color: AppColors.textPrimary,
+                        if (state.hasError)
+                          Padding(
+                            padding: EdgeInsets.only(
+                              top: 4.h,
+                              left: AppSpacing.sm,
                             ),
-                            cursorColor: AppColors.primary,
-                            decoration: InputDecoration(
-                              hintText: 'Phone Number',
-                              hintStyle: AppTextStyle.text14Regular.copyWith(
-                                color: AppColors.grey400,
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: AppSpacing.md,
-                                vertical: 14.h,
+                            child: Text(
+                              state.errorText!,
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontSize: 12.sp,
                               ),
                             ),
-                            validator: (v) =>
-                                v?.isEmpty ?? true ? 'Required' : null,
                           ),
-                        ),
                       ],
-                    ),
-                  ),
+                    );
+                  },
                 ),
                 SizedBox(height: AppSpacing.sm),
 
@@ -270,7 +310,78 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return null;
                   },
                 ),
-                SizedBox(height: AppSpacing.xl * 1.5),
+                SizedBox(height: AppSpacing.md),
+                Row(
+                  children: [
+                    SizedBox(
+                      height: 24,
+                      width: 24,
+
+                      child: Checkbox(
+                        value: _isAccepted,
+                        onChanged: (v) =>
+                            setState(() => _isAccepted = v ?? false),
+                        activeColor: AppColors.primary,
+                        checkColor: AppColors.background,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () => setState(() => _isAccepted = !_isAccepted),
+                        child: RichText(
+                          text: TextSpan(
+                            text: 'I Accept ',
+                            style: AppTextStyle.text12Regular.copyWith(
+                              color: AppColors.textSecondary,
+                            ),
+                            children: [
+                              TextSpan(
+                                text: 'Privacy Policy',
+                                style: AppTextStyle.text12Regular.copyWith(
+                                  color: AppColors.primary,
+                                  // decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    context.pushNamed(
+                                      LegalRoute.name,
+                                      queryParameters: {
+                                        'type': 'privacy_policy',
+                                        'title': 'Privacy Policy',
+                                      },
+                                    );
+                                  },
+                              ),
+                              const TextSpan(text: ' and '),
+                              TextSpan(
+                                text: 'Terms of Use.',
+                                style: AppTextStyle.text12Regular.copyWith(
+                                  color: AppColors.primary,
+                                  // decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    context.pushNamed(
+                                      LegalRoute.name,
+                                      queryParameters: {
+                                        'type': 'client_terms_of_use',
+                                        'title': 'Terms of Use',
+                                      },
+                                    );
+                                  },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: AppSpacing.xl),
 
                 Consumer<AuthProvider>(
                   builder: (context, provider, _) {

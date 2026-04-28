@@ -521,7 +521,9 @@ class TrainerApiService {
   }
 
   /// Get next available slot for a trainer
-  Future<NextAvailableSlotResponseModel> getNextAvailableSlot(String trainerId) async {
+  Future<NextAvailableSlotResponseModel> getNextAvailableSlot(
+    String trainerId,
+  ) async {
     try {
       final response = await _apiHitter.getApiResponse(
         Endpoints.getNextAvailableSlot(trainerId),
@@ -533,7 +535,8 @@ class TrainerApiService {
       } else {
         final responseData = response.response?.data;
         if (responseData is Map<String, dynamic>) {
-          final errorMessage = (responseData['error'] as String?) ??
+          final errorMessage =
+              (responseData['error'] as String?) ??
               (responseData['message'] as String?) ??
               response.msg;
 
@@ -551,6 +554,34 @@ class TrainerApiService {
           statusCode: response.response?.statusCode,
         );
       }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Update payment status for a booking
+  Future<bool> updatePaymentStatus({
+    required String bookingId,
+    required String status,
+    String? providerStatus,
+    Map<String, dynamic>? metadata,
+  }) async {
+    try {
+      final response = await _apiHitter.getPatchApiResponse(
+        Endpoints.updatePaymentStatus(bookingId),
+        data: {
+          'status': status,
+          if (providerStatus != null) 'providerStatus': providerStatus,
+          if (metadata != null) 'metadata': metadata,
+        },
+      );
+
+      return response.status;
     } on ApiException {
       rethrow;
     } catch (e) {

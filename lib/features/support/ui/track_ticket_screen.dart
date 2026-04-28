@@ -218,7 +218,8 @@ class _TrackTicketScreenState extends State<TrackTicketScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    ticket.title ?? 'No Subject',
+                    '${(ticket.category ?? '').split(' ').map((s) => s.isNotEmpty ? s[0].toUpperCase() + s.substring(1) : s).join(' ')} - ${ticket.title}' ??
+                        'No Subject',
                     style: AppTextStyle.text16Medium.copyWith(
                       color: AppColors.textPrimary,
                     ),

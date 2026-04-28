@@ -3,13 +3,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../provider/contact_support_provider.dart';
 
-class IssueTypeDropdown extends StatelessWidget {
-  const IssueTypeDropdown({super.key});
+class SeverityDropdown extends StatelessWidget {
+  const SeverityDropdown({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +18,7 @@ class IssueTypeDropdown extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Select Issue Type',
+              'Select Severity',
               style: AppTextStyle.text14Medium.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -27,7 +26,7 @@ class IssueTypeDropdown extends StatelessWidget {
             SizedBox(height: AppSpacing.xs),
             GestureDetector(
               onTap: () {
-                _showIssueTypeSheet(context, provider);
+                _showSeveritySheet(context, provider);
               },
               child: Container(
                 padding: EdgeInsets.symmetric(
@@ -42,20 +41,20 @@ class IssueTypeDropdown extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(
-                      _getIssueIcon(provider.issueType),
+                      Icons.priority_high_rounded,
                       size: 20.sp,
-                      color: provider.issueType.isEmpty
+                      color: provider.severity.isEmpty
                           ? AppColors.grey400
                           : AppColors.primary,
                     ),
                     SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
-                        provider.issueType.isEmpty
-                            ? 'Select issue type'
-                            : provider.issueType,
+                        provider.severity.isEmpty
+                            ? 'Select severity'
+                            : provider.severity.split(' – ').first,
                         style: AppTextStyle.text16Regular.copyWith(
-                          color: provider.issueType.isEmpty
+                          color: provider.severity.isEmpty
                               ? AppColors.grey400
                               : AppColors.textPrimary,
                         ),
@@ -76,36 +75,14 @@ class IssueTypeDropdown extends StatelessWidget {
     );
   }
 
-  IconData _getIssueIcon(String type) {
-    switch (type) {
-      case 'Bug / Not working':
-        return Icons.bug_report_outlined;
-      case 'Payment':
-        return Icons.payment_outlined;
-      case 'Chat':
-        return Icons.chat_bubble_outline_rounded;
-      case 'Bookings':
-        return Icons.calendar_today_outlined;
-      case 'Account':
-        return Icons.person_outline_rounded;
-      case 'Other':
-        return Icons.help_outline_rounded;
-      default:
-        return Icons.error_outline_rounded;
-    }
-  }
-
-  void _showIssueTypeSheet(
+  void _showSeveritySheet(
     BuildContext context,
     ContactSupportProvider provider,
   ) {
-    final issueTypes = [
-      'Bug / Not working',
-      'Payment',
-      'Chat',
-      'Bookings',
-      'Account',
-      'Other'
+    final severities = [
+      '🔴 Critical – Can’t complete task / money issue',
+      '🟠 Medium – Works but incorrect',
+      '🟢 Low – Minor / cosmetic',
     ];
 
     showModalBottomSheet(
@@ -131,7 +108,7 @@ class IssueTypeDropdown extends StatelessWidget {
             ),
             SizedBox(height: 20.h),
             Text(
-              'Issue Type',
+              'Severity Level',
               style: AppTextStyle.text18SemiBold.copyWith(
                 color: AppColors.textPrimary,
               ),
@@ -141,22 +118,21 @@ class IssueTypeDropdown extends StatelessWidget {
               child: ListView.separated(
                 shrinkWrap: true,
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                itemCount: issueTypes.length,
+                itemCount: severities.length,
                 separatorBuilder: (context, index) => Divider(
                   color: AppColors.grey100,
                   height: 1,
                 ),
                 itemBuilder: (context, index) {
-                  final type = issueTypes[index];
-                  final isSelected = provider.issueType == type;
+                  final severity = severities[index];
+                  final isSelected = provider.severity == severity;
                   return ListTile(
-                    leading: Icon(
-                      _getIssueIcon(type),
-                      color: isSelected ? AppColors.primary : AppColors.grey400,
-                      size: 22.sp,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: 4.h,
                     ),
                     title: Text(
-                      type,
+                      severity,
                       style: AppTextStyle.text16Regular.copyWith(
                         color: isSelected
                             ? AppColors.primary
@@ -168,7 +144,7 @@ class IssueTypeDropdown extends StatelessWidget {
                         ? Icon(Icons.check_circle, color: AppColors.primary)
                         : null,
                     onTap: () {
-                      provider.updateIssueType(type);
+                      provider.updateSeverity(severity);
                       Navigator.pop(context);
                     },
                   );

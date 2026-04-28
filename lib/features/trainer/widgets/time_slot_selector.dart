@@ -55,12 +55,6 @@ class TimeSlotSelector extends StatelessWidget {
             itemBuilder: (context, index) {
               final timeSlot = availableTimeSlots[index];
 
-              // final dateTime = parseDateTime(
-              //   '${provider.selectedDate} $timeSlot',
-              // );
-
-              // debugPrint("dateTime: $dateTime");
-
               bool isSlotAvailable = shouldShowTimeSlot(
                 '${provider.selectedDate} $timeSlot',
               );

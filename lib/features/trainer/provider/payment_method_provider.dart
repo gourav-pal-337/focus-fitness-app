@@ -77,7 +77,7 @@ class PaymentMethodProvider extends ChangeNotifier {
         sessionPlanId: sessionPlanId,
         startTime: timestamps['startTime']!,
         endTime: timestamps['endTime']!,
-        timezone: timezone ?? 'UTC',
+        timezone: timezone,
         notes: notes,
         mode: mode,
       );
@@ -162,10 +162,11 @@ class PaymentMethodProvider extends ChangeNotifier {
       final request = InitiatePaymentRequestModel(
         trainerId: trainerId,
         sessionPlanId: sessionPlanId,
+
         startTime: timestamps['startTime']!,
         endTime: timestamps['endTime']!,
         provider: provider,
-        timezone: timezone ?? 'UTC',
+        timezone: timezone,
         notes: notes,
         serviceFee: serviceFee,
         vatAmount: vatAmount,
@@ -280,5 +281,26 @@ class PaymentMethodProvider extends ChangeNotifier {
     }
   }
 
+  /// Update payment status for a booking
+  Future<bool> updatePaymentStatus({
+    required String bookingId,
+    required String status,
+    String? providerStatus,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final result = await _repository.updatePaymentStatus(
+      bookingId: bookingId,
+      status: status,
+      providerStatus: providerStatus,
+      metadata: metadata,
+    );
 
+    return await result.when(
+      success: (success) async => success,
+      failure: (message, code) {
+        debugPrint('Failed to update payment status: $message');
+        return false;
+      },
+    );
+  }
 }

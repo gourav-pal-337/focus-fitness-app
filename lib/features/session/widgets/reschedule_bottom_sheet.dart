@@ -361,7 +361,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
       separatorBuilder: (context, index) => SizedBox(width: 0),
       itemBuilder: (context, index) {
         final slot = filteredSlots[index];
-        final startTime = DateTime.parse(slot.startTime);
+        final startTime = DateTime.parse(slot.startTime).toLocal();
         final timeStr = DateFormat('hh:mm a').format(startTime);
         final isSelected = _selectedSlot == slot;
 
@@ -531,7 +531,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                   title: 'NEW SCHEDULE',
                   date: DateFormat('EEEE, MMM dd').format(newStart),
                   time:
-                      '${DateFormat('hh:mm a').format(DateTime.parse(_selectedSlot!.startTime))} - ${DateFormat('hh:mm a').format(DateTime.parse(_selectedSlot!.endTime))}',
+                      '${DateFormat('hh:mm a').format(DateTime.parse(_selectedSlot!.startTime).toLocal())} - ${DateFormat('hh:mm a').format(DateTime.parse(_selectedSlot!.endTime).toLocal())}',
                   icon: Icons.event_available_rounded,
                   isPrimary: true,
                 ),
@@ -669,11 +669,20 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
 
   Future<void> _handleReschedule(BuildContext context) async {
     final provider = context.read<SessionDetailsProvider>();
+
+    // Parse the UTC slot time and convert it to a local 'naive' string (without 'Z')
+    // This sends the actual 'wall clock time' (e.g. 16:00) instead of the UTC time (10:30Z)
+    final localStart = DateTime.parse(
+      _selectedSlot!.startTime,
+    ).toLocal().toIso8601String().split('Z')[0];
+    final localEnd = DateTime.parse(
+      _selectedSlot!.endTime,
+    ).toLocal().toIso8601String().split('Z')[0];
+
     final success = await provider.rescheduleBooking(
       bookingId: widget.session.bookingId!,
-      startTime: _selectedSlot!.startTime,
-      endTime: _selectedSlot!.endTime,
-
+      startTime: localStart,
+      endTime: localEnd,
       reason: _reasonController.text,
     );
 

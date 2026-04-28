@@ -10,6 +10,7 @@ class ContactSupportProvider extends ChangeNotifier {
   String? _error;
 
   String _issueType = '';
+  String _severity = '';
   String _subject = '';
   String _description = '';
   String? _screenshotPath;
@@ -17,12 +18,18 @@ class ContactSupportProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   String get issueType => _issueType;
+  String get severity => _severity;
   String get subject => _subject;
   String get description => _description;
   String? get screenshotPath => _screenshotPath;
 
   void updateIssueType(String value) {
     _issueType = value;
+    notifyListeners();
+  }
+
+  void updateSeverity(String value) {
+    _severity = value;
     notifyListeners();
   }
 
@@ -48,8 +55,8 @@ class ContactSupportProvider extends ChangeNotifier {
       notifyListeners();
       return null;
     }
-    if (_subject.isEmpty) {
-      _error = 'Please enter a subject';
+    if (_severity.isEmpty) {
+      _error = 'Please select severity';
       notifyListeners();
       return null;
     }
@@ -68,11 +75,24 @@ class ContactSupportProvider extends ChangeNotifier {
         file = File(_screenshotPath!);
       }
 
+      // Map severity to priority
+      String priority = 'low';
+      if (_severity.contains('Critical')) {
+        priority = 'high';
+      } else if (_severity.contains('Medium')) {
+        priority = 'medium';
+      }
+
+      debugPrint("category : $_issueType");
+      debugPrint("priority : $priority");
+      debugPrint("description : $_description");
+      debugPrint("title : $_severity");
+      // return null;
       final ticket = await _repository.createTicket(
-        title: _subject,
+        title: _severity,
         description: _description,
         category: _issueType,
-        priority: 'medium',
+        priority: priority,
         file: file,
       );
 

@@ -55,6 +55,7 @@ class SupportScreen extends StatelessWidget {
                         context.push(ContactSupportRoute.path);
                       },
                     ),
+
                     // Divider(color: AppColors.grey200, thickness: 1, height: 0),
                     // SupportOptionItem(
                     //   icon: Icons.receipt_long_outlined,
@@ -84,6 +85,38 @@ class SupportScreen extends StatelessWidget {
                       },
                     ),
                     Divider(color: AppColors.grey200, thickness: 1, height: 0),
+                    SupportOptionItem(
+                      icon: Icons.description_outlined,
+                      title: 'Terms of Use',
+                      description: 'Review our terms of use',
+                      onTap: () {
+                        context.pushNamed(
+                          LegalRoute.name,
+                          queryParameters: {
+                            'type': 'client_terms_of_use',
+                            'title': 'Terms of Use',
+                          },
+                        );
+                      },
+                    ),
+
+                    Divider(color: AppColors.grey200, thickness: 1, height: 0),
+
+                    SupportOptionItem(
+                      icon: Icons.privacy_tip_outlined,
+                      title: 'Privacy Policy',
+                      description: 'Review our privacy policy',
+                      onTap: () {
+                        context.pushNamed(
+                          LegalRoute.name,
+                          queryParameters: {
+                            'type': 'privacy_policy',
+                            'title': 'Privacy Policy',
+                          },
+                        );
+                      },
+                    ),
+
                     SizedBox(height: AppSpacing.xxl),
 
                     Padding(

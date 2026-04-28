@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:focus_fitness/features/video_player/ui/app_video_player.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/custom_app_bar.dart';
 import '../provider/video_player_provider.dart';
-import 'app_video_player.dart';
+import 'app_youtube_player.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoPlayerScreen extends StatefulWidget {
-  const VideoPlayerScreen({
-    super.key,
-    required this.videoUrl,
-    this.title,
-  });
+  const VideoPlayerScreen({super.key, required this.videoUrl, this.title});
 
   final String videoUrl;
   final String? title;
@@ -24,6 +22,16 @@ class VideoPlayerScreen extends StatefulWidget {
 class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   @override
   Widget build(BuildContext context) {
+    final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl);
+    final isYoutube = videoId != null;
+
+    if (isYoutube) {
+      return AppYoutubePlayer(
+        videoUrl: widget.videoUrl,
+        title: widget.title,
+      );
+    }
+
     return ChangeNotifierProvider(
       create: (_) => VideoPlayerProvider(),
       child: Consumer<VideoPlayerProvider>(
@@ -51,9 +59,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                 : SafeArea(
                     child: Column(
                       children: [
-                        CustomAppBar(
-                          title: widget.title ?? 'Video',
-                        ),
+                        CustomAppBar(title: widget.title ?? 'Video'),
                         Expanded(
                           child: AppVideoPlayer(videoUrl: widget.videoUrl),
                         ),
@@ -66,4 +72,3 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     );
   }
 }
-
