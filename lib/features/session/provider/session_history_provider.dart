@@ -20,7 +20,8 @@ class SessionHistoryProvider extends ChangeNotifier {
 
   SessionTab get selectedTab => _selectedTab;
   List<BookingModel> get allBookings => _allBookings;
-  List<BookingModel> get pendingCompletionBookings => _pendingCompletionBookings;
+  List<BookingModel> get pendingCompletionBookings =>
+      _pendingCompletionBookings;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -99,13 +100,14 @@ class SessionHistoryProvider extends ChangeNotifier {
   /// Map BookingModel to SessionData
   SessionData _mapBookingToSessionData(BookingModel booking) {
     // Format date and time using TimeUtils
-    final dateStr = TimeUtils.formatToLocal(
+    final dateStr = TimeUtils.formatToLocalDate(
       booking.startTime,
       format: 'MMM dd, yyyy',
     );
-    final timeStr = TimeUtils.formatToLocal(
+    final timeStr = TimeUtils.formatToLocalTimeRange(
       booking.startTime,
-      format: 'h:mm a',
+      booking.endTime,
+      showfulltime: false,
     );
 
     // Determine status
@@ -156,10 +158,7 @@ class SessionHistoryProvider extends ChangeNotifier {
 
   /// Refresh bookings
   Future<void> refresh() async {
-    await Future.wait([
-      fetchBookings(),
-      fetchPendingCompletionBookings(),
-    ]);
+    await Future.wait([fetchBookings(), fetchPendingCompletionBookings()]);
   }
 
   /// Fetch bookings that are pending completion confirmation
@@ -210,6 +209,7 @@ class SessionHistoryProvider extends ChangeNotifier {
       return false;
     }
   }
+
   /// Complete a booking
   Future<bool> completeBooking(String bookingId) async {
     try {

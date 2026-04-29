@@ -217,7 +217,7 @@ class SessionDetailsProvider extends ChangeNotifier {
       final now = DateTime.now();
       final from = now.toIso8601String().split('T').first;
       final to = now
-          .add(const Duration(days: 14))
+          .add(const Duration(days: 365))
           .toIso8601String()
           .split('T')
           .first;

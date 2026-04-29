@@ -87,8 +87,12 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
         slivers: [
           SliverList(
             delegate: SliverChildListDelegate([
-              TrainerProfileHeader(
-                trainerImageUrl: widget.trainerInfo?.profilePhoto,
+              Consumer<TrainerProfileProvider>(
+                builder: (context, provider, _) {
+                  return TrainerProfileHeader(
+                    trainerImageUrl: provider.trainer?.profilePhoto,
+                  );
+                },
               ),
               SizedBox(height: 50.h),
               Consumer<TrainerProfileProvider>(
@@ -456,12 +460,14 @@ class _BookSessionButton extends StatelessWidget {
                           provider.availableDates,
                         ),
                         'sessionTime': timeSlot,
+                        'trainerTimeZone': provider.trainer?.timezone ?? '',
                         'sessionStartTime':
                             DateTimeUtils.convertToIsoTimestamps(
                               dateId: dateId,
                               timeSlot: timeSlot,
                               availableDates: provider.availableDates,
                               durationMinutes: durationMinutes,
+                              trainerTimeZone: provider.trainer?.timezone,
                             )['startTime'] ??
                             '',
                         'mode': provider.sessionType.name,

@@ -54,11 +54,11 @@ class _SessionCompletionBottomSheetState
     final booking = widget.booking;
     final trainerName = booking.trainer?.fullName ?? 'Trainer';
     final trainerImage = booking.trainer?.profilePhoto ?? '';
-    final date = TimeUtils.formatToLocal(
+    final date = TimeUtils.formatToLocalDate(
       booking.startTime,
       format: 'MMM dd, yyyy',
     );
-    final time = TimeUtils.formatToLocal(booking.startTime, format: 'h:mm a');
+    final time = TimeUtils.formatToLocalTime(booking.startTime, format: 'h:mm a');
 
     return SlideTransition(
       position: _offsetAnimation,
@@ -196,37 +196,36 @@ class _SessionCompletionBottomSheetState
                         final success = await provider.completeBooking(
                           booking.id,
                         );
-                        if (mounted) {
-                          Navigator.pop(context);
-                          if (success) {
-                            final sessionData = SessionData(
-                              trainerName: trainerName,
-                              trainerImageUrl: trainerImage,
-                              sessionType:
-                                  booking.sessionPlan?.title ??
-                                  'Personal Training',
-                              duration:
-                                  '${booking.sessionPlan?.durationMinutes ?? 60} mins',
-                              status: SessionStatus.completed,
-                              date: date,
-                              startTime: time,
-                              bookingId: booking.id,
-                              booking: booking,
-                            );
+                        if (!mounted) return;
+                        Navigator.pop(context);
+                        if (success) {
+                          final sessionData = SessionData(
+                            trainerName: trainerName,
+                            trainerImageUrl: trainerImage,
+                            sessionType: booking.sessionPlan?.title ??
+                                'Personal Training',
+                            duration:
+                                '${booking.sessionPlan?.durationMinutes ?? 60} mins',
+                            status: SessionStatus.completed,
+                            date: date,
+                            startTime: time,
+                            bookingId: booking.id,
+                            booking: booking,
+                          );
 
-                            context.push(
-                              SessionDetailsRoute.path,
-                              extra: sessionData,
-                            );
+                          if (!context.mounted) return;
+                          context.push(
+                            SessionDetailsRoute.path,
+                            extra: sessionData,
+                          );
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Session marked as completed!'),
-                                behavior: SnackBarBehavior.floating,
-                                backgroundColor: AppColors.primary,
-                              ),
-                            );
-                          }
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Session marked as completed!'),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: AppColors.primary,
+                            ),
+                          );
                         }
                       },
                       type: ButtonType.gradient,

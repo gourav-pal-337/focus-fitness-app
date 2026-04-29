@@ -362,7 +362,10 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
       itemBuilder: (context, index) {
         final slot = filteredSlots[index];
         final startTime = DateTime.parse(slot.startTime).toLocal();
-        final timeStr = DateTimeUtils.formatTime(startTime.hour, startTime.minute);
+        final timeStr = DateTimeUtils.formatTime(
+          startTime.hour,
+          startTime.minute,
+        );
         final isSelected = _selectedSlot == slot;
 
         bool isSlotAvailable = shouldShowTimeSlot('$_selectedDate $timeStr');

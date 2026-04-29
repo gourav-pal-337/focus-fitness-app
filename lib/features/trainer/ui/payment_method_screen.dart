@@ -40,6 +40,7 @@ class PaymentMethodScreen extends StatefulWidget {
     this.sessionStartTime = '',
     this.mode,
     this.currency,
+    this.trainerTimeZone,
   });
 
   final double amount;
@@ -60,6 +61,7 @@ class PaymentMethodScreen extends StatefulWidget {
   final String sessionStartTime;
   final String? mode;
   final String? currency;
+  final String? trainerTimeZone;
 
   @override
   State<PaymentMethodScreen> createState() => _PaymentMethodScreenState();
@@ -187,6 +189,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 sessionStartTime: widget.sessionStartTime,
                 mode: widget.mode,
                 currency: widget.currency,
+                trainerTimeZone: widget.trainerTimeZone,
               ),
           ],
         ),
@@ -326,6 +329,7 @@ class _PayButton extends StatelessWidget {
     required this.sessionStartTime,
     this.mode,
     this.currency,
+    this.trainerTimeZone,
   });
 
   final double amount;
@@ -344,6 +348,7 @@ class _PayButton extends StatelessWidget {
   final String sessionStartTime;
   final String? mode;
   final String? currency;
+  final String? trainerTimeZone;
 
   @override
   Widget build(BuildContext context) {
@@ -591,6 +596,7 @@ class _PayButton extends StatelessWidget {
                     platformFeeType: settings?.platformFeeType,
                     vatTaxPercent: vatPercent,
                     mode: mode,
+                    trainerTimeZone: trainerTimeZone,
                   );
 
                   log("initiateResponse : ${initiateResponse?.payment} ");

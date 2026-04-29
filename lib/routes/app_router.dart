@@ -697,6 +697,7 @@ abstract class PaymentMethodRoute {
           state.uri.queryParameters['sessionStartTime'] ?? '';
       final mode = state.uri.queryParameters['mode'];
       final currency = state.uri.queryParameters['currency'];
+      final trainerTimeZone = state.uri.queryParameters['trainerTimeZone'];
 
       return PaymentMethodScreen(
         amount: amount,
@@ -715,6 +716,7 @@ abstract class PaymentMethodRoute {
         sessionStartTime: sessionStartTime,
         mode: mode,
         currency: currency,
+        trainerTimeZone: trainerTimeZone,
       );
     },
   );

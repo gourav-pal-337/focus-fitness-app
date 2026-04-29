@@ -36,6 +36,8 @@ class ContactSupportScreen extends StatelessWidget {
               ),
               Expanded(
                 child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: AppSpacing.screenPadding.left,

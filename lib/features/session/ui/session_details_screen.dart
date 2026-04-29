@@ -164,16 +164,10 @@ class _DateTimeBar extends StatelessWidget {
 
 String gettime(SessionData session) {
   if (session.booking == null) return "";
-  final startStr = TimeUtils.formatToLocal(
+  return TimeUtils.formatToLocalTimeRange(
     session.booking!.startTime,
-    format: 'h:mm a',
-  );
-  final endStr = TimeUtils.formatToLocal(
     session.booking!.endTime,
-    format: 'h:mm a',
   );
-
-  return "$startStr - $endStr";
 }
 
 class _PaymentDetailsSection extends StatelessWidget {
@@ -395,12 +389,12 @@ class _PaymentDetailsSection extends StatelessWidget {
       final durationMinutes = sessionPlan?.durationMinutes ?? 60;
 
       final trainerName = booking.trainer?.displayName ?? session.trainerName;
-      final sessionDate = TimeUtils.formatToLocal(
+      final sessionDate = TimeUtils.formatToLocalDate(
         booking.startTime,
         format: 'MMM dd, yyyy',
       );
       final sessionTime =
-          "${TimeUtils.formatToLocal(booking.startTime, format: 'h:mm a')} - ${TimeUtils.formatToLocal(booking.endTime, format: 'h:mm a')}";
+          "${TimeUtils.formatToLocalTime(booking.startTime, format: 'h:mm a')} - ${TimeUtils.formatToLocalTime(booking.endTime, format: 'h:mm a')}";
 
       // Construct path with query parameters
       final path = Uri(
@@ -598,6 +592,7 @@ class _ActionButton extends StatelessWidget {
           ':trainerId',
           session.booking?.trainer?.id ?? '',
         ),
+        // extra: session.booking?.trainer,
       );
       debugPrint('same trainer');
     }

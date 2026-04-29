@@ -5,6 +5,7 @@ import '../data/models/next_available_slot_response_model.dart';
 import '../data/repository/trainer_repository.dart';
 import '../../session/data/models/reschedule_models.dart';
 import '../utils/date_time_utils.dart';
+import '../../../core/utils/time_utils.dart';
 import '../../../../features/authentication/data/repository/auth_repository.dart'
     show ResultExtension;
 import '../../../core/service/local_storage_service.dart';
@@ -122,8 +123,8 @@ class TrainerProfileProvider extends ChangeNotifier {
           _trainer = response.trainer;
           _sessionPlans = response.sessionPlans;
 
-          // Generate availability from all session plans
-          _availability = _generateAvailability(_sessionPlans);
+          // Generate availability from all session plans using trainer's timezone
+          _availability = _generateAvailability(_sessionPlans, trainerTimeZone: _trainer?.timezone);
 
           // Initialize with the first available date if possible
           if (_availability.isNotEmpty) {
@@ -184,17 +185,22 @@ class TrainerProfileProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final timestamps = DateTimeUtils.convertToIsoTimestamps(
-        dateId: _selectedDate!,
-        timeSlot: _selectedTimeSlot!,
-        availableDates: availableDates,
-        durationMinutes: _selectedSessionPlan!.durationMinutes,
-      );
+      // 1. Combine selected date and time slot into a local DateTime
+      final dateInfo = availableDates.firstWhere((d) => d.dateId == _selectedDate!);
+      final localStart = TimeUtils.combineDateAndTime(dateInfo.dateTime, _selectedTimeSlot!);
+      final localEnd = localStart.add(Duration(minutes: _selectedSessionPlan!.durationMinutes));
+
+      // 2. Format to naive ISO string (no 'Z') for backend
+      final startTimeStr = TimeUtils.formatToBackend(localStart);
+      final endTimeStr = TimeUtils.formatToBackend(localEnd);
+
+      // 3. Get user timezone
+      final timezone = await TimeUtils.getUserTimezone();
 
       final result = await _repository.checkTrainerBooking(
         trainerId: _trainer!.id,
-        startTime: timestamps['startTime']!,
-        endTime: timestamps['endTime']!,
+        startTime: startTimeStr,
+        endTime: endTimeStr,
       );
 
       return await result.when(
@@ -290,7 +296,7 @@ class TrainerProfileProvider extends ChangeNotifier {
   }
 
   /// Generate discrete availability from session plan templates
-  List<DayAvailability> _generateAvailability(List<SessionPlanModel> plans) {
+  List<DayAvailability> _generateAvailability(List<SessionPlanModel> plans, {String? trainerTimeZone}) {
     final Map<String, List<RescheduleSlot>> grouped = {};
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -314,6 +320,7 @@ class TrainerProfileProvider extends ChangeNotifier {
             timeSlot: slotStr,
             availableDates: dateInfos,
             durationMinutes: plan.durationMinutes,
+            trainerTimeZone: trainerTimeZone,
           );
 
           grouped[dateId]!.add(
@@ -393,30 +400,25 @@ class TrainerProfileProvider extends ChangeNotifier {
     try {
       debugPrint("selected time : ${_selectedTimeSlot}");
 
-      // Convert date and time slot to ISO timestamps
-      final timestamps = DateTimeUtils.convertToIsoTimestamps(
-        dateId: _selectedDate!,
-        timeSlot: _selectedTimeSlot!,
-        availableDates: availableDates,
-        durationMinutes: _selectedSessionPlan!.durationMinutes,
-      );
+      // 1. Combine selected date and time slot into a local DateTime
+      final dateInfo = availableDates.firstWhere((d) => d.dateId == _selectedDate!);
+      final localStart = TimeUtils.combineDateAndTime(dateInfo.dateTime, _selectedTimeSlot!);
+      final localEnd = localStart.add(Duration(minutes: _selectedSessionPlan!.durationMinutes));
 
-      debugPrint("timestamps : ${timestamps}");
+      // 2. Format to naive ISO string (no 'Z') for backend
+      final startTimeStr = TimeUtils.formatToBackend(localStart);
+      final endTimeStr = TimeUtils.formatToBackend(localEnd);
 
-      // Get timezone
-      String? timezone = await LocalStorageService.getTimezone();
-      if (timezone == null || timezone.isEmpty) {
-        final info = await FlutterTimezone.getLocalTimezone();
-        timezone = info.identifier;
-      }
+      // 3. Get user timezone
+      final timezone = await TimeUtils.getUserTimezone();
 
       // Create request model
       final request = BookSessionRequestModel(
         trainerId: _trainer!.id,
         sessionPlanId: _selectedSessionPlan!.id,
-        startTime: timestamps['startTime']!,
-        endTime: timestamps['endTime']!,
-        timezone: timezone ?? 'UTC',
+        startTime: startTimeStr,
+        endTime: endTimeStr,
+        timezone: timezone,
         notes: notes,
         mode: _sessionType.name,
       );

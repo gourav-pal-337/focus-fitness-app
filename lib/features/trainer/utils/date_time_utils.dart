@@ -2,6 +2,8 @@ import 'package:intl/intl.dart';
 import 'package:timezone/timezone.dart' as tz;
 import '../data/models/trainer_profile_response_model.dart';
 
+import 'package:timezone/data/latest.dart' as tz_data;
+
 /// Date info for date selector
 class DateInfo {
   const DateInfo({
@@ -23,6 +25,24 @@ class DateInfo {
 
 /// Utility class for parsing dates and time slots from session plans
 class DateTimeUtils {
+  static bool _tzInitialized = false;
+
+  static void _ensureInitialized() {
+    if (!_tzInitialized) {
+      tz_data.initializeTimeZones();
+      _tzInitialized = true;
+    }
+  }
+
+  static String _normalizeTz(String? timezone) {
+    if (timezone == null || timezone.isEmpty || timezone == 'UTC') {
+      return 'Asia/Kolkata';
+    }
+    // Handle common aliases that might not be in the local tz database
+    if (timezone == 'Asia/Calcutta') return 'Asia/Kolkata';
+    return timezone;
+  }
+
   /// Parse available dates from all session plans and combine them
   static List<DateInfo> parseAllAvailableDates(
     List<SessionPlanModel> sessionPlans,
@@ -141,22 +161,19 @@ class DateTimeUtils {
 
         // Generate time slots based on duration
         var currentTime = startDateTime;
-        while (currentTime.isBefore(endDateTime) ||
-            currentTime.isAtSameMomentAs(endDateTime)) {
-          final nextTime = currentTime.add(Duration(minutes: durationMinutes));
-
-          // Check if next time slot fits within end time
-          if (nextTime.isAfter(endDateTime)) {
-            break;
-          }
-
+        while (currentTime
+                .add(Duration(minutes: durationMinutes))
+                .isBefore(endDateTime) ||
+            currentTime
+                .add(Duration(minutes: durationMinutes))
+                .isAtSameMomentAs(endDateTime)) {
           final formattedTime = _formatTimeFromDateTime(currentTime);
           if (formattedTime.isNotEmpty) {
             timeSlots.add(formattedTime);
           }
 
           // Move to next slot based on duration
-          currentTime = nextTime;
+          currentTime = currentTime.add(Duration(minutes: durationMinutes));
         }
       }
       return timeSlots;
@@ -180,20 +197,18 @@ class DateTimeUtils {
       final endDateTime = DateTime(2024, 1, 1, endHour, endMinute);
 
       var currentTime = startDateTime;
-      while (currentTime.isBefore(endDateTime) ||
-          currentTime.isAtSameMomentAs(endDateTime)) {
-        final nextTime = currentTime.add(Duration(minutes: durationMinutes));
-
-        if (nextTime.isAfter(endDateTime)) {
-          break;
-        }
-
+      while (currentTime
+              .add(Duration(minutes: durationMinutes))
+              .isBefore(endDateTime) ||
+          currentTime
+              .add(Duration(minutes: durationMinutes))
+              .isAtSameMomentAs(endDateTime)) {
         final formattedTime = _formatTimeFromDateTime(currentTime);
         if (formattedTime.isNotEmpty) {
           timeSlots.add(formattedTime);
         }
 
-        currentTime = nextTime;
+        currentTime = currentTime.add(Duration(minutes: durationMinutes));
       }
     }
 
@@ -302,6 +317,7 @@ class DateTimeUtils {
     required String timeSlot,
     required List<DateInfo> availableDates,
     required int durationMinutes,
+    String? trainerTimeZone,
   }) {
     print(
       "Converting to ISO Timestamps for dateId: $dateId, timeSlot: $timeSlot",
@@ -338,9 +354,11 @@ class DateTimeUtils {
       hour = 0;
     }
 
-    // Create DateTime for start time in the trainer's timezone (Asia/Kolkata/IST)
-    // This ensures that "10:00 AM" is always treated as 10:00 AM IST regardless of the user's location
-    final trainerLocation = tz.getLocation('Asia/Kolkata');
+    // Create DateTime for start time in the trainer's timezone
+    // This ensures that "10:00 AM" is always treated as 10:00 AM in the trainer's local context regardless of the user's location
+    _ensureInitialized();
+    final normalizedTz = _normalizeTz(trainerTimeZone);
+    final trainerLocation = tz.getLocation(normalizedTz);
     final startDateTime = tz.TZDateTime(
       trainerLocation,
       dateInfo.dateTime.year,

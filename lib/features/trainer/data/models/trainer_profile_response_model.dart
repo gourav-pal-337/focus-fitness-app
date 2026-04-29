@@ -46,6 +46,7 @@ class TrainerProfileInfo {
     this.isStripeConnected = false,
     this.isPayPalConnected = false,
     this.vatConfig,
+    this.timezone,
   });
 
   final String id;
@@ -61,6 +62,7 @@ class TrainerProfileInfo {
   final bool isStripeConnected;
   final bool isPayPalConnected;
   final VatConfig? vatConfig;
+  final String? timezone;
 
   factory TrainerProfileInfo.fromJson(Map<String, dynamic> json) {
     debugPrint(
@@ -88,6 +90,7 @@ class TrainerProfileInfo {
       vatConfig: json['vatConfig'] != null
           ? VatConfig.fromJson(json['vatConfig'] as Map<String, dynamic>)
           : null,
+      timezone: json['timezone'] as String?,
     );
   }
 }

@@ -7,6 +7,7 @@ import '../../../../features/authentication/data/repository/auth_repository.dart
 import '../data/models/payment_booking_models.dart';
 import '../../../core/service/local_storage_service.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import '../../../../core/utils/time_utils.dart';
 
 enum PaymentType { paypal, applePay, creditCard }
 
@@ -36,6 +37,7 @@ class PaymentMethodProvider extends ChangeNotifier {
     required List<Map<String, dynamic>> availableDatesData,
     String? notes,
     String? mode,
+    String? trainerTimeZone,
   }) async {
     _isBooking = true;
     _bookingError = null;
@@ -56,15 +58,16 @@ class PaymentMethodProvider extends ChangeNotifier {
         );
       }).toList();
 
-      // Convert date and time slot to ISO timestamps
-      final timestamps = DateTimeUtils.convertToIsoTimestamps(
-        dateId: dateId,
-        timeSlot: timeSlot,
-        availableDates: availableDates,
-        durationMinutes: durationMinutes,
-      );
+      // 1. Combine selected date and time slot into a local DateTime
+      final dateInfo = availableDates.firstWhere((d) => d.dateId == dateId);
+      final localStart = TimeUtils.combineDateAndTime(dateInfo.dateTime, timeSlot);
+      final localEnd = localStart.add(Duration(minutes: durationMinutes));
 
-      // Get timezone
+      // 2. Format to naive ISO string (no 'Z') for backend
+      final startTimeStr = TimeUtils.formatToBackend(localStart);
+      final endTimeStr = TimeUtils.formatToBackend(localEnd);
+
+      // 3. Get timezone
       String? timezone = await LocalStorageService.getTimezone();
       if (timezone == null || timezone.isEmpty) {
         final info = await FlutterTimezone.getLocalTimezone();
@@ -75,8 +78,8 @@ class PaymentMethodProvider extends ChangeNotifier {
       final request = BookSessionRequestModel(
         trainerId: trainerId,
         sessionPlanId: sessionPlanId,
-        startTime: timestamps['startTime']!,
-        endTime: timestamps['endTime']!,
+        startTime: startTimeStr,
+        endTime: endTimeStr,
         timezone: timezone,
         notes: notes,
         mode: mode,
@@ -123,6 +126,7 @@ class PaymentMethodProvider extends ChangeNotifier {
     double? vatTaxPercent,
     String? notes,
     String? mode,
+    String? trainerTimeZone,
   }) async {
     _isBooking = true;
     _bookingError = null;
@@ -143,15 +147,16 @@ class PaymentMethodProvider extends ChangeNotifier {
         );
       }).toList();
 
-      // Convert date and time slot to ISO timestamps
-      final timestamps = DateTimeUtils.convertToIsoTimestamps(
-        dateId: dateId,
-        timeSlot: timeSlot,
-        availableDates: availableDates,
-        durationMinutes: durationMinutes,
-      );
+      // 1. Combine selected date and time slot into a local DateTime
+      final dateInfo = availableDates.firstWhere((d) => d.dateId == dateId);
+      final localStart = TimeUtils.combineDateAndTime(dateInfo.dateTime, timeSlot);
+      final localEnd = localStart.add(Duration(minutes: durationMinutes));
 
-      // Get timezone
+      // 2. Format to naive ISO string (no 'Z') for backend
+      final startTimeStr = TimeUtils.formatToBackend(localStart);
+      final endTimeStr = TimeUtils.formatToBackend(localEnd);
+
+      // 3. Get timezone
       String? timezone = await LocalStorageService.getTimezone();
       if (timezone == null || timezone.isEmpty) {
         final info = await FlutterTimezone.getLocalTimezone();
@@ -162,9 +167,8 @@ class PaymentMethodProvider extends ChangeNotifier {
       final request = InitiatePaymentRequestModel(
         trainerId: trainerId,
         sessionPlanId: sessionPlanId,
-
-        startTime: timestamps['startTime']!,
-        endTime: timestamps['endTime']!,
+        startTime: startTimeStr,
+        endTime: endTimeStr,
         provider: provider,
         timezone: timezone,
         notes: notes,
