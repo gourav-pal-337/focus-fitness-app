@@ -14,11 +14,13 @@ class SessionHistoryProvider extends ChangeNotifier {
 
   SessionTab _selectedTab = SessionTab.all;
   List<BookingModel> _allBookings = [];
+  List<BookingModel> _pendingCompletionBookings = [];
   bool _isLoading = false;
   String? _error;
 
   SessionTab get selectedTab => _selectedTab;
   List<BookingModel> get allBookings => _allBookings;
+  List<BookingModel> get pendingCompletionBookings => _pendingCompletionBookings;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
@@ -154,6 +156,84 @@ class SessionHistoryProvider extends ChangeNotifier {
 
   /// Refresh bookings
   Future<void> refresh() async {
-    await fetchBookings();
+    await Future.wait([
+      fetchBookings(),
+      fetchPendingCompletionBookings(),
+    ]);
+  }
+
+  /// Fetch bookings that are pending completion confirmation
+  Future<void> fetchPendingCompletionBookings() async {
+    try {
+      final result = await _repository.getPendingCompletionBookings();
+
+      await result.when(
+        success: (response) async {
+          _pendingCompletionBookings = response.bookings;
+          notifyListeners();
+        },
+        failure: (message, code) {
+          debugPrint('Error fetching pending completions: $message');
+        },
+      );
+    } catch (e) {
+      debugPrint('Exception fetching pending completions: $e');
+    }
+  }
+
+  /// Update booking status (e.g. to completed)
+  Future<bool> updateBookingStatus(String bookingId, String status) async {
+    try {
+      final result = await _repository.updateBookingStatus(
+        bookingId: bookingId,
+        status: status,
+      );
+
+      return await result.when(
+        success: (success) async {
+          if (success) {
+            // Remove from pending list if it was there
+            _pendingCompletionBookings.removeWhere((b) => b.id == bookingId);
+            notifyListeners();
+            // Refresh main bookings list
+            fetchBookings();
+          }
+          return success;
+        },
+        failure: (message, code) {
+          debugPrint('Error updating booking status: $message');
+          return false;
+        },
+      );
+    } catch (e) {
+      debugPrint('Exception updating booking status: $e');
+      return false;
+    }
+  }
+  /// Complete a booking
+  Future<bool> completeBooking(String bookingId) async {
+    try {
+      final result = await _repository.completeBooking(bookingId);
+
+      return await result.when(
+        success: (success) async {
+          if (success) {
+            // Remove from pending list if it was there
+            _pendingCompletionBookings.removeWhere((b) => b.id == bookingId);
+            notifyListeners();
+            // Refresh main bookings list
+            fetchBookings();
+          }
+          return success;
+        },
+        failure: (message, code) {
+          debugPrint('Error completing booking: $message');
+          return false;
+        },
+      );
+    } catch (e) {
+      debugPrint('Exception completing booking: $e');
+      return false;
+    }
   }
 }

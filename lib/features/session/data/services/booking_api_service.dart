@@ -354,4 +354,135 @@ class BookingApiService {
       );
     }
   }
+
+  /// Get bookings that are pending completion confirmation
+  Future<GetBookingsResponseModel> getPendingCompletionBookings() async {
+    try {
+      final response = await _apiHitter.getApiResponse(
+        Endpoints.getPendingCompletionBookings,
+      );
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        return GetBookingsResponseModel.fromJson(responseData);
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              responseData['error'] as String? ??
+              responseData['message'] as String? ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage,
+            statusCode: response.response?.statusCode,
+          );
+        }
+
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Update booking status
+  Future<bool> updateBookingStatus({
+    required String bookingId,
+    required String status,
+  }) async {
+    try {
+      final endpoint = Endpoints.updateBookingStatus(bookingId);
+      final data = {'status': status};
+
+      debugPrint(
+        'BookingApiService: Calling updateBookingStatus with endpoint: $endpoint',
+      );
+      final response = await _apiHitter.getPatchApiResponse(
+        endpoint,
+        data: data,
+      );
+
+      debugPrint('BookingApiService: Response status: ${response.status}');
+
+      if (response.status) {
+        return true;
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              responseData['error'] as String? ??
+              responseData['message'] as String? ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage,
+            statusCode: response.response?.statusCode,
+          );
+        }
+
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+  /// Complete a booking
+  Future<bool> completeBooking(String bookingId) async {
+    try {
+      final endpoint = Endpoints.completeBooking(bookingId);
+
+      debugPrint(
+        'BookingApiService: Calling completeBooking with endpoint: $endpoint',
+      );
+      final response = await _apiHitter.getPostApiResponse(endpoint);
+
+      debugPrint('BookingApiService: Response status: ${response.status}');
+
+      if (response.status) {
+        return true;
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              responseData['error'] as String? ??
+              responseData['message'] as String? ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage,
+            statusCode: response.response?.statusCode,
+          );
+        }
+
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
 }

@@ -25,6 +25,16 @@ import '../widgets/trainer_connection_card.dart';
 import '../widgets/todays_workout_card.dart';
 import '../widgets/progress_card.dart';
 import '../widgets/trainer_summary_section.dart';
+import '../widgets/pending_completion_nudge.dart';
+import '../widgets/session_completion_bottom_sheet.dart';
+import '../../../core/utils/time_utils.dart';
+import '../../../core/widgets/show_image.dart';
+import '../../../core/widgets/buttons/custom_bottom.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_radius.dart';
+import '../../session/data/models/booking_model.dart';
+import '../../../routes/app_router.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -124,16 +134,39 @@ class _HomeScreenState extends State<HomeScreen> {
     // Fetch linked trainer when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      Future.wait([
+      await Future.wait([
         userProvider.fetchUserDetails(),
         userProvider.getFcmToken(),
         provider.fetchLinkedTrainer(),
         // workoutProvider.fetchTodaySummary(),
         // workoutProvider.fetchWeeklyProgress(),
         sessionHistory.fetchBookings(),
+        sessionHistory.fetchPendingCompletionBookings(),
         checkuserDetails(),
       ]);
+
+      if (!mounted) return;
+      if (sessionHistory.pendingCompletionBookings.isNotEmpty) {
+        _triggerSessionConfirmation(
+          sessionHistory.pendingCompletionBookings.first,
+        );
+      }
     });
+  }
+
+  void _triggerSessionConfirmation(BookingModel booking) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: SessionCompletionBottomSheet(booking: booking),
+      ),
+    );
   }
 
   @override
@@ -171,11 +204,18 @@ class _HomeScreenState extends State<HomeScreen> {
           sessionHistory.fetchBookings(
             force: true,
           ), // Force true guarantees isLoading transitions
+          sessionHistory.fetchPendingCompletionBookings(),
           checkuserDetails(),
         ]);
 
         if (provider.trainer != null) {
           await trainerProfile.fetchNextAvailableSlot(provider.trainer!.id);
+        }
+
+        if (mounted && sessionHistory.pendingCompletionBookings.isNotEmpty) {
+          _triggerSessionConfirmation(
+            sessionHistory.pendingCompletionBookings.first,
+          );
         }
       },
       child: AutoSystemUIWrapper(
@@ -197,6 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   sliver: SliverList(
                     delegate: SliverChildListDelegate([
+                      const PendingCompletionNudge(),
                       SizedBox(height: 24.h),
                       const TrainerConnectionCard(),
                       SizedBox(height: 16.h),

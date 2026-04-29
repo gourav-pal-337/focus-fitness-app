@@ -136,4 +136,45 @@ class BookingRepository {
       return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
     }
   }
+
+  /// Get bookings that are pending completion confirmation
+  Future<Result<GetBookingsResponseModel>> getPendingCompletionBookings() async {
+    try {
+      final response = await _apiService.getPendingCompletionBookings();
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  /// Update booking status
+  Future<Result<bool>> updateBookingStatus({
+    required String bookingId,
+    required String status,
+  }) async {
+    try {
+      final response = await _apiService.updateBookingStatus(
+        bookingId: bookingId,
+        status: status,
+      );
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+  /// Complete a booking
+  Future<Result<bool>> completeBooking(String bookingId) async {
+    try {
+      final response = await _apiService.completeBooking(bookingId);
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
 }
