@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+import 'package:timezone/timezone.dart' as tz;
 import '../data/models/trainer_profile_response_model.dart';
 
 /// Date info for date selector
@@ -218,11 +220,8 @@ class DateTimeUtils {
 
   /// Format hour and minute to display format (e.g., 15, 9 -> "3:09 pm")
   static String formatTime(int hour, int minute) {
-    final period = hour >= 12 ? 'pm' : 'am';
-    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-    final displayMinute = minute.toString().padLeft(2, '0');
-
-    return '$displayHour:$displayMinute $period';
+    final dateTime = DateTime(2024, 1, 1, hour, minute);
+    return DateFormat('h:mm a').format(dateTime).toLowerCase();
   }
 
   static String getDayAbbreviation(int weekday) {
@@ -339,8 +338,11 @@ class DateTimeUtils {
       hour = 0;
     }
 
-    // Create DateTime for start time in local time
-    final startDateTime = DateTime(
+    // Create DateTime for start time in the trainer's timezone (Asia/Kolkata/IST)
+    // This ensures that "10:00 AM" is always treated as 10:00 AM IST regardless of the user's location
+    final trainerLocation = tz.getLocation('Asia/Kolkata');
+    final startDateTime = tz.TZDateTime(
+      trainerLocation,
       dateInfo.dateTime.year,
       dateInfo.dateTime.month,
       dateInfo.dateTime.day,

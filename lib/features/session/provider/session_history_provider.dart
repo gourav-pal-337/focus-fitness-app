@@ -105,7 +105,7 @@ class SessionHistoryProvider extends ChangeNotifier {
     );
     final timeStr = TimeUtils.formatToLocal(
       booking.startTime,
-      format: 'hh:mm a',
+      format: 'h:mm a',
     );
 
     // Determine status

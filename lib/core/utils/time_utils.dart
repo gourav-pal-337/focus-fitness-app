@@ -2,7 +2,7 @@ import 'package:intl/intl.dart';
 
 class TimeUtils {
   // 1. Receives UTC ISO from Backend -> Converts to Local Device Time -> Formats
-  static String formatToLocal(String? utcIsoString, {String format = 'dd MMM yyyy, hh:mm a'}) {
+  static String formatToLocal(String? utcIsoString, {String format = 'dd MMM yyyy, h:mm a'}) {
     if (utcIsoString == null || utcIsoString.isEmpty) return '--';
     
     try {

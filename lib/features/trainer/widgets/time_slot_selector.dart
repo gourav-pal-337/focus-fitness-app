@@ -14,7 +14,7 @@ class TimeSlotSelector extends StatelessWidget {
 
   bool shouldShowTimeSlot(String dateStr) {
     try {
-      final format = DateFormat('yyyy-MM-dd hh:mm a');
+      final format = DateFormat('yyyy-MM-dd h:mm a');
       DateTime slotTime = format.parse(dateStr.toUpperCase());
       DateTime now = DateTime.now();
       return slotTime.isAfter(now);

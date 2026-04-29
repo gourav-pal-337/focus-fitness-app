@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../routes/app_router.dart';
+import '../../trainer/data/models/trainer_referral_response_model.dart' as trainer_model;
 
 class TrainerSpotlightItem extends StatelessWidget {
   const TrainerSpotlightItem({
@@ -36,6 +37,11 @@ class TrainerSpotlightItem extends StatelessWidget {
             final id = trainerId ?? name.toLowerCase().replaceAll(' ', '-');
             context.push(
               TrainerProfileRoute.path.replaceAll(':trainerId', id),
+              extra: trainer_model.TrainerInfo(
+                id: id,
+                fullName: name,
+                profilePhoto: imageUrl,
+              ),
             );
             // showModalBottomSheet(
             //   context: context,

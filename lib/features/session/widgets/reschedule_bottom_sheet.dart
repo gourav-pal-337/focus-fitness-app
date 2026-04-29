@@ -325,7 +325,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
 
   bool shouldShowTimeSlot(String dateStr) {
     try {
-      final format = DateFormat('yyyy-MM-dd hh:mm a');
+      final format = DateFormat('yyyy-MM-dd h:mm a');
       DateTime slotTime = format.parse(dateStr.toUpperCase());
       DateTime now = DateTime.now();
       return slotTime.isAfter(now);
@@ -362,7 +362,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
       itemBuilder: (context, index) {
         final slot = filteredSlots[index];
         final startTime = DateTime.parse(slot.startTime).toLocal();
-        final timeStr = DateFormat('hh:mm a').format(startTime);
+        final timeStr = DateTimeUtils.formatTime(startTime.hour, startTime.minute);
         final isSelected = _selectedSlot == slot;
 
         bool isSlotAvailable = shouldShowTimeSlot('$_selectedDate $timeStr');
@@ -495,7 +495,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                   title: 'CURRENT SCHEDULE',
                   date: DateFormat('EEEE, MMM dd').format(originalStart),
                   time:
-                      '${DateFormat('hh:mm a').format(originalStart)} - ${DateFormat('hh:mm a').format(originalEnd)}',
+                      '${DateTimeUtils.formatTime(originalStart.hour, originalStart.minute)} - ${DateTimeUtils.formatTime(originalEnd.hour, originalEnd.minute)}',
                   icon: Icons.calendar_today_outlined,
                   isDimmed: true,
                 ),
@@ -531,7 +531,7 @@ class _RescheduleBottomSheetState extends State<RescheduleBottomSheet> {
                   title: 'NEW SCHEDULE',
                   date: DateFormat('EEEE, MMM dd').format(newStart),
                   time:
-                      '${DateFormat('hh:mm a').format(DateTime.parse(_selectedSlot!.startTime).toLocal())} - ${DateFormat('hh:mm a').format(DateTime.parse(_selectedSlot!.endTime).toLocal())}',
+                      '${DateTimeUtils.formatTime(newStart.hour, newStart.minute)} - ${DateTimeUtils.formatTime(DateTime.parse(_selectedSlot!.startTime).toLocal().hour, DateTime.parse(_selectedSlot!.startTime).toLocal().minute)}',
                   icon: Icons.event_available_rounded,
                   isPrimary: true,
                 ),

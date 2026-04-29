@@ -57,7 +57,7 @@ class TrainerSearchResponseModel {
 class TrainerInfo {
   TrainerInfo({
     required this.id,
-    required this.referralCode,
+    this.referralCode = '',
     this.userId,
     this.fullName,
     this.preferredName,

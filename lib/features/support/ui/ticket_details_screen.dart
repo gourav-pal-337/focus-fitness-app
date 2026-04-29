@@ -70,7 +70,7 @@ class _TicketInfoSection extends StatelessWidget {
       try {
         final date = DateTime.parse(ticket!.createdAt!).toLocal();
         formattedDate = DateFormat('MMM d, yyyy').format(date);
-        final time = DateFormat('hh:mm a').format(date);
+        final time = DateFormat('h:mm a').format(date);
         formattedDate = 'Submitted on $formattedDate at $time';
       } catch (e) {
         formattedDate = ticket!.createdAt!;

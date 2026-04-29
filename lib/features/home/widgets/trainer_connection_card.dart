@@ -102,7 +102,13 @@ class TrainerConnectionCard extends StatelessWidget {
                 onTap: () {
                   final trainerId = trainer.id;
                   if (trainerId.isNotEmpty) {
-                    context.push(TrainerProfileRoute.path, extra: trainer);
+                    context.push(
+                      TrainerProfileRoute.path.replaceAll(
+                        ':trainerId',
+                        trainerId,
+                      ),
+                      extra: trainer,
+                    );
                   }
                 },
                 child: Row(

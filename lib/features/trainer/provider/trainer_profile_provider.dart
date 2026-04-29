@@ -80,7 +80,11 @@ class TrainerProfileProvider extends ChangeNotifier {
     );
 
     final slots = dayAvail.availableSlots.map((slot) {
+      debugPrint("slot.startTime: ${slot.startTime}");
       final dateTime = DateTime.parse(slot.startTime).toLocal();
+      debugPrint(
+        "slot.updatedtime: ${DateTimeUtils.formatTime(dateTime.hour, dateTime.minute)}",
+      );
       return DateTimeUtils.formatTime(dateTime.hour, dateTime.minute);
     }).toList();
 

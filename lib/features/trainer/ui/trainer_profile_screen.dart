@@ -42,6 +42,8 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
 
   @override
   void initState() {
+    log("Trainer Profile Screen initState");
+    log("Trainer Info: ${widget.trainerInfo}");
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.trainerInfo?.id != null) {

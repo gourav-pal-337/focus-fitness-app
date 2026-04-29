@@ -11,7 +11,8 @@ import 'package:focus_fitness/features/session/provider/session_history_provider
 
 import 'package:focus_fitness/routes/app_router.dart';
 import 'package:go_router/go_router.dart';
-import 'package:focus_fitness/features/session/widgets/session_card.dart' show SessionData, SessionStatus;
+import 'package:focus_fitness/features/session/widgets/session_card.dart'
+    show SessionData, SessionStatus;
 
 class SessionCompletionBottomSheet extends StatefulWidget {
   final BookingModel booking;
@@ -57,7 +58,7 @@ class _SessionCompletionBottomSheetState
       booking.startTime,
       format: 'MMM dd, yyyy',
     );
-    final time = TimeUtils.formatToLocal(booking.startTime, format: 'hh:mm a');
+    final time = TimeUtils.formatToLocal(booking.startTime, format: 'h:mm a');
 
     return SlideTransition(
       position: _offsetAnimation,
@@ -104,7 +105,7 @@ class _SessionCompletionBottomSheetState
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Did you finish your workout session?',
+                      'Did you finish your session?',
                       style: AppTextStyle.text14Regular.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -201,16 +202,22 @@ class _SessionCompletionBottomSheetState
                             final sessionData = SessionData(
                               trainerName: trainerName,
                               trainerImageUrl: trainerImage,
-                              sessionType: booking.sessionPlan?.title ?? 'Personal Training',
-                              duration: '${booking.sessionPlan?.durationMinutes ?? 60} mins',
+                              sessionType:
+                                  booking.sessionPlan?.title ??
+                                  'Personal Training',
+                              duration:
+                                  '${booking.sessionPlan?.durationMinutes ?? 60} mins',
                               status: SessionStatus.completed,
                               date: date,
                               startTime: time,
                               bookingId: booking.id,
                               booking: booking,
                             );
-                            
-                            context.push(SessionDetailsRoute.path, extra: sessionData);
+
+                            context.push(
+                              SessionDetailsRoute.path,
+                              extra: sessionData,
+                            );
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
