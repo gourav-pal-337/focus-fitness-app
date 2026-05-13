@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:timezone/timezone.dart' as tz;
 import '../data/models/trainer_profile_response_model.dart';
@@ -36,7 +37,7 @@ class DateTimeUtils {
 
   static String _normalizeTz(String? timezone) {
     if (timezone == null || timezone.isEmpty || timezone == 'UTC') {
-      return 'Asia/Kolkata';
+      return 'UTC';
     }
     // Handle common aliases that might not be in the local tz database
     if (timezone == 'Asia/Calcutta') return 'Asia/Kolkata';
@@ -78,7 +79,8 @@ class DateTimeUtils {
     // Use startDate if available, otherwise use today
     DateTime startDate;
     if (sessionPlan.startDate != null) {
-      final planStart = sessionPlan.startDate!;
+      // Use toUtc() to get the correct absolute date (avoids local timezone shift)
+      final planStart = sessionPlan.startDate!.toUtc();
       startDate = DateTime(planStart.year, planStart.month, planStart.day);
     } else {
       startDate = today;
@@ -87,7 +89,7 @@ class DateTimeUtils {
     // Use endDate if available, otherwise use 7 days from start
     DateTime endDate;
     if (sessionPlan.endDate != null) {
-      final planEnd = sessionPlan.endDate!;
+      final planEnd = sessionPlan.endDate!.toUtc();
       endDate = DateTime(planEnd.year, planEnd.month, planEnd.day);
     } else {
       endDate = startDate.add(const Duration(days: 7));
@@ -319,9 +321,6 @@ class DateTimeUtils {
     required int durationMinutes,
     String? trainerTimeZone,
   }) {
-    print(
-      "Converting to ISO Timestamps for dateId: $dateId, timeSlot: $timeSlot",
-    );
     // Find the date info
     final dateInfo = availableDates.firstWhere(
       (d) => d.dateId == dateId,
@@ -372,6 +371,7 @@ class DateTimeUtils {
     final endDateTime = startDateTime.add(Duration(minutes: durationMinutes));
 
     // Convert to ISO 8601 format in UTC
+    // This allows the UI to use .toLocal() to show the time in the user's timezone
     final startTime = startDateTime.toUtc().toIso8601String();
     final endTime = endDateTime.toUtc().toIso8601String();
 

@@ -133,6 +133,7 @@ class SessionPlanModel {
     this.timeStart,
     this.timeEnd,
     this.timeRange,
+    this.timezone,
   });
 
   final String id;
@@ -150,6 +151,7 @@ class SessionPlanModel {
   final String? timeStart;
   final String? timeEnd;
   final String? timeRange; // String format: "09:00 AM - 10:00 AM"
+  final String? timezone;
 
   factory SessionPlanModel.fromJson(Map<String, dynamic> json) {
     debugPrint("json platformFeeCurrency: ${json['platformFeeCurrency']}");
@@ -177,6 +179,7 @@ class SessionPlanModel {
       timeStart: json['timeStart'] as String?,
       timeEnd: json['timeEnd'] as String?,
       timeRange: json['timeRange'] as String?,
+      timezone: json['timezone'] as String?,
     );
   }
 }

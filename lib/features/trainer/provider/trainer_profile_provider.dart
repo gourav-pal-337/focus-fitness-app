@@ -81,12 +81,9 @@ class TrainerProfileProvider extends ChangeNotifier {
     );
 
     final slots = dayAvail.availableSlots.map((slot) {
-      debugPrint("slot.startTime: ${slot.startTime}");
       final dateTime = DateTime.parse(slot.startTime).toLocal();
-      debugPrint(
-        "slot.updatedtime: ${DateTimeUtils.formatTime(dateTime.hour, dateTime.minute)}",
-      );
-      return DateTimeUtils.formatTime(dateTime.hour, dateTime.minute);
+      final formatted = DateTimeUtils.formatTime(dateTime.hour, dateTime.minute);
+      return formatted;
     }).toList();
 
     return slots..sort();
@@ -320,7 +317,7 @@ class TrainerProfileProvider extends ChangeNotifier {
             timeSlot: slotStr,
             availableDates: dateInfos,
             durationMinutes: plan.durationMinutes,
-            trainerTimeZone: trainerTimeZone,
+            trainerTimeZone: plan.timezone ?? trainerTimeZone,
           );
 
           grouped[dateId]!.add(
