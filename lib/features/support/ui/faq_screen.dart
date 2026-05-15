@@ -73,7 +73,7 @@ class _FaqScreenState extends State<FaqScreen> {
                               color: AppColors.textSecondary,
                             ),
                           ),
-                          SizedBox(height: AppSpacing.md),
+                          SizedBox(height: AppSpacing.xs),
                           ...faqs.map((faq) {
                             return Column(
                               children: [

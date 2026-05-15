@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:focus_fitness/core/widgets/show_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../../routes/app_router.dart';
+import '../../../core/provider/app_features_provider.dart';
+import '../../../core/utils/feature_flag_utils.dart';
 import 'session_status_badge.dart';
 import 'session_action_buttons.dart';
 import 'invoice_button.dart';
@@ -47,44 +50,21 @@ class SessionCard extends StatelessWidget {
 
   final SessionData session;
 
-  String _getSessionDetailsPath() {
-    final statusString = session.status == SessionStatus.completed
-        ? 'completed'
-        : session.status == SessionStatus.cancelled
-        ? 'cancelled'
-        : 'upcoming';
-
-    final queryParams = {
-      'trainerName': session.trainerName,
-      'trainerImageUrl': session.trainerImageUrl,
-      'sessionType': session.sessionType,
-      'duration': session.duration,
-      'status': statusString,
-      'date': session.date,
-    };
-    if (session.startTime != null) {
-      queryParams['startTime'] = session.startTime!;
-    }
-    if (session.bookingId != null && session.bookingId!.isNotEmpty) {
-      queryParams['bookingId'] = session.bookingId!;
-    }
-    debugPrint(
-      'SessionCard: _getSessionDetailsPath called with queryParams: $queryParams',
-    );
-
-    final uri = Uri(
-      path: SessionDetailsRoute.path,
-      queryParameters: queryParams,
-    );
-    return uri.toString();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final features = context.watch<AppFeaturesProvider>();
+
     return GestureDetector(
       onTap: () {
-        context.push(SessionDetailsRoute.path, extra: session);
-        // context.push(_getSessionDetailsPath());
+        if (features.isSessionSummariesEnabled) {
+          context.push(SessionDetailsRoute.path, extra: session);
+        } else {
+          FeatureFlagUtils.showFeatureDisabledBottomSheet(
+            context,
+            title: 'Summaries Disabled',
+            message: 'Session details and summaries are currently unavailable.',
+          );
+        }
       },
       child: Container(
         padding: EdgeInsets.all(AppSpacing.md),
@@ -95,7 +75,7 @@ class SessionCard extends StatelessWidget {
             BoxShadow(
               color: AppColors.grey400.withValues(alpha: 0.1),
               blurRadius: 4,
-              offset: Offset(0, 10),
+              offset: const Offset(0, 10),
             ),
           ],
         ),
@@ -158,7 +138,8 @@ class SessionCard extends StatelessWidget {
               InvoiceButton(invoiceUrl: session.invoiceUrl!),
             ],
             if (session.status == SessionStatus.completed &&
-                session.booking?.feedback == null) ...[
+                session.booking?.feedback == null &&
+                features.isRatingFeedbackEnabled) ...[
               SizedBox(height: AppSpacing.lg),
               SessionActionButtons(session: session),
             ],

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../core/provider/app_features_provider.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -42,25 +44,28 @@ class EmptyWorkoutSection extends StatelessWidget {
           SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              CustomButton(
-                text: 'Add Logs +',
-                type: ButtonType.filled,
-                onPressed: onCreateTap,
-                backgroundColor: AppColors.primary,
-                textColor: AppColors.background,
-                borderRadius: 12.r,
-
-              ),
-              SizedBox(width: AppSpacing.md),
-              GestureDetector(
-                onTap: onViewLogTap,
-                child: Text(
-                  'View Workout Log',
-                  style: AppTextStyle.text14Medium.copyWith(
-                    color: AppColors.textPrimary,
+              if (context.watch<AppFeaturesProvider>().isWorkoutLoggingEnabled)
+                CustomButton(
+                  text: 'Add Logs +',
+                  type: ButtonType.filled,
+                  onPressed: onCreateTap,
+                  backgroundColor: AppColors.primary,
+                  textColor: AppColors.background,
+                  borderRadius: 12.r,
+                ),
+              if (context.watch<AppFeaturesProvider>().isWorkoutLoggingEnabled &&
+                  context.watch<AppFeaturesProvider>().isSessionLogsEnabled)
+                SizedBox(width: AppSpacing.md),
+              if (context.watch<AppFeaturesProvider>().isSessionLogsEnabled)
+                GestureDetector(
+                  onTap: onViewLogTap,
+                  child: Text(
+                    'View Workout Log',
+                    style: AppTextStyle.text14Medium.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ],

@@ -14,6 +14,9 @@ import '../models/workout_exercise_model.dart';
 import '../providers/session_provider.dart';
 import '../services/workout_api_service.dart';
 import '../provider/workout_provider.dart';
+import '../../../core/provider/app_features_provider.dart';
+import '../../../core/widgets/feature_disabled_widget.dart';
+import '../../../core/widgets/feature_flag_wrapper.dart';
 import '../widgets/exercise_progress_card.dart';
 import '../widgets/date_selector.dart';
 
@@ -44,17 +47,32 @@ class _WorkoutProgressScreenState extends State<WorkoutProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: WorkoutProgressProvider(),
-      child: _WorkoutProgressContent(
-        selectedDate: _selectedDate,
-        onDateSelected: (date) {
-          setState(() {
-            _selectedDate = date;
-          });
-        },
-        exerciseIdToAdd: widget.exerciseIdToAdd,
-        exerciseNameToAdd: widget.exerciseNameToAdd,
+    final isEnabled =
+        context
+            .watch<AppFeaturesProvider>()
+            .features
+            ?.workouts
+            .workoutProgress ??
+        true;
+
+    return FeatureFlagWrapper(
+      isEnabled: isEnabled,
+      title: 'Coming Soon',
+      message:
+          'Workout tracking is currently under maintenance. Please check back later.',
+      icon: Icons.history,
+      child: ChangeNotifierProvider.value(
+        value: WorkoutProgressProvider(),
+        child: _WorkoutProgressContent(
+          selectedDate: _selectedDate,
+          onDateSelected: (date) {
+            setState(() {
+              _selectedDate = date;
+            });
+          },
+          exerciseIdToAdd: widget.exerciseIdToAdd,
+          exerciseNameToAdd: widget.exerciseNameToAdd,
+        ),
       ),
     );
   }

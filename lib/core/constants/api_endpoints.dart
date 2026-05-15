@@ -1,8 +1,8 @@
 class Endpoints {
   // TODO: Update baseUrl with actual API base URL
   static const String baseUrl =
-      'https://focus-fusion-api.applore.in/api/mobile'; // dev
-  // 'http://localhost:4000/api/mobile';
+      // 'https://focus-fusion-api.applore.in/api/mobile'; // dev
+      'http://localhost:4000/api/mobile';
   //   'https://martha-insightful-genevie.ngrok-free.dev/api/mobile'; //gourav dev
   // 'https://3p68r138-4000.inc1.devtunnels.ms/api/mobile'; //sahil dev
 
@@ -15,7 +15,7 @@ class Endpoints {
   static const String getUserDetails = '/auth/get-user-details';
   static const String sendOtp = '/auth/send-otp';
   static const String verifyOtp = '/auth/verify-otp';
-  static const String forgotPassword = '/auth/password/fporgot';
+  static const String forgotPassword = '/auth/password/forgot';
   static const String resetPassword = '/auth/password/reset';
   static const String sendTfaOtp = '/auth/tfa/send-otp';
   static const String verifyTfa = '/auth/tfa/verify';
@@ -29,6 +29,7 @@ class Endpoints {
   // Trainer endpoints
   static const String getTrainerByReferralCode = '/trainer/referral';
   static const String searchTrainer = '/auth/search-trainer';
+  static const String allTrainers = '/auth/all-trainers';
   static const String linkTrainer = '/trainer/link';
   static const String getLinkedTrainer = '/trainer/linked';
   static const String unlinkTrainer = '/trainer/unlink';
@@ -71,6 +72,7 @@ class Endpoints {
   // System Settings endpoints
   static const String systemSettings = '/system-settings';
   static const String feeSettings = '/system-settings/fees';
+  static const String appFeatures = '/system-settings/app-features';
 
   // Notification endpoints
   static const String fcmToken = '/notifications/fcm-token';

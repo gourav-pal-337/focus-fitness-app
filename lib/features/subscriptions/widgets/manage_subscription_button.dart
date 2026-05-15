@@ -53,16 +53,16 @@ class ManageSubscriptionButton extends StatelessWidget {
             onPressed: provider.isCheckingOut
                 ? () {} // Disable click while loading
                 : () {
-                    if (selectedPlan != null) {
-                      final trainerId =
-                          provider.trainer?.id ?? '65b82a17f3c74b00018a1b2c';
-                      final amount = selectedPlan.amount.toStringAsFixed(2);
-                      final planType = selectedPlan.planType;
+                    // if (selectedPlan != null) {
+                    //   final trainerId =
+                    //       provider.trainer?.id ?? '65b82a17f3c74b00018a1b2c';
+                    //   final amount = selectedPlan.amount.toStringAsFixed(2);
+                    //   final planType = selectedPlan.planType;
 
-                      context.push(
-                        '/payment-method?amount=$amount&trainerId=$trainerId&isSubscription=true&planType=$planType',
-                      );
-                    }
+                    //   context.push(
+                    //     '/payment-method?amount=$amount&trainerId=$trainerId&isSubscription=true&planType=$planType',
+                    //   );
+                    // }
                   },
             width: double.infinity,
             backgroundColor: AppColors.primary,

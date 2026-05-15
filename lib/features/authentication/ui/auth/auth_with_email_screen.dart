@@ -18,6 +18,7 @@ import '../../../../routes/app_router.dart';
 import '../../provider/auth_provider.dart';
 import '../../data/models/login_request_model.dart';
 import '../../data/models/register_request_model.dart';
+import '../../../../core/provider/app_features_provider.dart';
 import 'auth_mode.dart';
 
 class AuthWithEmailScreen extends StatefulWidget {
@@ -459,13 +460,15 @@ class _AuthWithEmailScreenState extends State<AuthWithEmailScreen> {
                         },
                       ),
                       SizedBox(height: AppSpacing.lg * 1.5),
-                      const _SocialDivider(),
-                      SizedBox(height: AppSpacing.lg),
-                      _SocialRow(
-                        mode: widget.mode,
-                        onGooglePressed: _handleGoogleLogin,
-                        onApplePressed: _handleAppleLogin,
-                      ),
+                      if (context.watch<AppFeaturesProvider>().isSocialAuthEnabled) ...[
+                        const _SocialDivider(),
+                        SizedBox(height: AppSpacing.lg),
+                        _SocialRow(
+                          mode: widget.mode,
+                          onGooglePressed: _handleGoogleLogin,
+                          onApplePressed: _handleAppleLogin,
+                        ),
+                      ],
                     ],
                   ),
                 ),

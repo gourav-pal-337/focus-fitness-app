@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/routes/app_router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -8,7 +9,9 @@ import '../../../core/theme/app_radius.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/custom_app_bar.dart';
-import '../../../routes/app_router.dart';
+import '../../../core/provider/app_features_provider.dart';
+import '../../../core/widgets/feature_disabled_widget.dart';
+import '../../../core/widgets/feature_flag_wrapper.dart';
 import '../models/exercise_model.dart';
 import '../providers/workout_provider.dart' as api_workout_provider;
 import '../providers/exercise_provider.dart';
@@ -65,48 +68,113 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<ExerciseProvider>.value(value: _provider),
-        ChangeNotifierProvider<api_workout_provider.WorkoutProvider>.value(
-          value: _workoutProvider,
-        ),
-      ],
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: Column(
-            children: [
-              const CustomAppBar(title: 'Exercises'),
-              SizedBox(height: AppSpacing.md),
-              if (!widget.fromAssignedWorkout)
-                Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.screenPadding.left,
-                    vertical: AppSpacing.md,
+    return FeatureFlagWrapper(
+      isEnabled: context.watch<AppFeaturesProvider>().isExerciseLibraryEnabled,
+      title: 'Coming Soon',
+      message:
+          'The exercise library is currently under maintenance. Please check back later.',
+      icon: Icons.library_books,
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider<ExerciseProvider>.value(value: _provider),
+          ChangeNotifierProvider<api_workout_provider.WorkoutProvider>.value(
+            value: _workoutProvider,
+          ),
+        ],
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          body: SafeArea(
+            child: Column(
+              children: [
+                const CustomAppBar(title: 'Exercises'),
+                SizedBox(height: AppSpacing.md),
+                if (!widget.fromAssignedWorkout)
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.screenPadding.left,
+                      vertical: AppSpacing.md,
+                    ),
+                    child: _SearchBar(provider: _provider),
                   ),
-                  child: _SearchBar(provider: _provider),
-                ),
-              if (!widget.fromAssignedWorkout)
-                _CategoryFilter(provider: _provider),
-              Expanded(
-                child: Consumer2<api_workout_provider.WorkoutProvider, ExerciseProvider>(
-                  builder: (context, workoutProvider, exerciseProvider, _) {
-                    if (widget.fromAssignedWorkout) {
-                      if (workoutProvider.isLoading) {
+                if (!widget.fromAssignedWorkout)
+                  _CategoryFilter(provider: _provider),
+                Expanded(
+                  child: Consumer2<api_workout_provider.WorkoutProvider, ExerciseProvider>(
+                    builder: (context, workoutProvider, exerciseProvider, _) {
+                      if (widget.fromAssignedWorkout) {
+                        if (workoutProvider.isLoading) {
+                          return const LoadingShimmer();
+                        }
+
+                        final assignedCategoryId = widget.assignedCategoryId;
+                        final assignedExercises = workoutProvider.workouts
+                            .where(
+                              (w) =>
+                                  assignedCategoryId != null &&
+                                  w.category?.id == assignedCategoryId,
+                            )
+                            .toList();
+
+                        return assignedExercises.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'No exercises found',
+                                  style: AppTextStyle.text16Medium.copyWith(
+                                    color: AppColors.grey400,
+                                  ),
+                                ),
+                              )
+                            : Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.screenPadding.left,
+                                ),
+                                child: GridView.builder(
+                                  padding: EdgeInsets.only(
+                                    bottom: AppSpacing.xl,
+                                  ),
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                        crossAxisSpacing: AppSpacing.md,
+                                        mainAxisSpacing: AppSpacing.md,
+                                        childAspectRatio: 6 / 5,
+                                      ),
+                                  itemCount: assignedExercises.length,
+                                  itemBuilder: (context, index) {
+                                    final item = assignedExercises[index];
+                                    final dateMillis = widget
+                                        .workoutDate
+                                        ?.millisecondsSinceEpoch;
+                                    final imageUrl =
+                                        item.imageUrl ??
+                                        item.category?.imageUrl ??
+                                        _fallbackExerciseImageUrl;
+
+                                    return ExerciseCard(
+                                      name: item.exerciseName,
+                                      imageUrl: imageUrl,
+                                      onTap: () {
+                                        context.push(
+                                          '${ExerciseDetailsRoute.path}?exerciseId=${item.exerciseId}${dateMillis != null ? '&date=$dateMillis' : ''}',
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              );
+                      }
+
+                      if (workoutProvider.isLoading ||
+                          exerciseProvider.isLoading) {
                         return const LoadingShimmer();
                       }
 
-                      final assignedCategoryId = widget.assignedCategoryId;
-                      final assignedExercises = workoutProvider.workouts
-                          .where(
-                            (w) =>
-                                assignedCategoryId != null &&
-                                w.category?.id == assignedCategoryId,
-                          )
-                          .toList();
+                      final exercisesToShow = _resolveExercisesToShow(
+                        workoutProvider: workoutProvider,
+                        exerciseProvider: exerciseProvider,
+                      );
 
-                      return assignedExercises.isEmpty
+                      return exercisesToShow.isEmpty
                           ? Center(
                               child: Text(
                                 'No exercises found',
@@ -128,103 +196,47 @@ class _ExercisesScreenState extends State<ExercisesScreen> {
                                       mainAxisSpacing: AppSpacing.md,
                                       childAspectRatio: 6 / 5,
                                     ),
-                                itemCount: assignedExercises.length,
+                                itemCount: exercisesToShow.length,
                                 itemBuilder: (context, index) {
-                                  final item = assignedExercises[index];
-                                  final dateMillis = widget
-                                      .workoutDate
-                                      ?.millisecondsSinceEpoch;
-                                  final imageUrl =
-                                      item.imageUrl ??
-                                      item.category?.imageUrl ??
-                                      _fallbackExerciseImageUrl;
-
+                                  final exercise = exercisesToShow[index];
                                   return ExerciseCard(
-                                    name: item.exerciseName,
-                                    imageUrl: imageUrl,
+                                    name: exercise.name,
+                                    imageUrl: exercise.imageUrl,
                                     onTap: () {
+                                      final dateMillis = widget
+                                          .workoutDate
+                                          ?.millisecondsSinceEpoch;
+
+                                      if (widget.fromWorkoutProgress &&
+                                          widget.workoutDate != null) {
+                                        final workoutProgressProvider =
+                                            local_workout_provider.WorkoutProgressProvider();
+                                        workoutProgressProvider
+                                            .addExerciseToWorkout(
+                                              widget.workoutDate!,
+                                              local_workout_provider.Exercise(
+                                                id: exercise.id,
+                                                name: exercise.name,
+                                                imageUrl: exercise.imageUrl,
+                                              ),
+                                            );
+                                        context.pop();
+                                        return;
+                                      }
+
                                       context.push(
-                                        '${ExerciseDetailsRoute.path}?exerciseId=${item.exerciseId}${dateMillis != null ? '&date=$dateMillis' : ''}',
+                                        '${ExerciseDetailsRoute.path}?exerciseId=${exercise.id}${dateMillis != null ? '&date=$dateMillis' : ''}',
                                       );
                                     },
                                   );
                                 },
                               ),
                             );
-                    }
-
-                    if (workoutProvider.isLoading ||
-                        exerciseProvider.isLoading) {
-                      return const LoadingShimmer();
-                    }
-
-                    final exercisesToShow = _resolveExercisesToShow(
-                      workoutProvider: workoutProvider,
-                      exerciseProvider: exerciseProvider,
-                    );
-
-                    return exercisesToShow.isEmpty
-                        ? Center(
-                            child: Text(
-                              'No exercises found',
-                              style: AppTextStyle.text16Medium.copyWith(
-                                color: AppColors.grey400,
-                              ),
-                            ),
-                          )
-                        : Padding(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: AppSpacing.screenPadding.left,
-                            ),
-                            child: GridView.builder(
-                              padding: EdgeInsets.only(bottom: AppSpacing.xl),
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    crossAxisSpacing: AppSpacing.md,
-                                    mainAxisSpacing: AppSpacing.md,
-                                    childAspectRatio: 6 / 5,
-                                  ),
-                              itemCount: exercisesToShow.length,
-                              itemBuilder: (context, index) {
-                                final exercise = exercisesToShow[index];
-                                return ExerciseCard(
-                                  name: exercise.name,
-                                  imageUrl: exercise.imageUrl,
-                                  onTap: () {
-                                    final dateMillis = widget
-                                        .workoutDate
-                                        ?.millisecondsSinceEpoch;
-
-                                    if (widget.fromWorkoutProgress &&
-                                        widget.workoutDate != null) {
-                                      final workoutProgressProvider =
-                                          local_workout_provider.WorkoutProgressProvider();
-                                      workoutProgressProvider
-                                          .addExerciseToWorkout(
-                                            widget.workoutDate!,
-                                            local_workout_provider.Exercise(
-                                              id: exercise.id,
-                                              name: exercise.name,
-                                              imageUrl: exercise.imageUrl,
-                                            ),
-                                          );
-                                      context.pop();
-                                      return;
-                                    }
-
-                                    context.push(
-                                      '${ExerciseDetailsRoute.path}?exerciseId=${exercise.id}${dateMillis != null ? '&date=$dateMillis' : ''}',
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          );
-                  },
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

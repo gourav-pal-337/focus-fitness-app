@@ -1,6 +1,7 @@
 import '../../../../core/constants/api_endpoints.dart';
 import '../../../../core/network/api_hitter.dart';
 import '../../../../features/authentication/data/exceptions/api_exception.dart';
+import '../models/app_features_model.dart';
 import '../models/system_settings_model.dart';
 
 /// API service for system settings operations
@@ -93,6 +94,42 @@ class SystemSettingsApiService {
       );
 
       return response.status;
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
+  /// Get app features
+  Future<AppFeaturesResponseModel> getAppFeatures() async {
+    try {
+      final response = await _apiHitter.getApiResponse(Endpoints.appFeatures);
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        return AppFeaturesResponseModel.fromJson(responseData);
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              responseData['message'] as String? ??
+              responseData['error'] as String? ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage,
+            statusCode: response.response?.statusCode,
+          );
+        }
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
     } on ApiException {
       rethrow;
     } catch (e) {

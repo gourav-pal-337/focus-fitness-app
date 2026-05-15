@@ -17,6 +17,8 @@ import 'package:focus_fitness/features/profile/provider/edit_profile_details_pro
 import 'package:focus_fitness/features/profile/ui/edit_profile_details_screen.dart';
 import '../../session/provider/session_history_provider.dart';
 import '../../workouts/providers/workout_provider.dart';
+import '../../../core/provider/app_features_provider.dart';
+import '../../../core/utils/feature_flag_utils.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -277,6 +279,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         //   context,
                         //   listen: false,
                         // );
+                        final featuresProvider =
+                            Provider.of<AppFeaturesProvider>(
+                              context,
+                              listen: false,
+                            );
+
+                        if (!featuresProvider.isWhatsappEnabled) {
+                          FeatureFlagUtils.showFeatureDisabledBottomSheet(
+                            context,
+                            title: 'Coming Soon',
+                            message:
+                                'Whatsapp feature is currently under maintenance. Please check back later.',
+                          );
+                          return;
+                        }
+
                         final trainerProv = Provider.of<LinkedTrainerProvider>(
                           context,
                           listen: false,

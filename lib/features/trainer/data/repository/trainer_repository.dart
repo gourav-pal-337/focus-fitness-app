@@ -66,6 +66,19 @@ class TrainerRepository {
     }
   }
 
+  /// Get all trainers
+  /// Returns list of all available trainers
+  Future<Result<TrainerSearchResponseModel>> getAllTrainers() async {
+    try {
+      final response = await _apiService.getAllTrainers();
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode ?? 500);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
   /// Get linked trainer for authenticated user
   Future<Result<LinkedTrainerResponseModel>> getLinkedTrainer() async {
     try {

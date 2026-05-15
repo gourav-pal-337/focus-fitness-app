@@ -114,6 +114,45 @@ class TrainerApiService {
     }
   }
 
+  /// Get all trainers
+  /// Returns list of all available trainers
+  Future<TrainerSearchResponseModel> getAllTrainers() async {
+    try {
+      final response = await _apiHitter.getApiResponse(Endpoints.allTrainers);
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        return TrainerSearchResponseModel.fromJson(responseData);
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              (responseData['error'] as String?) ??
+              (responseData['message'] as String?) ??
+              response.msg;
+
+          throw ApiException(
+            message: errorMessage.isNotEmpty
+                ? errorMessage
+                : 'Failed to fetch trainers',
+            statusCode: response.response?.statusCode,
+          );
+        }
+        throw ApiException(
+          message: response.msg.isNotEmpty ? response.msg : 'Failed to fetch trainers',
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
+
   /// Get linked trainer for authenticated user
   Future<LinkedTrainerResponseModel> getLinkedTrainer() async {
     try {

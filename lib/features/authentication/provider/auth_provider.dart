@@ -311,11 +311,13 @@ class AuthProvider extends ChangeNotifier {
 
   // Trainer lookup state
   bool _isValidatingTrainer = false;
+  bool _isShowingAllTrainers = false;
   List<TrainerInfo> _foundTrainers = [];
   TrainerInfo? _selectedTrainer;
   String? _trainerValidationError;
 
   bool get isValidatingTrainer => _isValidatingTrainer;
+  bool get isShowingAllTrainers => _isShowingAllTrainers;
   List<TrainerInfo> get foundTrainers => _foundTrainers;
   TrainerInfo? get foundTrainer =>
       _selectedTrainer; // For backward compatibility
@@ -331,6 +333,7 @@ class AuthProvider extends ChangeNotifier {
     _foundTrainers = [];
     _selectedTrainer = null;
     _trainerValidationError = null;
+    _isShowingAllTrainers = false;
     notifyListeners();
   }
 
@@ -338,6 +341,7 @@ class AuthProvider extends ChangeNotifier {
   void selectTrainer(TrainerInfo trainer) {
     _selectedTrainer = trainer;
     _trainerId = trainer.referralCode;
+    _isShowingAllTrainers = false;
     notifyListeners();
   }
 
@@ -350,11 +354,13 @@ class AuthProvider extends ChangeNotifier {
       _selectedTrainer = null;
       _trainerValidationError = null;
       _isValidatingTrainer = false;
+      _isShowingAllTrainers = false;
       notifyListeners();
       return;
     }
 
     _isValidatingTrainer = true;
+    _isShowingAllTrainers = false;
     _trainerValidationError = null;
     _foundTrainers = [];
     _selectedTrainer = null;
@@ -377,6 +383,7 @@ class AuthProvider extends ChangeNotifier {
           }
           _trainerValidationError = null;
           _isValidatingTrainer = false;
+          _isShowingAllTrainers = false;
           notifyListeners();
         },
         failure: (message, code) {
@@ -384,6 +391,7 @@ class AuthProvider extends ChangeNotifier {
           _selectedTrainer = null;
           _trainerValidationError = message;
           _isValidatingTrainer = false;
+          _isShowingAllTrainers = false;
           notifyListeners();
         },
       );
@@ -392,6 +400,47 @@ class AuthProvider extends ChangeNotifier {
       _selectedTrainer = null;
       _trainerValidationError = e.toString().replaceAll('Exception: ', '');
       _isValidatingTrainer = false;
+      _isShowingAllTrainers = false;
+      notifyListeners();
+    }
+  }
+
+  /// Fetch all trainers
+  Future<void> fetchAllTrainers() async {
+    _isValidatingTrainer = true;
+    _isShowingAllTrainers = true;
+    _trainerValidationError = null;
+    _foundTrainers = [];
+    _selectedTrainer = null;
+    notifyListeners();
+
+    try {
+      final result = await _trainerRepository.getAllTrainers();
+
+      await result.when(
+        success: (response) async {
+          _foundTrainers = response.trainers;
+          _selectedTrainer = null;
+          _trainerValidationError = null;
+          _isValidatingTrainer = false;
+          _isShowingAllTrainers = true;
+          notifyListeners();
+        },
+        failure: (message, code) {
+          _foundTrainers = [];
+          _selectedTrainer = null;
+          _trainerValidationError = message;
+          _isValidatingTrainer = false;
+          _isShowingAllTrainers = false;
+          notifyListeners();
+        },
+      );
+    } catch (e) {
+      _foundTrainers = [];
+      _selectedTrainer = null;
+      _trainerValidationError = e.toString().replaceAll('Exception: ', '');
+      _isValidatingTrainer = false;
+      _isShowingAllTrainers = false;
       notifyListeners();
     }
   }

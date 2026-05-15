@@ -18,21 +18,21 @@ class OnboardingPageData {
 
 class OnboardingProvider extends ChangeNotifier {
   OnboardingProvider()
-      : pages = const <OnboardingPageData>[
-          OnboardingPageData(
-            title: 'Your Training.\nConnected.',
-            imagePath: AppAssets.onboarding1,
-          ),
-          OnboardingPageData(
-            title: 'Plans, Workouts &\nProgress',
-            imagePath: AppAssets.onboarding2,
-          ),
-          OnboardingPageData(
-            title: '',
-            imagePath: AppAssets.onboarding3,
-            showPrimaryCta: true,
-          ),
-        ];
+    : pages = const <OnboardingPageData>[
+        OnboardingPageData(
+          title: 'Your Training.\nConnected.',
+          imagePath: AppAssets.onboarding1,
+        ),
+        OnboardingPageData(
+          title: 'Plans, Workouts &\nProgress',
+          imagePath: AppAssets.onboarding2,
+        ),
+        OnboardingPageData(
+          title: '',
+          imagePath: AppAssets.onboarding3,
+          showPrimaryCta: true,
+        ),
+      ];
 
   final PageController pageController = PageController();
 
@@ -44,10 +44,10 @@ class OnboardingProvider extends ChangeNotifier {
   /// Initialize onboarding provider by checking onboarding status
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     try {
       final onboardingCompleted = await LocalStorageService.getOnboarding();
-      
+
       // If onboarding is already completed, start from the last page
       if (onboardingCompleted == true) {
         currentPage = pages.length - 1;
@@ -59,7 +59,7 @@ class OnboardingProvider extends ChangeNotifier {
         // Start from first page
         currentPage = 0;
       }
-      
+
       _isInitialized = true;
       notifyListeners();
     } catch (e) {
@@ -86,7 +86,7 @@ class OnboardingProvider extends ChangeNotifier {
       );
       currentPage = nextPage;
       notifyListeners();
-      
+
       // If we've reached the last page, mark onboarding as completed
       if (currentPage == pages.length - 1) {
         await LocalStorageService.setOnboarding(true);
@@ -106,5 +106,3 @@ class OnboardingProvider extends ChangeNotifier {
     super.dispose();
   }
 }
-
-

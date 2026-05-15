@@ -8,6 +8,9 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/custom_app_bar.dart';
 import '../../../core/widgets/buttons/custom_bottom.dart';
+import '../../../core/provider/app_features_provider.dart';
+import '../../../core/widgets/feature_disabled_widget.dart';
+import '../../../core/widgets/feature_flag_wrapper.dart';
 import '../providers/workout_provider.dart';
 import '../../../routes/app_router.dart';
 import '../models/workout_category_model.dart';
@@ -44,176 +47,203 @@ class _WorkoutsScreenState extends State<WorkoutsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<WorkoutProvider>.value(
-      value: _workoutProvider,
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: Column(
-            children: [
-              Consumer<WorkoutProvider>(
-                builder: (context, provider, _) {
-                  return CustomAppBar(
-                    onBack: () {
-                      context.go(HomeRoute.path);
-                    },
-                    title: 'Workout',
-                    actions: [
-                      if (provider.isLoading && provider.workouts.isNotEmpty)
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 8.w),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 14.w,
-                                height: 14.w,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    AppColors.primary,
+    final features = context.watch<AppFeaturesProvider>().features;
+    final workouts = features?.workouts;
+
+    // Check if at least one workout feature is enabled. Default to true if features are not yet loaded.
+    final isAnyWorkoutFeatureEnabled =
+        workouts == null ||
+        (workouts.workoutProgress ||
+            workouts.exerciseLibrary ||
+            workouts.activeWorkoutLogging ||
+            workouts.workoutManuals ||
+            workouts.sessionLogs);
+
+    return FeatureFlagWrapper(
+      isEnabled: isAnyWorkoutFeatureEnabled,
+      title: 'Coming Soon',
+      message:
+          'The workout section is currently under maintenance. Please check back later.',
+      icon: Icons.fitness_center,
+      child: ChangeNotifierProvider<WorkoutProvider>.value(
+        value: _workoutProvider,
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          body: SafeArea(
+            child: Column(
+              children: [
+                Consumer<WorkoutProvider>(
+                  builder: (context, provider, _) {
+                    return CustomAppBar(
+                      onBack: () {
+                        context.go(HomeRoute.path);
+                      },
+                      title: 'Workout',
+                      actions: [
+                        if (provider.isLoading && provider.workouts.isNotEmpty)
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8.w),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 14.w,
+                                  height: 14.w,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      AppColors.primary,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      IconButton(
-                        onPressed: () {
-                          context.push(ManualsRoute.path);
-                        },
-                        icon: Icon(Icons.menu_book, color: AppColors.textPrimary),
-                      ),
-                    ],
-                  );
-                },
-              ),
-              DateSelector(
-                selectedDate: _selectedDate,
-                onDateSelected: (date) {
-                  debugPrint('onDateSelected 1: $date');
-                  setState(() {
-                    _selectedDate = date;
-                  });
-                  debugPrint('onDateSelected 2: $date');
-                  _workoutProvider.fetchWorkoutByDate(date, force: true);
-                },
-              ),
-              SizedBox(height: AppSpacing.xl),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Consumer<WorkoutProvider>(
-                        builder: (context, provider, _) {
-                          if (provider.isLoading && provider.workouts.isEmpty) {
-                            return const LoadingShimmer();
-                          }
+                        if (context
+                            .watch<AppFeaturesProvider>()
+                            .isWorkoutManualsEnabled)
+                          IconButton(
+                            onPressed: () {
+                              context.push(ManualsRoute.path);
+                            },
+                            icon: Icon(
+                              Icons.menu_book,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+                DateSelector(
+                  selectedDate: _selectedDate,
+                  onDateSelected: (date) {
+                    debugPrint('onDateSelected 1: $date');
+                    setState(() {
+                      _selectedDate = date;
+                    });
+                    debugPrint('onDateSelected 2: $date');
+                    _workoutProvider.fetchWorkoutByDate(date, force: true);
+                  },
+                ),
+                SizedBox(height: AppSpacing.xl),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Consumer<WorkoutProvider>(
+                          builder: (context, provider, _) {
+                            if (provider.isLoading &&
+                                provider.workouts.isEmpty) {
+                              return const LoadingShimmer();
+                            }
 
-                          if (provider.errorMessage != null &&
-                              provider.errorMessage != _lastErrorMessage) {
-                            _lastErrorMessage = provider.errorMessage;
-                            WidgetsBinding.instance.addPostFrameCallback((_) {
-                              final msg =
-                                  provider.errorMessage ??
-                                  'Failed to load workout';
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(msg),
-                                  action: SnackBarAction(
-                                    label: 'Retry',
-                                    onPressed: () {
-                                      provider.refresh();
-                                    },
+                            if (provider.errorMessage != null &&
+                                provider.errorMessage != _lastErrorMessage) {
+                              _lastErrorMessage = provider.errorMessage;
+                              WidgetsBinding.instance.addPostFrameCallback((_) {
+                                final msg =
+                                    provider.errorMessage ??
+                                    'Failed to load workout';
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(msg),
+                                    action: SnackBarAction(
+                                      label: 'Retry',
+                                      onPressed: () {
+                                        provider.refresh();
+                                      },
+                                    ),
                                   ),
+                                );
+                              });
+                            }
+
+                            if (provider.errorMessage != null &&
+                                (provider.workouts.isEmpty)) {
+                              return Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: AppSpacing.screenPadding.left,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Could not load workout',
+                                      style: AppTextStyle.text16SemiBold
+                                          .copyWith(
+                                            color: AppColors.textPrimary,
+                                          ),
+                                    ),
+                                    SizedBox(height: AppSpacing.xs),
+                                    Text(
+                                      (provider.errorMessage ?? '').replaceAll(
+                                        "Exception: ",
+                                        "",
+                                      ),
+                                      style: AppTextStyle.text12Medium.copyWith(
+                                        color: AppColors.grey400,
+                                      ),
+                                    ),
+                                    SizedBox(height: AppSpacing.md),
+                                    CustomButton(
+                                      text: 'Retry',
+                                      type: ButtonType.text,
+                                      onPressed: provider.refresh,
+                                      borderColor: AppColors.textPrimary,
+                                      textColor: AppColors.textPrimary,
+                                      borderRadius: 12.r,
+                                    ),
+                                  ],
                                 ),
                               );
-                            });
-                          }
+                            }
 
-                          if (provider.errorMessage != null &&
-                              (provider.workouts.isEmpty)) {
-                            return Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: AppSpacing.screenPadding.left,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Could not load workout',
-                                    style: AppTextStyle.text16SemiBold.copyWith(
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                  SizedBox(height: AppSpacing.xs),
-                                  Text(
-                                    (provider.errorMessage ?? '').replaceAll(
-                                      "Exception: ",
-                                      "",
-                                    ),
-                                    style: AppTextStyle.text12Medium.copyWith(
-                                      color: AppColors.grey400,
-                                    ),
-                                  ),
-                                  SizedBox(height: AppSpacing.md),
-                                  CustomButton(
-                                    text: 'Retry',
-                                    type: ButtonType.text,
-                                    onPressed: provider.refresh,
-                                    borderColor: AppColors.textPrimary,
-                                    textColor: AppColors.textPrimary,
-                                    borderRadius: 12.r,
-                                  ),
-                                ],
-                              ),
+                            if ((provider.isRestDay ||
+                                    provider.dayTitle == 'Rest Day') &&
+                                provider.workouts.isEmpty) {
+                              return _RestDaySection(
+                                dayTitle: provider.dayTitle ?? 'Rest Day',
+                              );
+                            }
+
+                            return Column(
+                              children: [
+                                EmptyWorkoutSection(
+                                  hasData: provider.workouts.isNotEmpty,
+                                  onCreateTap: () {
+                                    context
+                                        .push(
+                                          '${WorkoutProgressRoute.path}?date=${_selectedDate.millisecondsSinceEpoch}',
+                                        )
+                                        .then((value) {
+                                          if (value == true) {
+                                            provider.refresh();
+                                          }
+                                        });
+                                  },
+                                  onViewLogTap: () {
+                                    context.push(
+                                      '${SessionLogDetailsRoute.path}?date=${_selectedDate.millisecondsSinceEpoch}',
+                                    );
+                                  },
+                                ),
+                                SizedBox(height: AppSpacing.md),
+                                _AssignedCategoriesSection(
+                                  provider: provider,
+                                  selectedDate: _selectedDate,
+                                ),
+                              ],
                             );
-                          }
-
-                          if ((provider.isRestDay ||
-                                  provider.dayTitle == 'Rest Day') &&
-                              provider.workouts.isEmpty) {
-                            return _RestDaySection(
-                              dayTitle: provider.dayTitle ?? 'Rest Day',
-                            );
-                          }
-
-                          return Column(
-                            children: [
-                              EmptyWorkoutSection(
-                                hasData: provider.workouts.isNotEmpty,
-                                onCreateTap: () {
-                                  context
-                                      .push(
-                                        '${WorkoutProgressRoute.path}?date=${_selectedDate.millisecondsSinceEpoch}',
-                                      )
-                                      .then((value) {
-                                        if (value == true) {
-                                          provider.refresh();
-                                        }
-                                      });
-                                },
-                                onViewLogTap: () {
-                                  context.push(
-                                    '${SessionLogDetailsRoute.path}?date=${_selectedDate.millisecondsSinceEpoch}',
-                                  );
-                                },
-                              ),
-                              SizedBox(height: AppSpacing.md),
-                              _AssignedCategoriesSection(
-                                provider: provider,
-                                selectedDate: _selectedDate,
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

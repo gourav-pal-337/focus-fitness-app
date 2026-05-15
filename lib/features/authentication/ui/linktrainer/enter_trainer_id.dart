@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/core/provider/app_features_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -62,6 +63,31 @@ class EnterTrainerIdScreen extends StatelessWidget {
               const TrainerSearchField(),
               SizedBox(height: AppSpacing.md),
               const _TrainerValidationInfo(),
+              SizedBox(height: AppSpacing.md),
+              if (authProvider.trainerId.isEmpty &&
+                  context
+                      .watch<AppFeaturesProvider>()
+                      .isTrainerDiscoveryEnabled)
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                      authProvider.fetchAllTrainers();
+                    },
+                    child: Text(
+                      'Don\'t have a referral code?',
+                      style: AppTextStyle.text14SemiBold.copyWith(
+                        color: AppColors.primary,
+                        // decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ),
+              if (authProvider.isShowingAllTrainers &&
+                  context
+                      .watch<AppFeaturesProvider>()
+                      .isTrainerDiscoveryEnabled)
+                const TrainerListWidget(),
             ],
           ),
         ),

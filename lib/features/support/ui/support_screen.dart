@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:focus_fitness/features/support/widgets/contact_support_bottom_sheet.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../../../core/provider/app_features_provider.dart';
+import '../../../core/utils/feature_flag_utils.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
@@ -43,7 +46,18 @@ class SupportScreen extends StatelessWidget {
                       title: 'FAQs',
                       description: 'View frequently asked questions',
                       onTap: () {
-                        context.push(FaqsRoute.path);
+                        if (context
+                            .read<AppFeaturesProvider>()
+                            .isFaqSystemEnabled) {
+                          context.push(FaqsRoute.path);
+                        } else {
+                          FeatureFlagUtils.showFeatureDisabledBottomSheet(
+                            context,
+                            title: 'Coming Soon',
+                            message:
+                                'FAQs are currently under maintenance. Please check back later.',
+                          );
+                        }
                       },
                     ),
                     Divider(color: AppColors.grey200, thickness: 1, height: 0),
@@ -52,7 +66,18 @@ class SupportScreen extends StatelessWidget {
                       title: 'Contact Support',
                       description: 'Create Support Ticket',
                       onTap: () {
-                        context.push(ContactSupportRoute.path);
+                        if (context
+                            .read<AppFeaturesProvider>()
+                            .isSupportTicketsEnabled) {
+                          context.push(ContactSupportRoute.path);
+                        } else {
+                          FeatureFlagUtils.showFeatureDisabledBottomSheet(
+                            context,
+                            title: 'Coming Soon',
+                            message:
+                                'Support tickets are currently under maintenance. Please check back later.',
+                          );
+                        }
                       },
                     ),
 
@@ -71,17 +96,26 @@ class SupportScreen extends StatelessWidget {
                       title: 'Track Ticket Status',
                       description: 'Track your ticket status here.',
                       onTap: () {
-                        ContactSupportBottomSheet.show(
-                          context: context,
-                          onCreateTicketTap: () {
-                            context.push(ContactSupportRoute.path);
-                          },
-                          onTrackTicketStatusTap: () {
-                            context.push(TrackTicketRoute.path);
-                          },
-                        );
-
-                        // TODO: Navigate to Track Ticket Status screen
+                        if (context
+                            .read<AppFeaturesProvider>()
+                            .isSupportTicketsEnabled) {
+                          ContactSupportBottomSheet.show(
+                            context: context,
+                            onCreateTicketTap: () {
+                              context.push(ContactSupportRoute.path);
+                            },
+                            onTrackTicketStatusTap: () {
+                              context.push(TrackTicketRoute.path);
+                            },
+                          );
+                        } else {
+                          FeatureFlagUtils.showFeatureDisabledBottomSheet(
+                            context,
+                            title: 'Coming Soon',
+                            message:
+                                'Support tickets are currently under maintenance. Please check back later.',
+                          );
+                        }
                       },
                     ),
                     Divider(color: AppColors.grey200, thickness: 1, height: 0),

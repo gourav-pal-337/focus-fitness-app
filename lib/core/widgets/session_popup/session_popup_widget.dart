@@ -20,6 +20,8 @@ import '../../../routes/app_router.dart';
 import '../../../features/profile/data/services/profile_api_service.dart';
 import '../../../features/profile/data/models/update_client_profile_request_model.dart';
 import '../../provider/user_provider.dart';
+import '../../provider/app_features_provider.dart';
+import '../../utils/feature_flag_utils.dart';
 
 /// Global session popup widget that can be shown on any screen using Overlay
 class SessionPopupWidget extends StatefulWidget {
@@ -348,7 +350,11 @@ class SessionBottomSheetContent extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: Color(0xFFE91E63),
                 ),
-                child: Icon(Icons.person, size: 30.sp, color: AppColors.background),
+                child: Icon(
+                  Icons.person,
+                  size: 30.sp,
+                  color: AppColors.background,
+                ),
               ),
             ),
           ),
@@ -465,6 +471,19 @@ class SessionBottomSheetContent extends StatelessWidget {
       ),
       borderRadius: 12.r,
       onPressed: () async {
+        final featuresProvider = Provider.of<AppFeaturesProvider>(
+          context,
+          listen: false,
+        );
+
+        if (!featuresProvider.isWhatsappEnabled) {
+          FeatureFlagUtils.showFeatureDisabledBottomSheet(
+            context,
+            title: 'Coming Soon',
+          );
+          return;
+        }
+
         if (trainerConntact.isEmpty) {
           _showUpdatePhoneNumberDialog(context);
           onDismiss();

@@ -14,6 +14,8 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/buttons/custom_bottom.dart';
 import '../../../core/widgets/date_time_bar.dart';
+import '../../../core/provider/app_features_provider.dart';
+import '../../../core/utils/feature_flag_utils.dart';
 import '../provider/trainer_profile_provider.dart';
 import '../provider/system_settings_provider.dart';
 import '../utils/date_time_utils.dart';
@@ -420,7 +422,17 @@ class _BookSessionButton extends StatelessWidget {
                 !provider.isBooking &&
                 !provider.isCheckingAvailability &&
                 provider.isSlotAvailable,
-            onPressed: showBookingConfirmation
+            onPressed:
+                !context.read<AppFeaturesProvider>().isSessionSchedulingEnabled
+                ? () {
+                    FeatureFlagUtils.showFeatureDisabledBottomSheet(
+                      context,
+                      title: 'Coming Soon',
+                      message:
+                          'Session booking is currently under maintenance. Please check back later.',
+                    );
+                  }
+                : showBookingConfirmation
                 ? () async {
                     final sessionPlan = provider.selectedSessionPlan;
                     final baseAmount = sessionPlan?.feeAmount ?? 100.00;

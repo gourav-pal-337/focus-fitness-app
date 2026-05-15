@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:focus_fitness/core/provider/app_features_provider.dart';
 import 'package:focus_fitness/core/provider/session_popup_provider.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
 import 'package:focus_fitness/core/service/local_storage_service.dart';
@@ -148,6 +149,10 @@ class AppBootstrap extends StatelessWidget {
             ),
             ChangeNotifierProvider<SessionDetailsProvider>(
               create: (_) => SessionDetailsProvider(),
+            ),
+            ChangeNotifierProvider<AppFeaturesProvider>(
+              create: (_) => AppFeaturesProvider()..fetchFeatures(),
+              lazy: false,
             ),
             ChangeNotifierProvider<WorkoutProvider>(
               create: (_) => WorkoutProvider(),

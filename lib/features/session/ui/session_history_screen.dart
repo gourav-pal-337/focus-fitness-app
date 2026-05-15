@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/core/widgets/loading/background_refresh_indicator.dart';
 import 'package:focus_fitness/routes/app_router.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +9,10 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/custom_sliver_app_bar.dart';
-import '../../../core/widgets/loading/background_refresh_indicator.dart';
+import '../../../core/provider/app_features_provider.dart';
+import '../../../core/widgets/feature_disabled_widget.dart';
+import '../../../core/widgets/feature_flag_wrapper.dart';
+import '../../../core/widgets/custom_app_bar.dart';
 import '../provider/session_history_provider.dart';
 import '../widgets/session_card.dart';
 import '../widgets/session_tab_bar.dart';
@@ -35,49 +39,64 @@ class _SessionHistoryScreenState extends State<SessionHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator(
-      onRefresh: () async {
-        Provider.of<SessionHistoryProvider>(
-          context,
-          listen: false,
-        ).fetchBookings();
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.background,
-        body: Consumer<SessionHistoryProvider>(
-          builder: (context, provider, child) {
-            return CustomScrollView(
-              slivers: [
-                CustomSliverAppBar(
-                  onBack: () {
-                    context.go(HomeRoute.path);
-                  },
-                  title: 'Session History',
-                  backgroundImage:
-                      'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800',
-                  actions: [
-                    BackgroundRefreshIndicator(
-                      isRefreshing:
-                          provider.isLoading && provider.sessions.isNotEmpty,
-                    ),
-                  ],
-                ),
-                SliverPersistentHeader(
-                  pinned: true,
+    final features = context.watch<AppFeaturesProvider>().features;
+    final bookings = features?.bookings;
 
-                  // floating: true,
-                  delegate: _TabBarDelegate(child: const SessionTabBar()),
-                ),
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.screenPadding.left,
-                    vertical: AppSpacing.md,
+    // Default to true if features are not yet loaded.
+    final isHistoryEnabled =
+        bookings == null ||
+        (bookings.sessionManagement ||
+            bookings.sessionSummaries ||
+            bookings.ratingFeedback);
+
+    return FeatureFlagWrapper(
+      isEnabled: isHistoryEnabled,
+      title: 'Coming Soon',
+      message:
+          'The session history section is currently under maintenance. Please check back later.',
+      icon: Icons.history,
+      child: RefreshIndicator(
+        onRefresh: () async {
+          Provider.of<SessionHistoryProvider>(
+            context,
+            listen: false,
+          ).fetchBookings();
+        },
+        child: Scaffold(
+          backgroundColor: AppColors.background,
+          body: Consumer<SessionHistoryProvider>(
+            builder: (context, provider, child) {
+              return CustomScrollView(
+                slivers: [
+                  CustomSliverAppBar(
+                    onBack: () {
+                      context.go(HomeRoute.path);
+                    },
+                    title: 'Session History',
+                    backgroundImage:
+                        'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800',
+                    actions: [
+                      BackgroundRefreshIndicator(
+                        isRefreshing:
+                            provider.isLoading && provider.sessions.isNotEmpty,
+                      ),
+                    ],
                   ),
-                  sliver: _buildSliverList(provider),
-                ),
-              ],
-            );
-          },
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _TabBarDelegate(child: const SessionTabBar()),
+                  ),
+                  SliverPadding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.screenPadding.left,
+                      vertical: AppSpacing.md,
+                    ),
+                    sliver: _buildSliverList(provider),
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

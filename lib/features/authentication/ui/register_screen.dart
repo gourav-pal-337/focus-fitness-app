@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/core/widgets/buttons/buttons.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,9 +17,10 @@ import '../../../core/widgets/country_code_picker.dart';
 import '../provider/auth_provider.dart';
 import '../data/models/register_request_model.dart';
 import '../../../routes/app_router.dart';
+import '../../../core/provider/app_features_provider.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/widgets/app_image.dart';
-import '../../../core/widgets/buttons/buttons.dart';
+import '../../../core/widgets/why_focus_section.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -398,13 +400,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 SizedBox(height: AppSpacing.lg * 1.5),
 
-                const _SocialDivider(),
-                SizedBox(height: AppSpacing.lg),
-                _SocialRow(
-                  onGooglePressed: _handleGoogleLogin,
-                  onApplePressed: _handleAppleLogin,
-                ),
-                SizedBox(height: AppSpacing.lg),
+                if (context
+                    .watch<AppFeaturesProvider>()
+                    .isSocialAuthEnabled) ...[
+                  const _SocialDivider(),
+                  SizedBox(height: AppSpacing.lg),
+                  _SocialRow(
+                    onGooglePressed: _handleGoogleLogin,
+                    onApplePressed: _handleAppleLogin,
+                  ),
+                  SizedBox(height: AppSpacing.lg),
+                ],
                 Center(
                   child: TextButton(
                     onPressed: () => context.pop(),
@@ -426,7 +432,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: AppSpacing.lg),
+                SizedBox(height: AppSpacing.xl),
+                const WhyFocusSection(),
+                SizedBox(height: AppSpacing.xxl),
               ],
             ),
           ),

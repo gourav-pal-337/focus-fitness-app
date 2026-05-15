@@ -96,7 +96,8 @@ class _TrainerSearchFieldState extends State<TrainerSearchField> {
         _touched &&
         provider.trainerId.isEmpty &&
         !_focusNode.hasFocus &&
-        provider.selectedTrainer == null;
+        provider.selectedTrainer == null &&
+        !provider.isShowingAllTrainers;
     final showDropdown =
         provider.hasTrainers &&
         _focusNode.hasFocus &&
