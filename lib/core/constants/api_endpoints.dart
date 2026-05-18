@@ -1,9 +1,9 @@
 class Endpoints {
   // TODO: Update baseUrl with actual API base URL
   static const String baseUrl =
-      // 'https://focus-fusion-api.applore.in/api/mobile'; // dev
-      'http://localhost:4000/api/mobile';
-  //   'https://martha-insightful-genevie.ngrok-free.dev/api/mobile'; //gourav dev
+      'https://focus-fusion-api.applore.in/api/mobile'; // dev
+  // 'http://localhost:4000/api/mobile';
+  // 'https://martha-insightful-genevie.ngrok-free.dev/api/mobile'; //gourav dev
   // 'https://3p68r138-4000.inc1.devtunnels.ms/api/mobile'; //sahil dev
 
   static const String uploadFile = '/uploads';
@@ -20,6 +20,7 @@ class Endpoints {
   static const String sendTfaOtp = '/auth/tfa/send-otp';
   static const String verifyTfa = '/auth/tfa/verify';
   static const String disableTfa = '/auth/tfa';
+  static const String refreshToken = '/auth/refresh-token';
 
   // Client profile endpoints
   static const String getClientProfile = '/client/profile';

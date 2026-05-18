@@ -236,6 +236,8 @@ class ApiHitter {
             path.contains('/auth/register');
 
         if (!isAuthRequest) {
+          // Note: Token refresh is handled in the interceptor.
+          // This method is called after the interceptor's onError (if it fails to refresh).
           String errorMessage = 'Something went wrong';
           if (e.response?.data is Map<String, dynamic>) {
             errorMessage =
@@ -415,6 +417,9 @@ class ApiHitter {
 }
 
 class _AccessTokenInterceptor extends Interceptor {
+  static bool _isRefreshing = false;
+  static List<Map<String, dynamic>> _failedRequests = [];
+
   @override
   void onRequest(
     RequestOptions options,
@@ -436,15 +441,104 @@ class _AccessTokenInterceptor extends Interceptor {
   }
 
   @override
-  void onError(DioException exception, ErrorInterceptorHandler handler) {
+  void onError(DioException exception, ErrorInterceptorHandler handler) async {
     final response = exception.response;
-    if (response != null) {
-      if (response.data is Map<String, dynamic> &&
-          (response.data as Map<String, dynamic>).containsKey('message')) {
-        // Error message handling can be added here if needed
+    if (response != null && response.statusCode == 401) {
+      final path = exception.requestOptions.path;
+      final isAuthRequest =
+          path.contains('/auth/login') ||
+          path.contains('/auth/verify-otp') ||
+          path.contains('/auth/firebase-login') ||
+          path.contains('/auth/register') ||
+          path.contains('/auth/refresh-token');
+
+      if (!isAuthRequest) {
+        if (_isRefreshing) {
+          // If already refreshing, queue this request
+          log("Refresh already in progress, queuing request: ${exception.requestOptions.path}");
+          return _retryRequestOnCompletion(exception, handler);
+        }
+
+        _isRefreshing = true;
+        final refreshToken = await LocalStorageService.getRefreshToken();
+        if (refreshToken.isNotEmpty) {
+          try {
+            log("Attempting to refresh token...");
+            final refreshDio = Dio(BaseOptions(baseUrl: Endpoints.baseUrl));
+            final refreshResponse = await refreshDio.post(
+              Endpoints.refreshToken,
+              data: {'refreshToken': refreshToken},
+            );
+
+            if (refreshResponse.statusCode == 200 ||
+                refreshResponse.statusCode == 201) {
+              final newAccessToken =
+                  refreshResponse.data['accessToken'] ??
+                  refreshResponse.data['tokens']['accessToken'];
+              final newRefreshToken =
+                  refreshResponse.data['refreshToken'] ??
+                  refreshResponse.data['tokens']['refreshToken'];
+
+              if (newAccessToken != null) {
+                log("Token refreshed successfully!");
+                await LocalStorageService.setToken(newAccessToken);
+                if (newRefreshToken != null) {
+                  await LocalStorageService.setRefreshToken(newRefreshToken);
+                }
+
+                _isRefreshing = false;
+                _resolveQueue(newAccessToken);
+
+                // Retry the current request
+                return _retryRequest(exception.requestOptions, newAccessToken, handler);
+              }
+            }
+          } catch (e) {
+            log("Refresh token failed: $e");
+            _isRefreshing = false;
+            _failedRequests.clear();
+            // Fall through to default error handling (logout)
+          }
+        } else {
+          _isRefreshing = false;
+        }
       }
     }
     super.onError(exception, handler);
+  }
+
+  void _resolveQueue(String newToken) {
+    log("Resolving queued requests: ${_failedRequests.length}");
+    for (var request in _failedRequests) {
+      final options = request['options'] as RequestOptions;
+      final handler = request['handler'] as ErrorInterceptorHandler;
+      _retryRequest(options, newToken, handler);
+    }
+    _failedRequests.clear();
+  }
+
+  Future<void> _retryRequestOnCompletion(
+    DioException exception,
+    ErrorInterceptorHandler handler,
+  ) async {
+    _failedRequests.add({
+      'options': exception.requestOptions,
+      'handler': handler,
+    });
+  }
+
+  Future<void> _retryRequest(
+    RequestOptions options,
+    String newToken,
+    ErrorInterceptorHandler handler,
+  ) async {
+    options.headers['Authorization'] = 'Bearer $newToken';
+    try {
+      final retryResponse = await ApiHitter.singleton.dio!.fetch(options);
+      handler.resolve(retryResponse);
+    } catch (e) {
+      handler.reject(e is DioException ? e : DioException(requestOptions: options, error: e));
+    }
   }
 }
 
