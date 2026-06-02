@@ -142,6 +142,7 @@ class _AuthWithPhoneScreenState extends State<AuthWithPhoneScreen> {
                           'countryCode': countryCode,
                           'identifier': phoneNumber,
                           'mode': widget.mode,
+                          'purpose': widget.mode == AuthMode.login ? 'login' : 'signup',
                         },
                       );
                       // Reset when coming back

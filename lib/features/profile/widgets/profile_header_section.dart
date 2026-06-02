@@ -368,12 +368,17 @@ class DefaultAvatar extends StatelessWidget {
   final String? name;
 
   String _getInitials(String? name) {
-    if (name == null || name.isEmpty) return '👤';
-    final parts = name.trim().split(' ');
-    if (parts.length > 1) {
+    if (name == null) return '👤';
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return '👤';
+    final parts = trimmed.split(RegExp(r'\s+'));
+    if (parts.length > 1 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
-    return parts[0][0].toUpperCase();
+    if (parts.isNotEmpty && parts[0].isNotEmpty) {
+      return parts[0][0].toUpperCase();
+    }
+    return '👤';
   }
 
   @override

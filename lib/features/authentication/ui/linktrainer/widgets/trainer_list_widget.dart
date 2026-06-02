@@ -8,6 +8,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_text_styles.dart';
 import '../../../../trainer/data/models/trainer_referral_response_model.dart';
 import '../../../provider/auth_provider.dart';
+import 'trainer_details_sheet.dart';
 
 class TrainerListWidget extends StatelessWidget {
   const TrainerListWidget({super.key});
@@ -92,11 +93,12 @@ class _TrainerListItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+          color: isSelected ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ShowImage(
               imageUrl: trainer.profilePhoto,
@@ -114,6 +116,7 @@ class _TrainerListItem extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     trainer.fullName ?? 'Trainer',
@@ -121,7 +124,7 @@ class _TrainerListItem extends StatelessWidget {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 2.h),
                   Text(
                     trainer.referralCode,
                     style: AppTextStyle.text12Regular.copyWith(
@@ -130,29 +133,61 @@ class _TrainerListItem extends StatelessWidget {
                   ),
                   if (trainer.bioSummary != null && trainer.bioSummary!.isNotEmpty) ...[
                     SizedBox(height: 4.h),
-                    Text(
-                      trainer.bioSummary!,
-                      style: AppTextStyle.text12Regular.copyWith(
-                        color: AppColors.textSecondary,
+                    GestureDetector(
+                      onTap: () {
+                        showTrainerDetails(context, trainer);
+                      },
+                      child: RichText(
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        text: TextSpan(
+                          style: AppTextStyle.text12Regular.copyWith(
+                            color: AppColors.textSecondary,
+                            height: 1.4,
+                          ),
+                          children: [
+                            TextSpan(text: trainer.bioSummary!),
+                            TextSpan(
+                              text: ' Read More',
+                              style: AppTextStyle.text12Regular.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ],
               ),
             ),
-            // Selection Indicator
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: AppColors.primary,
-                size: 24.sp,
-              ),
+            SizedBox(width: AppSpacing.sm),
+            // Selection Indicator & Info buttons row
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(
+                    Icons.info_outline_rounded,
+                    color: AppColors.primary,
+                    size: 22.sp,
+                  ),
+                  onPressed: () {
+                    showTrainerDetails(context, trainer);
+                  },
+                ),
+                if (isSelected)
+                  Icon(
+                    Icons.check_circle,
+                    color: AppColors.primary,
+                    size: 24.sp,
+                  ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 }
-

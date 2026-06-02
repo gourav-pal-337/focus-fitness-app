@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
+import 'package:focus_fitness/core/service/local_storage_service.dart';
 import '../../../core/widgets/app_logo.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -14,6 +14,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    // LocalStorageService.setOnboarding(false);
     // Navigation is handled by appRedirect in routes/app_redirect.dart
   }
 

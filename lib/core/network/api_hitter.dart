@@ -427,7 +427,11 @@ class _AccessTokenInterceptor extends Interceptor {
   ) async {
     final token = await LocalStorageService.getToken();
     log("User token is: ${token ?? ''}");
-    options.headers.putIfAbsent('Authorization', () => 'Bearer $token');
+    if (token != null && token.isNotEmpty) {
+      options.headers['Authorization'] = 'Bearer $token';
+    } else {
+      options.headers.remove('Authorization');
+    }
     super.onRequest(options, handler);
   }
 

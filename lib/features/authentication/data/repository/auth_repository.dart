@@ -113,20 +113,22 @@ class AuthRepository {
     }
   }
 
-  Future<Result<SendOtpResponseModel>> sendEmailOtp(String email) async {
+  Future<Result<SendOtpResponseModel>> sendEmailOtp(String email, {String purpose = 'verification'}) async {
     return sendOtp(
-      SendOtpRequestModel(email: email, purpose: 'verification', role: 'client'),
+      SendOtpRequestModel(email: email, purpose: purpose, role: 'client'),
     );
   }
 
   Future<Result<SendOtpResponseModel>> sendPhoneOtp(
     String countryCode,
-    String phone,
-  ) async {
+    String phone, {
+    String purpose = 'verification',
+  }) async {
     return sendOtp(
       SendOtpRequestModel(
-        phone: '$countryCode$phone',
-        purpose: 'verification',
+        phone: phone,
+        countryCode: countryCode,
+        purpose: purpose,
         role: 'client',
       ),
     );
@@ -147,13 +149,14 @@ class AuthRepository {
 
   Future<Result<LoginResponseModel>> verifyEmailOtp(
     String email,
-    String otp,
-  ) async {
+    String otp, {
+    String purpose = 'verification',
+  }) async {
     return verifyOtp(
       VerifyOtpRequestModel(
         email: email,
         code: otp,
-        purpose: 'verification',
+        purpose: purpose,
         role: 'client',
       ),
     );
@@ -162,13 +165,15 @@ class AuthRepository {
   Future<Result<LoginResponseModel>> verifyPhoneOtp(
     String countryCode,
     String phone,
-    String otp,
-  ) async {
+    String otp, {
+    String purpose = 'verification',
+  }) async {
     return verifyOtp(
       VerifyOtpRequestModel(
-        phone: '$countryCode$phone',
+        phone: phone,
+        countryCode: countryCode,
         code: otp,
-        purpose: 'verification',
+        purpose: purpose,
         role: 'client',
       ),
     );
@@ -211,6 +216,26 @@ class AuthRepository {
   Future<Result<bool>> disableTfa() async {
     try {
       final response = await _apiService.disableTfa();
+      return Success(response);
+    } on ApiException catch (e) {
+      return Failure(e.message, code: e.statusCode);
+    } catch (e) {
+      return Failure(e.toString().replaceAll('Exception: ', ''), code: 500);
+    }
+  }
+
+  /// Check if user exists by email/phone/countryCode
+  Future<Result<bool>> checkUserExists({
+    required String email,
+    required String phone,
+    required String countryCode,
+  }) async {
+    try {
+      final response = await _apiService.checkUserExists(
+        email: email,
+        phone: phone,
+        countryCode: countryCode,
+      );
       return Success(response);
     } on ApiException catch (e) {
       return Failure(e.message, code: e.statusCode);

@@ -64,7 +64,8 @@ class EnterTrainerIdScreen extends StatelessWidget {
               SizedBox(height: AppSpacing.md),
               const _TrainerValidationInfo(),
               SizedBox(height: AppSpacing.md),
-              if (authProvider.trainerId.isEmpty &&
+              if (authProvider.selectedTrainer == null &&
+                  !authProvider.isShowingAllTrainers &&
                   context
                       .watch<AppFeaturesProvider>()
                       .isTrainerDiscoveryEnabled)
@@ -75,7 +76,7 @@ class EnterTrainerIdScreen extends StatelessWidget {
                       authProvider.fetchAllTrainers();
                     },
                     child: Text(
-                      'Don\'t have a referral code?',
+                      'No referral code? Pick a trainer',
                       style: AppTextStyle.text14SemiBold.copyWith(
                         color: AppColors.primary,
                         // decoration: TextDecoration.underline,

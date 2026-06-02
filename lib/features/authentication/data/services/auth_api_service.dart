@@ -428,4 +428,50 @@ class AuthApiService {
       );
     }
   }
+
+  /// Check if user exists by email/phone/countryCode
+  Future<bool> checkUserExists({
+    required String email,
+    required String phone,
+    required String countryCode,
+  }) async {
+    try {
+      final response = await _apiHitter.getPostApiResponse(
+        Endpoints.checkUser,
+        data: {
+          'email': email,
+          'phone': phone,
+          'countryCode': countryCode,
+        },
+      );
+
+      if (response.status && response.response != null) {
+        final responseData = response.response!.data as Map<String, dynamic>;
+        return responseData['exists'] as bool? ?? false;
+      } else {
+        final responseData = response.response?.data;
+        if (responseData is Map<String, dynamic>) {
+          final errorMessage =
+              responseData['error'] as String? ??
+              responseData['message'] as String? ??
+              response.msg;
+          throw ApiException(
+            message: errorMessage,
+            statusCode: response.response?.statusCode,
+          );
+        }
+        throw ApiException(
+          message: response.msg,
+          statusCode: response.response?.statusCode,
+        );
+      }
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(
+        message: e.toString().replaceAll('Exception: ', ''),
+        statusCode: 500,
+      );
+    }
+  }
 }

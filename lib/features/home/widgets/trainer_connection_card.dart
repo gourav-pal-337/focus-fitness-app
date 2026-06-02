@@ -14,6 +14,8 @@ import '../../../core/widgets/buttons/custom_bottom.dart';
 import '../../../routes/app_router.dart';
 import '../../trainer/provider/linked_trainer_provider.dart';
 import 'trainer_connection_card_skeleton.dart';
+import '../../../core/provider/app_features_provider.dart';
+import '../../../core/utils/feature_flag_utils.dart';
 
 class TrainerConnectionCard extends StatelessWidget {
   const TrainerConnectionCard({super.key});
@@ -169,35 +171,49 @@ class TrainerConnectionCard extends StatelessWidget {
               ),
               if (isLive) ...[
                 SizedBox(height: AppSpacing.md),
-                CustomButton(
-                  text: 'Book Your Session',
-                  onPressed: () {
-                    final trainerId = trainer.id;
-                    if (trainerId.isNotEmpty) {
-                      final uri = Uri(
-                        path: TrainerProfileRoute.path.replaceAll(
-                          ':trainerId',
-                          trainerId,
-                        ),
-                        queryParameters: {'scrollToBooking': 'true'},
-                      ).toString();
-                      context.push(uri, extra: trainer);
-                    }
+                Builder(
+                  builder: (context) {
+                    final isBookingEnabled = context.watch<AppFeaturesProvider>().isSessionSchedulingEnabled;
+                    return CustomButton(
+                      text: isBookingEnabled ? 'Book Your Session' : 'Coming Soon',
+                      onPressed: () {
+                        if (!isBookingEnabled) {
+                          FeatureFlagUtils.showFeatureDisabledBottomSheet(
+                            context,
+                            title: 'Coming Soon',
+                            message:
+                                'Session booking is currently under maintenance. Please check back later.',
+                          );
+                          return;
+                        }
+                        final trainerId = trainer.id;
+                        if (trainerId.isNotEmpty) {
+                          final uri = Uri(
+                            path: TrainerProfileRoute.path.replaceAll(
+                              ':trainerId',
+                              trainerId,
+                            ),
+                            queryParameters: {'scrollToBooking': 'true'},
+                          ).toString();
+                          context.push(uri, extra: trainer);
+                        }
+                      },
+                      type: ButtonType.gradient,
+                      gradientColors: [
+                        Colors.black,
+                        Colors.grey.shade800,
+                        Colors.grey.shade700,
+                      ],
+                      width: double.infinity,
+                      size: ButtonSize.medium,
+                      borderRadius: 12.r,
+                      icon: Icon(
+                        Icons.calendar_today_outlined,
+                        color: Colors.white,
+                        size: 18.sp,
+                      ),
+                    );
                   },
-                  type: ButtonType.gradient,
-                  gradientColors: [
-                    Colors.black,
-                    Colors.grey.shade800,
-                    Colors.grey.shade700,
-                  ],
-                  width: double.infinity,
-                  size: ButtonSize.medium,
-                  borderRadius: 12.r,
-                  icon: Icon(
-                    Icons.calendar_today_outlined,
-                    color: Colors.white,
-                    size: 18.sp,
-                  ),
                 ),
               ],
             ],

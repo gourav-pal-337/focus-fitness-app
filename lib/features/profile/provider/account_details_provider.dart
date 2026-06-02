@@ -47,7 +47,10 @@ class AccountDetailsProvider extends ChangeNotifier {
       // Logic to separate country code if needed
       if ((countryCode == null || countryCode.isEmpty) &&
           phone.startsWith('+')) {
-        if (phone.startsWith('+91')) {
+        if (phone.startsWith('+44')) {
+          countryCode = '+44';
+          phone = phone.substring(3).trim();
+        } else if (phone.startsWith('+91')) {
           countryCode = '+91';
           phone = phone.substring(3).trim();
         } else {
@@ -136,7 +139,7 @@ class AccountDetailsProvider extends ChangeNotifier {
           label: 'Contact Number',
           value: '',
           hintText: 'Enter your mobile number',
-          countryCode: '+91',
+          countryCode: '+44',
         ),
         // const AccountField(label: 'Password', value: '************'),
       ];
@@ -160,9 +163,11 @@ class AccountDetailsProvider extends ChangeNotifier {
       String phone = user?.phone ?? '';
       // Cannot easily access countryCode from UserProvider.user (RegisterResponseModel?)
       // unless updated. assuming user?.phone is full string.
-      String countryCode = '+91'; // default? or try parse?
+      String countryCode = '+44'; // default? or try parse?
 
-      if (phone.startsWith('+91')) {
+      if (phone.startsWith('+44')) {
+        phone = phone.substring(3).trim();
+      } else if (phone.startsWith('+91')) {
         phone = phone.substring(3).trim();
       } else {
         // try parse?

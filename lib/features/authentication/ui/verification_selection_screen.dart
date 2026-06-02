@@ -91,7 +91,7 @@ class _SelectionOptions extends StatelessWidget {
           icon: Icons.email_outlined,
           isLoading: authProvider.isEmailOtpLoading,
           onTap: () async {
-            final success = await authProvider.sendEmailOtp(screen.email);
+            final success = await authProvider.sendEmailOtp(screen.email, purpose: 'verification');
             if (success && context.mounted) {
               context.push(
                 OtpVerificationRoute.path,
@@ -99,6 +99,7 @@ class _SelectionOptions extends StatelessWidget {
                   'type': 'email',
                   'identifier': screen.email,
                   'mode': AuthMode.signup,
+                  'purpose': 'verification',
                 },
               );
             }
@@ -114,6 +115,7 @@ class _SelectionOptions extends StatelessWidget {
             final success = await authProvider.sendPhoneOtp(
               screen.countryCode,
               screen.phone,
+              purpose: 'verification',
             );
             if (success && context.mounted) {
               context.push(
@@ -123,6 +125,7 @@ class _SelectionOptions extends StatelessWidget {
                   'countryCode': screen.countryCode,
                   'identifier': screen.phone,
                   'mode': AuthMode.signup,
+                  'purpose': 'verification',
                 },
               );
             }

@@ -21,12 +21,14 @@ class OtpVerificationScreen extends StatefulWidget {
     this.countryCode,
     required this.identifier,
     this.mode = AuthMode.signup,
+    this.purpose,
   });
 
   final String type; // 'email' or 'phone'
   final String? countryCode;
   final String identifier;
   final AuthMode mode;
+  final String? purpose;
 
   @override
   State<OtpVerificationScreen> createState() => _OtpVerificationScreenState();
@@ -47,14 +49,21 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     final otp = _otpController.text.trim();
 
     if (otp.length < 6) return;
-
+    print("otp: $otp");
+    print("widget.type: ${widget.type}");
+    print("widget.identifier: ${widget.identifier}");
+    print("widget.countryCode: ${widget.countryCode}");
+    print("widget.mode: ${widget.mode}");
+    // return;
+    final purpose = widget.purpose ?? 'verification';
     if (widget.type == 'email') {
-      await authProvider.verifyEmailOtp(widget.identifier, otp);
+      await authProvider.verifyEmailOtp(widget.identifier, otp, purpose: purpose);
     } else {
       await authProvider.verifyPhoneOtp(
         widget.countryCode ?? '',
         widget.identifier,
         otp,
+        purpose: purpose,
       );
     }
 
@@ -144,6 +153,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 type: widget.type,
                 identifier: widget.identifier,
                 countryCode: widget.countryCode,
+                purpose: widget.purpose,
               ),
             ],
           ),
@@ -205,6 +215,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       controller: _otpController,
       defaultPinTheme: defaultPinTheme,
       focusedPinTheme: focusedPinTheme,
+      // textInputAction: TextInputAction.none,
+      closeKeyboardWhenCompleted: true,
       onChanged: (value) {
         setState(() {}); // Update button state
       },
@@ -224,11 +236,13 @@ class _ResendTimer extends StatelessWidget {
     required this.type,
     required this.identifier,
     this.countryCode,
+    this.purpose,
   });
 
   final String type;
   final String identifier;
   final String? countryCode;
+  final String? purpose;
 
   @override
   Widget build(BuildContext context) {
@@ -236,10 +250,11 @@ class _ResendTimer extends StatelessWidget {
     return OtpResendTimer(
       expiresAt: DateTime.now().add(const Duration(seconds: 30)),
       onResend: () {
+        final resendPurpose = purpose ?? 'verification';
         if (type == 'email') {
-          authProvider.sendEmailOtp(identifier);
+          authProvider.sendEmailOtp(identifier, purpose: resendPurpose);
         } else {
-          authProvider.sendPhoneOtp(countryCode ?? '', identifier);
+          authProvider.sendPhoneOtp(countryCode ?? '', identifier, purpose: resendPurpose);
         }
       },
     );

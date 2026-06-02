@@ -308,12 +308,14 @@ abstract class OtpVerificationRoute {
       final countryCode = extra?['countryCode'];
       final identifier = extra?['identifier'] ?? '';
       final mode = extra?['mode'] as AuthMode? ?? AuthMode.signup;
+      final purpose = extra?['purpose'] as String?;
 
       return OtpVerificationScreen(
         type: type,
         countryCode: countryCode,
         identifier: identifier,
         mode: mode,
+        purpose: purpose,
       );
     },
   );
@@ -627,7 +629,8 @@ abstract class TrainerProfileRoute {
     name: name,
     builder: (context, state) {
       final trainerId = state.pathParameters['trainerId'];
-      final trainerInfo = state.extra as TrainerInfo? ??
+      final trainerInfo =
+          state.extra as TrainerInfo? ??
           (trainerId != null ? TrainerInfo(id: trainerId) : null);
       final scrollToBooking =
           state.uri.queryParameters['scrollToBooking'] == 'true';

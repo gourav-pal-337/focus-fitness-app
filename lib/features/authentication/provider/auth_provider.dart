@@ -107,7 +107,8 @@ class AuthProvider extends ChangeNotifier {
       debugPrint("Sending OTP to $fullNumber for $purpose");
 
       final request = SendOtpRequestModel(
-        phone: fullNumber,
+        phone: _phoneNumber,
+        countryCode: _countryCode,
         purpose: purpose,
         role: role,
       );
@@ -166,7 +167,8 @@ class AuthProvider extends ChangeNotifier {
       debugPrint("Verifying OTP for $fullNumber");
 
       final request = VerifyOtpRequestModel(
-        phone: fullNumber,
+        phone: _phoneNumber,
+        countryCode: _countryCode,
         code: _otp,
         purpose: purpose,
         role: role,
@@ -693,13 +695,13 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> sendEmailOtp(String email) async {
+  Future<bool> sendEmailOtp(String email, {String purpose = 'verification'}) async {
     _isEmailOtpLoading = true;
     _errorMessage = '';
     notifyListeners();
 
     try {
-      final result = await _repository.sendEmailOtp(email);
+      final result = await _repository.sendEmailOtp(email, purpose: purpose);
       _isEmailOtpLoading = false;
       return result.when(
         success: (response) async {
@@ -722,12 +724,12 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> verifyEmailOtp(String email, String otp) async {
+  Future<void> verifyEmailOtp(String email, String otp, {String purpose = 'verification'}) async {
     _setAuthState(AuthState.loading);
     _errorMessage = '';
 
     try {
-      final result = await _repository.verifyEmailOtp(email, otp);
+      final result = await _repository.verifyEmailOtp(email, otp, purpose: purpose);
       await result.when(
         success: (response) async {
           _loginResponse = response;
@@ -746,13 +748,13 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> sendPhoneOtp(String countryCode, String phone) async {
+  Future<bool> sendPhoneOtp(String countryCode, String phone, {String purpose = 'verification'}) async {
     _isPhoneOtpLoading = true;
     _errorMessage = '';
     notifyListeners();
 
     try {
-      final result = await _repository.sendPhoneOtp(countryCode, phone);
+      final result = await _repository.sendPhoneOtp(countryCode, phone, purpose: purpose);
       _isPhoneOtpLoading = false;
       return result.when(
         success: (response) async {
@@ -778,13 +780,14 @@ class AuthProvider extends ChangeNotifier {
   Future<void> verifyPhoneOtp(
     String countryCode,
     String phone,
-    String otp,
-  ) async {
+    String otp, {
+    String purpose = 'verification',
+  }) async {
     _setAuthState(AuthState.loading);
     _errorMessage = '';
 
     try {
-      final result = await _repository.verifyPhoneOtp(countryCode, phone, otp);
+      final result = await _repository.verifyPhoneOtp(countryCode, phone, otp, purpose: purpose);
       await result.when(
         success: (response) async {
           _loginResponse = response;
@@ -982,10 +985,44 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Check if user exists by email/phone/countryCode
+  Future<bool> checkUserExists({
+    required String email,
+    required String phone,
+    required String countryCode,
+  }) async {
+    _setAuthState(AuthState.loading);
+    _errorMessage = '';
+    _errorCode = null;
+
+    try {
+      final result = await _repository.checkUserExists(
+        email: email,
+        phone: phone,
+        countryCode: countryCode,
+      );
+
+      switch (result) {
+        case Success(data: final exists):
+          _setAuthState(AuthState.idle);
+          return exists;
+        case Failure(message: final message, code: final code):
+          _errorMessage = message;
+          _errorCode = code;
+          _setAuthState(AuthState.error);
+          throw Exception(message);
+      }
+    } catch (e) {
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
+      _setAuthState(AuthState.error);
+      rethrow;
+    }
+  }
+
   // Reset all auth data
   void reset() {
     _name = '';
-    _countryCode = '+91';
+    _countryCode = '+44';
     _phoneNumber = '';
     _trainerId = '';
     _resetEmail = '';

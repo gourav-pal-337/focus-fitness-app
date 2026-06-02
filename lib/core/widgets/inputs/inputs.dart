@@ -74,7 +74,7 @@ class AppTextFormField extends StatelessWidget {
         hintStyle:
             hintStyle ??
             AppTextStyle.text16Regular.copyWith(
-              color: AppColors.grey100.withOpacity(0.7),
+              color: AppColors.grey100.withValues(alpha: 0.7),
             ),
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
@@ -92,6 +92,23 @@ class AppTextFormField extends StatelessWidget {
             color: focusedBorderColor ?? AppColors.primary,
             width: 1.2,
           ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: AppRadius.medium,
+          borderSide: const BorderSide(
+            color: Colors.red,
+            width: 1,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: AppRadius.medium,
+          borderSide: const BorderSide(
+            color: Colors.red,
+            width: 1.2,
+          ),
+        ),
+        errorStyle: AppTextStyle.text12Regular.copyWith(
+          color: Colors.red,
         ),
         contentPadding: EdgeInsets.symmetric(
           horizontal: AppSpacing.md,

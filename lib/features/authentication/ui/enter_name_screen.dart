@@ -66,28 +66,6 @@ class EnterNameScreen extends StatelessWidget {
                   const _SurnameField(),
                   SizedBox(height: AppSpacing.lg),
                   const _ProceedButton(),
-                  SizedBox(height: AppSpacing.xs),
-                  Center(
-                    child: TextButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) => const _WhyFocusBottomSheet(),
-                        );
-                      },
-                      child: Text(
-                        'Why Focus Fusion?',
-                        style: AppTextStyle.text14Medium.copyWith(
-                          color: AppColors.background.withOpacity(0.8),
-                          decoration: TextDecoration.underline,
-                          decorationColor: AppColors.background.withOpacity(
-                            0.8,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -170,37 +148,3 @@ class _ProceedButton extends StatelessWidget {
   }
 }
 
-class _WhyFocusBottomSheet extends StatelessWidget {
-  const _WhyFocusBottomSheet();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-      ),
-      padding: EdgeInsets.only(
-        top: AppSpacing.md,
-        bottom: MediaQuery.of(context).padding.bottom + AppSpacing.xl,
-        left: AppSpacing.md,
-        right: AppSpacing.md,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40.w,
-            height: 4.h,
-            decoration: BoxDecoration(
-              color: AppColors.grey300,
-              borderRadius: BorderRadius.circular(2.r),
-            ),
-          ),
-          SizedBox(height: AppSpacing.sm),
-          const WhyFocusSection(),
-        ],
-      ),
-    );
-  }
-}

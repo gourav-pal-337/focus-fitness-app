@@ -20,7 +20,7 @@ import '../../../routes/app_router.dart';
 import '../../../core/provider/app_features_provider.dart';
 import '../../../core/constants/app_assets.dart';
 import '../../../core/widgets/app_image.dart';
-import '../../../core/widgets/why_focus_section.dart';
+import 'auth/auth_mode.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -37,7 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  String _countryCode = '+91';
+  String _countryCode = '+44';
   bool _isPhoneFocused = false;
   bool _isAccepted = false;
 
@@ -67,30 +67,81 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final fullName = '${authProvider.forename} ${authProvider.surname}';
     final phoneNumber = _phoneController.text.trim();
+    final emailAddress = _emailController.text.trim();
 
-    final request = RegisterRequestModel(
-      forename: authProvider.forename,
-      surname: authProvider.surname,
-      fullName: fullName,
-      email: _emailController.text.trim(),
-      countryCode: _countryCode,
-      phone: phoneNumber,
-      password: _passwordController.text.trim(),
-      isAcceptedTerms: _isAccepted,
-    );
-
-    authProvider.setPendingRegisterRequest(request);
-
-    if (mounted) {
-      // Pass email/phone for verification screen
-      context.push(
-        VerificationSelectionRoute.path,
-        extra: {
-          'email': _emailController.text.trim(),
-          'countryCode': _countryCode,
-          'phone': phoneNumber,
-        },
+    try {
+      // 1. Check if user already exists
+      final userExists = await authProvider.checkUserExists(
+        email: emailAddress,
+        phone: phoneNumber,
+        countryCode: _countryCode,
       );
+
+      if (userExists) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('An account with this email or phone number already exists.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      // 2. If available, proceed with onboarding registration flow
+      final request = RegisterRequestModel(
+        forename: authProvider.forename,
+        surname: authProvider.surname,
+        fullName: fullName,
+        email: emailAddress,
+        countryCode: _countryCode,
+        phone: phoneNumber,
+        password: _passwordController.text.trim(),
+        isAcceptedTerms: _isAccepted,
+      );
+
+      authProvider.setPendingRegisterRequest(request);
+
+      // 3. Send SMS OTP directly to phone number
+      final otpSent = await authProvider.sendPhoneOtp(_countryCode, phoneNumber);
+
+      if (!otpSent) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authProvider.errorMessage.isNotEmpty 
+                  ? authProvider.errorMessage 
+                  : 'Failed to send verification code. Please try again.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+
+      if (mounted) {
+        // Navigate directly to OTP Verification Screen for Phone
+        context.push(
+          OtpVerificationRoute.path,
+          extra: {
+            'type': 'phone',
+            'countryCode': _countryCode,
+            'identifier': phoneNumber,
+            'mode': AuthMode.signup,
+            'purpose': 'verification',
+          },
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -218,7 +269,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   height: 50,
                                   child: MyCountryCodePicker(
                                     selectedCode: _countryCode,
-                                    selectedFlag: '🇮🇳',
+                                    selectedFlag: '🇬🇧',
                                     onCountryCodeTap: (code) {
                                       if (code != null) {
                                         setState(() {
@@ -432,8 +483,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: AppSpacing.xl),
-                const WhyFocusSection(),
                 SizedBox(height: AppSpacing.xxl),
               ],
             ),

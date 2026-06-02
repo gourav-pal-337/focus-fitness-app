@@ -18,8 +18,8 @@ class TwoFactorAuthProvider extends ChangeNotifier {
 
   TfaViewState _viewState = TfaViewState.initial;
   String _phoneNumber = '';
-  String _countryCode = '+91';
-  String _countryFlag = '🇮🇳';
+  String _countryCode = '+44';
+  String _countryFlag = '🇬🇧';
 
   bool get isEnabled => _isEnabled;
   bool get isLoading => _isLoading;

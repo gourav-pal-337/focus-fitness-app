@@ -339,11 +339,12 @@ class LocalStorageService {
       if (existingDates.contains(dateKey)) return;
       existingDates.add(dateKey);
       // Keep insertion order but cap size to avoid unbounded growth.
-      final limited = existingDates.reversed.take(30).toList().reversed.toList();
-      await _prefsInstance.setString(
-        _workoutCacheDatesKey,
-        limited.join(','),
-      );
+      final limited = existingDates.reversed
+          .take(30)
+          .toList()
+          .reversed
+          .toList();
+      await _prefsInstance.setString(_workoutCacheDatesKey, limited.join(','));
     } catch (e) {
       log(e.toString());
     }
