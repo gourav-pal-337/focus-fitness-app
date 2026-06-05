@@ -1,4 +1,4 @@
-package com.example.focus_fitness
+package com.focusfitness.fit
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

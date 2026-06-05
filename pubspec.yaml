@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.2+33
+version: 1.0.0+1
 
 environment:
   sdk: ^3.10.0
@@ -63,7 +63,7 @@ dependencies:
   package_info_plus: ^9.0.0
   cached_network_image: ^3.4.1
   shimmer: ^3.0.0
-  device_calendar: ^3.9.0
+  device_calendar: ^4.3.3
   permission_handler: ^12.0.1
   timezone: ^0.10.1
   flutter_timezone: ^5.0.2
@@ -80,6 +80,12 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+
+# device_calendar 4.x pins timezone ^0.9.0, but the app (and flutter_local_notifications)
+# need timezone ^0.10.x. The timezone API used by device_calendar is compatible with
+# 0.10.x, so we override to a single resolved version for the whole tree.
+dependency_overrides:
+  timezone: ^0.10.1
 
 flutter_launcher_icons:
   android: "launcher_icon"

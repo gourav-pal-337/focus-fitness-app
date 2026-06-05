@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAtoyAjO6Ym_EtjbKYZPrXFhvVnQFydYKA',
-    appId: '1:340118958004:android:209b6b6deaba20e9c68ce1',
+    appId: '1:340118958004:android:ce17ac2b86e03ff2c68ce1',
     messagingSenderId: '340118958004',
     projectId: 'focus-fitness-90f35',
     storageBucket: 'focus-fitness-90f35.firebasestorage.app',
@@ -66,12 +66,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCWk9LC4zuUoK3qj3ZHhTe1D3MZXKuCmKw',
-    appId: '1:340118958004:ios:463a822d5f8651b1c68ce1',
+    appId: '1:340118958004:ios:03dab9212fef1755c68ce1',
     messagingSenderId: '340118958004',
     projectId: 'focus-fitness-90f35',
     storageBucket: 'focus-fitness-90f35.firebasestorage.app',
-    iosClientId: '340118958004-ua0nk1jo78basoajp9s5n5uus6dpnkgt.apps.googleusercontent.com',
-    iosBundleId: 'com.focusFitness.app',
+    androidClientId: '340118958004-mqa1t48ohr4646jitfeo1vqcgv7b35fd.apps.googleusercontent.com',
+    iosClientId: '340118958004-d7m1hu31op68ejbhseo0d8gc6o0bruec.apps.googleusercontent.com',
+    iosBundleId: 'com.focusfitness.fitt',
   );
 
 }
