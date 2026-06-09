@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/app_modal_sheet.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:focus_fitness/core/constants/app_assets.dart';
@@ -37,6 +38,8 @@ import '../../../core/theme/app_radius.dart';
 import '../../session/data/models/booking_model.dart';
 import '../../../routes/app_router.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/network/api_hitter.dart';
+import '../../../core/constants/api_endpoints.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -157,7 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _triggerSessionConfirmation(BookingModel booking) {
-    showModalBottomSheet(
+    showAppModalSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
@@ -309,18 +312,32 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (userPhone != null && userPhone.isNotEmpty) {
                           // if (trainerWhatsapp != null &&
                           //     trainerWhatsapp.isNotEmpty) {
-                          final Uri whatsappUrl = Uri.parse(
-                            'https://wa.me/+15551436124?text=Hello',
-                          );
+                          try {
+                            final response = await ApiHitter().getApiResponse(
+                              Endpoints.whatsappRedirectNumber,
+                            );
 
-                          // if (await canLaunchUrl(whatsappUrl)) {
-                          await launchUrl(
-                            whatsappUrl,
-                            mode: LaunchMode.externalApplication,
-                          );
-                          // } else {
-                          //   debugPrint('Could not launch $whatsappUrl');
-                          // }
+                            String whatsappNumber = '+447469461048'; // fallback
+                            if (response.status && response.response != null) {
+                              final data = response.response!.data;
+
+                              if (data is Map<String, dynamic>) {
+                                whatsappNumber =
+                                    data['data']['phoneNumber'] ??
+                                    '+447469461048';
+                              }
+                            }
+
+                            final Uri whatsappUrl = Uri.parse(
+                              'https://wa.me/$whatsappNumber?text=Hello',
+                            );
+                            await launchUrl(
+                              whatsappUrl,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          } catch (e) {
+                            debugPrint('Error fetching whatsapp number: $e');
+                          }
                           // } else {
                           //   if (context.mounted) {
                           //     ScaffoldMessenger.of(context).showSnackBar(

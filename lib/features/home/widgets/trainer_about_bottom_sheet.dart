@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/app_modal_sheet.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -15,7 +16,7 @@ class TrainerAboutBottomSheet extends StatelessWidget {
     required BuildContext context,
     required TrainerInfo trainer,
   }) {
-    return showModalBottomSheet<void>(
+    return showAppModalSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/app_modal_sheet.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
@@ -12,7 +13,7 @@ class FeatureFlagUtils {
     String message =
         'This feature is currently under maintenance. Please check back later or contact support if you have questions.',
   }) {
-    showModalBottomSheet(
+    showAppModalSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) {

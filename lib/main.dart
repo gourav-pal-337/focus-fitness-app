@@ -20,6 +20,7 @@ import 'package:focus_fitness/features/trainer/provider/trainer_profile_provider
 import 'package:focus_fitness/features/trainer/provider/system_settings_provider.dart';
 import 'package:focus_fitness/features/workouts/providers/workout_provider.dart';
 import 'package:focus_fitness/firebase_options.dart';
+import 'package:focus_fitness/core/responsive/responsive_config.dart';
 import 'package:provider/provider.dart';
 import 'app.dart';
 import 'features/sample/provider/sample_provider.dart';
@@ -109,11 +110,22 @@ class AppBootstrap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(390, 844),
-      minTextAdapt: true,
-      builder: (context, child) {
-        return MultiProvider(
+    // ScreenUtilInit derives its scale from the real device size. We read that
+    // real size (MediaQuery.fromView does not cap it — it just makes this
+    // rebuild on size changes) and pass a computed designSize that clamps the
+    // tablet/iPad scale factor while leaving phones to scale normally.
+    return MediaQuery.fromView(
+      view: View.of(context),
+      child: Builder(
+        builder: (context) {
+          final designSize = ResponsiveConfig.designSizeFor(
+            MediaQuery.sizeOf(context),
+          );
+          return ScreenUtilInit(
+            designSize: designSize,
+            minTextAdapt: true,
+            builder: (context, child) {
+              return MultiProvider(
           providers: [
             ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
             ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
@@ -158,9 +170,12 @@ class AppBootstrap extends StatelessWidget {
               create: (_) => WorkoutProvider(),
             ),
           ],
-          child: const App(),
-        );
-      },
+                child: const App(),
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

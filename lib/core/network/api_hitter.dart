@@ -157,6 +157,7 @@ class ApiHitter {
           queryParameters: queryParameters,
           data: data,
         );
+
         return apiData(response);
       } on DioException catch (error) {
         return exception(error);
@@ -459,7 +460,9 @@ class _AccessTokenInterceptor extends Interceptor {
       if (!isAuthRequest) {
         if (_isRefreshing) {
           // If already refreshing, queue this request
-          log("Refresh already in progress, queuing request: ${exception.requestOptions.path}");
+          log(
+            "Refresh already in progress, queuing request: ${exception.requestOptions.path}",
+          );
           return _retryRequestOnCompletion(exception, handler);
         }
 
@@ -494,7 +497,11 @@ class _AccessTokenInterceptor extends Interceptor {
                 _resolveQueue(newAccessToken);
 
                 // Retry the current request
-                return _retryRequest(exception.requestOptions, newAccessToken, handler);
+                return _retryRequest(
+                  exception.requestOptions,
+                  newAccessToken,
+                  handler,
+                );
               }
             }
           } catch (e) {
@@ -541,7 +548,9 @@ class _AccessTokenInterceptor extends Interceptor {
       final retryResponse = await ApiHitter.singleton.dio!.fetch(options);
       handler.resolve(retryResponse);
     } catch (e) {
-      handler.reject(e is DioException ? e : DioException(requestOptions: options, error: e));
+      handler.reject(
+        e is DioException ? e : DioException(requestOptions: options, error: e),
+      );
     }
   }
 }

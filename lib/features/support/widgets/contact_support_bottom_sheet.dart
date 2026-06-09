@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/app_modal_sheet.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -21,7 +22,7 @@ class ContactSupportBottomSheet extends StatelessWidget {
     required VoidCallback onCreateTicketTap,
     required VoidCallback onTrackTicketStatusTap,
   }) {
-    return showModalBottomSheet<void>(
+    return showAppModalSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,

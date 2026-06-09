@@ -26,6 +26,7 @@ class Endpoints {
   static const String disableTfa = '/auth/tfa';
   static const String refreshToken = '/auth/refresh-token';
   static const String checkUser = '/auth/check-user';
+  static const String whatsappRedirectNumber = '/auth/whatsapp-redirect-number';
 
   // Client profile endpoints
   static const String getClientProfile = '/client/profile';

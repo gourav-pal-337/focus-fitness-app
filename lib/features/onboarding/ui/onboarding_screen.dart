@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/app_modal_sheet.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
@@ -308,7 +309,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildDetailsToggle() {
     return TextButton(
       onPressed: () {
-        showModalBottomSheet(
+        showAppModalSheet(
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,

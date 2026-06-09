@@ -87,6 +87,20 @@ class WhyFocusSection extends StatelessWidget {
                 'The avatar can help with general fitness guidance, motivation and reminders, but it does not replace professional, medical or emergency advice',
             isDisclaimer: true,
           ),
+
+          SizedBox(height: AppSpacing.md),
+
+          // General disclaimer Card
+          const _BenefitItem(
+            icon: Icons.info_outline_rounded,
+            title: 'General disclaimer',
+            description:
+                'Focus Fusion provides general fitness support and trainer-style '
+                'engagement between sessions. It does not replace your trainer or '
+                'medical advice. It is designed for fitness-related support, not '
+                'open-ended chat or non-fitness advice.',
+            isDisclaimer: true,
+          ),
         ],
       ),
     );

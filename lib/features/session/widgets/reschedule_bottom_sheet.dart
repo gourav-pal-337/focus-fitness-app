@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/app_modal_sheet.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +21,7 @@ class RescheduleBottomSheet extends StatefulWidget {
   final SessionData session;
 
   static Future<void> show(BuildContext context, SessionData session) {
-    return showModalBottomSheet(
+    return showAppModalSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

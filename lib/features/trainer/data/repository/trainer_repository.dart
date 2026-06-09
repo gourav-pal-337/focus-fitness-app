@@ -24,7 +24,7 @@ class TrainerRepository {
   ) async {
     try {
       // Validate referral code length (minimum 4 characters as per API)
-      if (referralCode.trim().length < 4) {
+      if (referralCode.trim().length < 2) {
         return Failure(
           'Referral code must be at least 4 characters long.',
           code: 400,
@@ -48,7 +48,7 @@ class TrainerRepository {
   ) async {
     try {
       // Validate referral code length (minimum 4 characters as per API)
-      if (referralCode.trim().length < 4) {
+      if (referralCode.trim().length < 2) {
         return Failure(
           'Referral code must be at least 4 characters long.',
           code: 400,
@@ -97,7 +97,7 @@ class TrainerRepository {
   ) async {
     try {
       // Validate required fields
-      if (request.referralCode.trim().length < 4) {
+      if (request.referralCode.trim().length < 2) {
         return Failure(
           'Referral code must be at least 4 characters long.',
           code: 400,

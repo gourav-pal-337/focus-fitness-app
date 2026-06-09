@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/app_modal_sheet.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
@@ -108,7 +109,7 @@ class IssueTypeDropdown extends StatelessWidget {
       'Other'
     ];
 
-    showModalBottomSheet(
+    showAppModalSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,

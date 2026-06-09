@@ -10,7 +10,10 @@
       "Bash(flutter pub *)",
       "Bash(curl -s \"https://pub.dev/api/packages/device_calendar\")",
       "Bash(ls -la app/*.jks key.properties)",
-      "Bash(sed -E 's/\\(Password=\\).*/\\\\1***MASKED***/' key.properties)"
+      "Bash(sed -E 's/\\(Password=\\).*/\\\\1***MASKED***/' key.properties)",
+      "Bash(fvm flutter *)",
+      "Bash(python3 -)",
+      "Bash(flutter analyze *)"
     ]
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:focus_fitness/core/widgets/app_modal_sheet.dart';
 
 import 'package:flutter/material.dart';
 import 'package:focus_fitness/core/widgets/show_image.dart';
@@ -26,7 +27,7 @@ class ProfileHeaderSection extends StatelessWidget {
     final picker = ImagePicker();
 
     // Show source selection bottom sheet
-    final ImageSource? source = await showModalBottomSheet<ImageSource>(
+    final ImageSource? source = await showAppModalSheet<ImageSource>(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(

@@ -63,6 +63,7 @@ class TrainerInfo {
     this.preferredName,
     this.profilePhoto,
     this.bioSummary,
+    this.shortSummary,
     this.expertiseAreas,
     this.sessionTypes,
     this.trainingPhilosophy,
@@ -77,6 +78,7 @@ class TrainerInfo {
   final String? preferredName;
   final String? profilePhoto;
   final String? bioSummary;
+  final String? shortSummary;
   final List<String>? expertiseAreas;
   final List<String>? sessionTypes;
   final String? trainingPhilosophy;
@@ -92,6 +94,7 @@ class TrainerInfo {
       preferredName: json['preferredName'] as String?,
       profilePhoto: json['profilePhoto'] as String?,
       bioSummary: json['bioSummary'] as String?,
+      shortSummary: json['shortSummary'] as String?,
       expertiseAreas: json['expertiseAreas'] != null
           ? List<String>.from(json['expertiseAreas'] as List)
           : null,
@@ -117,4 +120,10 @@ class TrainerInfo {
 
   /// Get display name (preferred name or full name)
   String get displayName => preferredName ?? fullName ?? 'Trainer';
+
+  /// Short text shown on trainer cards/lists. Prefers [shortSummary],
+  /// falling back to [bioSummary] when it isn't available.
+  String? get previewSummary => (shortSummary != null && shortSummary!.isNotEmpty)
+      ? shortSummary
+      : bioSummary;
 }

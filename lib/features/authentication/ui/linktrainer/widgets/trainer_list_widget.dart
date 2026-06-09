@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/theme/app_text_styles.dart';
+import '../../../../../core/widgets/expandable_summary_text.dart';
 import '../../../../trainer/data/models/trainer_referral_response_model.dart';
 import '../../../provider/auth_provider.dart';
 import 'trainer_details_sheet.dart';
@@ -26,10 +27,7 @@ class TrainerListWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.background,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: AppColors.grey200,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.grey200, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,25 +41,18 @@ class TrainerListWidget extends StatelessWidget {
               ),
             ),
           ),
-          Divider(
-            height: 1,
-            thickness: 1,
-            color: AppColors.grey200,
-          ),
+          Divider(height: 1, thickness: 1, color: AppColors.grey200),
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             padding: EdgeInsets.zero,
             itemCount: provider.foundTrainers.length,
-            separatorBuilder: (_, __) => Divider(
-              height: 1,
-              thickness: 1,
-              color: AppColors.grey200,
-            ),
+            separatorBuilder: (_, __) =>
+                Divider(height: 1, thickness: 1, color: AppColors.grey200),
             itemBuilder: (context, index) {
               final trainer = provider.foundTrainers[index];
               final isSelected = provider.selectedTrainer?.id == trainer.id;
-              
+
               return _TrainerListItem(
                 trainer: trainer,
                 isSelected: isSelected,
@@ -93,9 +84,14 @@ class _TrainerListItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary.withOpacity(0.08) : Colors.transparent,
+          color: isSelected
+              ? AppColors.primary.withOpacity(0.08)
+              : Colors.transparent,
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -131,33 +127,10 @@ class _TrainerListItem extends StatelessWidget {
                       color: AppColors.grey400,
                     ),
                   ),
-                  if (trainer.bioSummary != null && trainer.bioSummary!.isNotEmpty) ...[
+                  if (trainer.previewSummary != null &&
+                      trainer.previewSummary!.isNotEmpty) ...[
                     SizedBox(height: 4.h),
-                    GestureDetector(
-                      onTap: () {
-                        showTrainerDetails(context, trainer);
-                      },
-                      child: RichText(
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        text: TextSpan(
-                          style: AppTextStyle.text12Regular.copyWith(
-                            color: AppColors.textSecondary,
-                            height: 1.4,
-                          ),
-                          children: [
-                            TextSpan(text: trainer.bioSummary!),
-                            TextSpan(
-                              text: ' Read More',
-                              style: AppTextStyle.text12Regular.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    ExpandableSummaryText(text: trainer.previewSummary!),
                   ],
                 ],
               ),

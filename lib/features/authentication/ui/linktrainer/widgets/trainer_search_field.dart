@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:focus_fitness/core/widgets/show_image.dart';
+import 'package:focus_fitness/core/widgets/expandable_summary_text.dart';
 
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -77,7 +78,7 @@ class _TrainerSearchFieldState extends State<TrainerSearchField> {
     }
 
     // Only search if query is at least 4 characters (as per API requirement)
-    if (query.length < 4) {
+    if (query.length < 2) {
       provider.clearTrainerValidation();
       return;
     }
@@ -336,33 +337,10 @@ class _TrainerDropdownItem extends StatelessWidget {
                       color: AppColors.grey400,
                     ),
                   ),
-                  if (trainer.bioSummary != null && trainer.bioSummary!.isNotEmpty) ...[
+                  if (trainer.previewSummary != null &&
+                      trainer.previewSummary!.isNotEmpty) ...[
                     SizedBox(height: 4.h),
-                    GestureDetector(
-                      onTap: () {
-                        showTrainerDetails(context, trainer);
-                      },
-                      child: RichText(
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        text: TextSpan(
-                          style: AppTextStyle.text12Regular.copyWith(
-                            color: AppColors.textSecondary,
-                            height: 1.4,
-                          ),
-                          children: [
-                            TextSpan(text: trainer.bioSummary!),
-                            TextSpan(
-                              text: ' Read More',
-                              style: AppTextStyle.text12Regular.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                    ExpandableSummaryText(text: trainer.previewSummary!),
                   ],
                 ],
               ),
@@ -386,7 +364,11 @@ class _TrainerDropdownItem extends StatelessWidget {
                 ),
                 if (isSelected) ...[
                   SizedBox(width: AppSpacing.xs),
-                  Icon(Icons.check_circle, color: AppColors.primary, size: 24.sp),
+                  Icon(
+                    Icons.check_circle,
+                    color: AppColors.primary,
+                    size: 24.sp,
+                  ),
                 ],
               ],
             ),

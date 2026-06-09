@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/app_modal_sheet.dart';
 import 'package:focus_fitness/core/widgets/show_image.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -513,7 +514,7 @@ class SessionBottomSheetContent extends StatelessWidget {
     String countryCode = '+44';
     String countryFlag = '🇬🇧';
 
-    showModalBottomSheet(
+    showAppModalSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

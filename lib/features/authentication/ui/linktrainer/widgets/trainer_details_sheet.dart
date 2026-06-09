@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/app_modal_sheet.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
@@ -11,7 +12,7 @@ import '../../../provider/auth_provider.dart';
 
 /// Helper function to show trainer details bottom sheet
 void showTrainerDetails(BuildContext context, TrainerInfo trainer) {
-  showModalBottomSheet(
+  showAppModalSheet(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,

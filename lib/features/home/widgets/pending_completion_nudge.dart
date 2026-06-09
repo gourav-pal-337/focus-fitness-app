@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focus_fitness/core/widgets/app_modal_sheet.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:focus_fitness/core/theme/app_colors.dart';
@@ -106,7 +107,7 @@ class PendingCompletionNudge extends StatelessWidget {
     BuildContext context,
     BookingModel booking,
   ) {
-    showModalBottomSheet(
+    showAppModalSheet(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
