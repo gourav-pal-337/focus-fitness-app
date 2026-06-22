@@ -4,6 +4,7 @@ import 'package:focus_fitness/features/profile/provider/client_profile_provider.
 import 'package:go_router/go_router.dart';
 
 import 'package:provider/provider.dart';
+import '../../../core/provider/app_features_provider.dart';
 import '../../../core/provider/user_provider.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -53,14 +54,17 @@ class SupportSettingsSection extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _SettingsMenuItem(
-                icon: Icons.notifications_outlined,
-                label: 'Notifications',
-                onTap: () {
-                  context.push(NotificationsRoute.path);
-                },
-              ),
-              Divider(color: AppColors.grey200, thickness: 1, height: 0),
+              // Notifications — hidden when the notifications feature is disabled.
+              if (context.watch<AppFeaturesProvider>().isNotificationsEnabled) ...[
+                _SettingsMenuItem(
+                  icon: Icons.notifications_outlined,
+                  label: 'Notifications',
+                  onTap: () {
+                    context.push(NotificationsRoute.path);
+                  },
+                ),
+                Divider(color: AppColors.grey200, thickness: 1, height: 0),
+              ],
               _SettingsMenuItem(
                 icon: Icons.privacy_tip_outlined,
                 label: 'Privacy & Security',

@@ -28,7 +28,15 @@ class FeatureFlagWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (isEnabled) return child;
+    // Disabled features are hidden entirely from the UI.
+    return const SizedBox.shrink();
+  }
 
+  // Preserved (currently unused): the previous "Coming Soon" overlay shown for
+  // disabled features. Disabled features are now hidden via the
+  // SizedBox.shrink above; this is kept for potential future use.
+  // ignore: unused_element
+  Widget _buildComingSoonOverlay(BuildContext context) {
     return Stack(
       children: [
         // The background content remains visible but non-interactive

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/constants/app_assets.dart';
+import '../../../core/provider/app_features_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
@@ -18,6 +20,36 @@ class DashboardBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final features = context.watch<AppFeaturesProvider>().features;
+
+    // Hide a tab entirely when none of its features are enabled. Default to
+    // showing if config isn't loaded yet (it's loaded synchronously, so this
+    // is just a safety fallback). Branch indices are preserved.
+    final showWorkouts =
+        features == null ||
+        (features.workouts.workoutProgress ||
+            features.workouts.exerciseLibrary ||
+            features.workouts.activeWorkoutLogging ||
+            features.workouts.workoutManuals ||
+            features.workouts.sessionLogs);
+    final showSubscriptions =
+        features == null ||
+        (features.finance.subscriptionOffers ||
+            features.finance.payments ||
+            features.finance.paymentHistory);
+    final showHistory =
+        features == null ||
+        (features.bookings.sessionManagement ||
+            features.bookings.sessionSummaries ||
+            features.bookings.ratingFeedback);
+    // Privacy Policy & Terms of Use remain reachable from Profile, so the
+    // Support tab can be hidden when no support feature is enabled.
+    final showSupport =
+        features == null ||
+        (features.support.supportTickets ||
+            features.support.faqSystem ||
+            features.support.notifications);
+
     return Container(
       decoration: BoxDecoration(
         color: AppColors.background,
@@ -51,34 +83,38 @@ class DashboardBottomNavigation extends StatelessWidget {
                     selectedIndex: selectedIndex,
                     onTap: onTap,
                   ),
-                  _NavItem(
-                    iconPath: AppAssets.workouts,
-                    label: 'Workouts',
-                    index: 1,
-                    selectedIndex: selectedIndex,
-                    onTap: onTap,
-                  ),
-                  _NavItem(
-                    iconPath: AppAssets.subscriptions,
-                    label: 'Subscriptions',
-                    index: 2,
-                    selectedIndex: selectedIndex,
-                    onTap: onTap,
-                  ),
-                  _NavItem(
-                    iconPath: AppAssets.support,
-                    label: 'Support',
-                    index: 3,
-                    selectedIndex: selectedIndex,
-                    onTap: onTap,
-                  ),
-                  _NavItem(
-                    iconPath: AppAssets.sessionHistory,
-                    label: 'History',
-                    index: 4,
-                    selectedIndex: selectedIndex,
-                    onTap: onTap,
-                  ),
+                  if (showWorkouts)
+                    _NavItem(
+                      iconPath: AppAssets.workouts,
+                      label: 'Workouts',
+                      index: 1,
+                      selectedIndex: selectedIndex,
+                      onTap: onTap,
+                    ),
+                  if (showSubscriptions)
+                    _NavItem(
+                      iconPath: AppAssets.subscriptions,
+                      label: 'Subscriptions',
+                      index: 2,
+                      selectedIndex: selectedIndex,
+                      onTap: onTap,
+                    ),
+                  if (showSupport)
+                    _NavItem(
+                      iconPath: AppAssets.support,
+                      label: 'Support',
+                      index: 3,
+                      selectedIndex: selectedIndex,
+                      onTap: onTap,
+                    ),
+                  if (showHistory)
+                    _NavItem(
+                      iconPath: AppAssets.sessionHistory,
+                      label: 'History',
+                      index: 4,
+                      selectedIndex: selectedIndex,
+                      onTap: onTap,
+                    ),
                 ],
               ),
             ),

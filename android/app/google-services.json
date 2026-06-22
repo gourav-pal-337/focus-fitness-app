@@ -1,92 +1,56 @@
 {
   "project_info": {
-    "project_number": "340118958004",
-    "project_id": "focus-fitness-90f35",
-    "storage_bucket": "focus-fitness-90f35.firebasestorage.app"
+    "project_number": "419558554401",
+    "project_id": "focus-fusion-notification",
+    "storage_bucket": "focus-fusion-notification.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:340118958004:android:209b6b6deaba20e9c68ce1",
-        "android_client_info": {
-          "package_name": "com.example.focus_fitness"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "340118958004-rd6csopfahv3bjcqr5lefn65utj1irn3.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.focus_fitness",
-            "certificate_hash": "bf5df3dbd874acf7d61e3aef4b9f05cf1964571a"
-          }
-        },
-        {
-          "client_id": "340118958004-6ljnc8n2ugvpn5ojm978ceopmc6ip068.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAtoyAjO6Ym_EtjbKYZPrXFhvVnQFydYKA"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "340118958004-6ljnc8n2ugvpn5ojm978ceopmc6ip068.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "340118958004-llge5dcl0jt1rnim22ikil4gfu9c7gr1.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.focusfitness.fit"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:340118958004:android:ce17ac2b86e03ff2c68ce1",
+        "mobilesdk_app_id": "1:419558554401:android:9efc1a1b16b88ecb8fdc60",
         "android_client_info": {
           "package_name": "com.focusfitness.fit"
         }
       },
       "oauth_client": [
         {
-          "client_id": "340118958004-mqa1t48ohr4646jitfeo1vqcgv7b35fd.apps.googleusercontent.com",
+          "client_id": "419558554401-e4sstf9vtg8nd3mgjjks22kq0l1f4apo.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.focusfitness.fit",
-            "certificate_hash": "bf5df3dbd874acf7d61e3aef4b9f05cf1964571a"
+            "certificate_hash": "f7d86aad4840987299556820515a42cb6a0e58e7"
           }
         },
         {
-          "client_id": "340118958004-6ljnc8n2ugvpn5ojm978ceopmc6ip068.apps.googleusercontent.com",
+          "client_id": "419558554401-t9esf2iuv6kdh9b8o9tkn32cnv562e88.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.focusfitness.fit",
+            "certificate_hash": "a11d5c479494ca7a60bba56a60435b44113a9ef9"
+          }
+        },
+        {
+          "client_id": "419558554401-q7502meslkmnk572aaablkg5d9rpq9te.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAtoyAjO6Ym_EtjbKYZPrXFhvVnQFydYKA"
+          "current_key": "AIzaSyA2ZRNcgFWvLQRIg4iJICnlCsDlWBOy0Zs"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "340118958004-6ljnc8n2ugvpn5ojm978ceopmc6ip068.apps.googleusercontent.com",
+              "client_id": "419558554401-q7502meslkmnk572aaablkg5d9rpq9te.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "340118958004-llge5dcl0jt1rnim22ikil4gfu9c7gr1.apps.googleusercontent.com",
+              "client_id": "419558554401-e708jbphftuhc28bltbgkf2lasr547t2.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.focusfitness.fit"
+                "bundle_id": "com.focusfitness.fitt"
               }
             }
           ]

@@ -177,7 +177,10 @@ class _TrainerProfileScreenState extends State<TrainerProfileScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: _BookSessionButton(),
+      bottomNavigationBar:
+          context.watch<AppFeaturesProvider>().isSessionSchedulingEnabled
+          ? _BookSessionButton()
+          : null,
     );
   }
 }
@@ -204,10 +207,14 @@ class _ProfileContent extends StatelessWidget {
             child: const TrainerSummarySection(),
           ),
         ],
-        SizedBox(height: AppSpacing.xl),
-        const DateSelector(),
-        SizedBox(height: AppSpacing.xl),
-        const TimeSlotSelector(),
+        // Booking (date/time selection) is hidden when session scheduling
+        // is disabled.
+        if (context.watch<AppFeaturesProvider>().isSessionSchedulingEnabled) ...[
+          SizedBox(height: AppSpacing.xl),
+          const DateSelector(),
+          SizedBox(height: AppSpacing.xl),
+          const TimeSlotSelector(),
+        ],
       ],
     );
   }

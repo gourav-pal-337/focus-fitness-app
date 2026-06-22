@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -677,7 +676,9 @@ class AuthProvider extends ChangeNotifier {
         success: (response) async {
           _registerResponse = response;
           // Since we're now registering AFTER verification, it's safe to store tokens
-          if (response.accessToken != null || response.tokens?.accessToken != null || response.token != null) {
+          if (response.accessToken != null ||
+              response.tokens?.accessToken != null ||
+              response.token != null) {
             await _storeRegisterTokens(response);
           }
           _setAuthState(AuthState.registerSuccess);
@@ -695,7 +696,10 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> sendEmailOtp(String email, {String purpose = 'verification'}) async {
+  Future<bool> sendEmailOtp(
+    String email, {
+    String purpose = 'verification',
+  }) async {
     _isEmailOtpLoading = true;
     _errorMessage = '';
     notifyListeners();
@@ -724,12 +728,20 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> verifyEmailOtp(String email, String otp, {String purpose = 'verification'}) async {
+  Future<void> verifyEmailOtp(
+    String email,
+    String otp, {
+    String purpose = 'verification',
+  }) async {
     _setAuthState(AuthState.loading);
     _errorMessage = '';
 
     try {
-      final result = await _repository.verifyEmailOtp(email, otp, purpose: purpose);
+      final result = await _repository.verifyEmailOtp(
+        email,
+        otp,
+        purpose: purpose,
+      );
       await result.when(
         success: (response) async {
           _loginResponse = response;
@@ -748,13 +760,21 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> sendPhoneOtp(String countryCode, String phone, {String purpose = 'verification'}) async {
+  Future<bool> sendPhoneOtp(
+    String countryCode,
+    String phone, {
+    String purpose = 'verification',
+  }) async {
     _isPhoneOtpLoading = true;
     _errorMessage = '';
     notifyListeners();
 
     try {
-      final result = await _repository.sendPhoneOtp(countryCode, phone, purpose: purpose);
+      final result = await _repository.sendPhoneOtp(
+        countryCode,
+        phone,
+        purpose: purpose,
+      );
       _isPhoneOtpLoading = false;
       return result.when(
         success: (response) async {
@@ -787,7 +807,12 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = '';
 
     try {
-      final result = await _repository.verifyPhoneOtp(countryCode, phone, otp, purpose: purpose);
+      final result = await _repository.verifyPhoneOtp(
+        countryCode,
+        phone,
+        otp,
+        purpose: purpose,
+      );
       await result.when(
         success: (response) async {
           _loginResponse = response;
@@ -878,16 +903,30 @@ class AuthProvider extends ChangeNotifier {
     _tfaRequired = false;
 
     try {
-      final credential = await _socialAuthService.signInWithApple();
-      if (credential != null && credential.user != null) {
-        final token = await credential.user!.getIdToken();
+      final appleResult = await _socialAuthService.signInWithApple();
+
+      if (appleResult != null && appleResult.userCredential.user != null) {
+        final user = appleResult.userCredential.user!;
+        final token = await user.getIdToken();
         if (token != null) {
           final request = FirebaseLoginRequestModel(
             idToken: token,
             role: 'client',
-            email: credential.user!.email,
-            fullName: credential.user!.displayName,
+            // Use the name/email Apple provided on first sign-in so we never
+            // have to prompt the user to re-enter them.
+            email: appleResult.email ?? user.email,
+            fullName: appleResult.fullName ?? user.displayName,
+            forename: appleResult.forename,
+            surname: appleResult.surname,
             provider: 'apple',
+          );
+
+          debugPrint(
+            '[AppleSignIn] sending to backend -> '
+            'fullName: ${request.fullName}, '
+            'forename: ${request.forename}, '
+            'surname: ${request.surname}, '
+            'email: ${request.email}',
           );
 
           final result = await _repository.firebaseLogin(request);
@@ -913,8 +952,8 @@ class AuthProvider extends ChangeNotifier {
           _setAuthState(AuthState.error);
         }
       } else {
-        _errorMessage = "Apple Sign In failed";
-        _setAuthState(AuthState.error);
+        // appleResult is null when the user cancelled the sign-in sheet.
+        _setAuthState(AuthState.idle);
       }
     } catch (e) {
       _errorMessage = e.toString().replaceAll('Exception: ', '');

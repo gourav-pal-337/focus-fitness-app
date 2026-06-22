@@ -41,84 +41,94 @@ class SupportScreen extends StatelessWidget {
                     //   textAlign: TextAlign.center,
                     // ),
                     // SizedBox(height: AppSpacing.xl),
-                    SupportOptionItem(
-                      icon: Icons.help_outline,
-                      title: 'FAQs',
-                      description: 'View frequently asked questions',
-                      onTap: () {
-                        if (context
-                            .read<AppFeaturesProvider>()
-                            .isFaqSystemEnabled) {
-                          context.push(FaqsRoute.path);
-                        } else {
-                          FeatureFlagUtils.showFeatureDisabledBottomSheet(
-                            context,
-                            title: 'Coming Soon',
-                            message:
-                                'FAQs are currently under maintenance. Please check back later.',
-                          );
-                        }
-                      },
-                    ),
-                    Divider(color: AppColors.grey200, thickness: 1, height: 0),
-                    SupportOptionItem(
-                      icon: Icons.add_comment,
-                      title: 'Contact Support',
-                      description: 'Create Support Ticket',
-                      onTap: () {
-                        if (context
-                            .read<AppFeaturesProvider>()
-                            .isSupportTicketsEnabled) {
-                          context.push(ContactSupportRoute.path);
-                        } else {
-                          FeatureFlagUtils.showFeatureDisabledBottomSheet(
-                            context,
-                            title: 'Coming Soon',
-                            message:
-                                'Support tickets are currently under maintenance. Please check back later.',
-                          );
-                        }
-                      },
-                    ),
-
-                    // Divider(color: AppColors.grey200, thickness: 1, height: 0),
-                    // SupportOptionItem(
-                    //   icon: Icons.receipt_long_outlined,
-                    //   title: 'Billing & Subscriptions',
-                    //   description: 'Billing & subscription settings.',
-                    //   onTap: () {
-                    //     context.go(SubscriptionsRoute.path);
-                    //   },
-                    // ),
-                    Divider(color: AppColors.grey200, thickness: 1, height: 0),
-                    SupportOptionItem(
-                      icon: Icons.check_circle_outline,
-                      title: 'Track Ticket Status',
-                      description: 'Track your ticket status here.',
-                      onTap: () {
-                        if (context
-                            .read<AppFeaturesProvider>()
-                            .isSupportTicketsEnabled) {
-                          ContactSupportBottomSheet.show(
-                            context: context,
-                            onCreateTicketTap: () {
-                              context.push(ContactSupportRoute.path);
-                            },
-                            onTrackTicketStatusTap: () {
-                              context.push(TrackTicketRoute.path);
-                            },
-                          );
-                        } else {
-                          FeatureFlagUtils.showFeatureDisabledBottomSheet(
-                            context,
-                            title: 'Coming Soon',
-                            message:
-                                'Support tickets are currently under maintenance. Please check back later.',
-                          );
-                        }
-                      },
-                    ),
-                    Divider(color: AppColors.grey200, thickness: 1, height: 0),
+                    // FAQs — hidden when the FAQ system is disabled.
+                    if (context.watch<AppFeaturesProvider>().isFaqSystemEnabled) ...[
+                      SupportOptionItem(
+                        icon: Icons.help_outline,
+                        title: 'FAQs',
+                        description: 'View frequently asked questions',
+                        onTap: () {
+                          if (context
+                              .read<AppFeaturesProvider>()
+                              .isFaqSystemEnabled) {
+                            context.push(FaqsRoute.path);
+                          } else {
+                            FeatureFlagUtils.showFeatureDisabledBottomSheet(
+                              context,
+                              title: 'Coming Soon',
+                              message:
+                                  'FAQs are currently under maintenance. Please check back later.',
+                            );
+                          }
+                        },
+                      ),
+                      Divider(
+                        color: AppColors.grey200,
+                        thickness: 1,
+                        height: 0,
+                      ),
+                    ],
+                    // Support tickets — hidden when ticketing is disabled.
+                    if (context
+                        .watch<AppFeaturesProvider>()
+                        .isSupportTicketsEnabled) ...[
+                      SupportOptionItem(
+                        icon: Icons.add_comment,
+                        title: 'Contact Support',
+                        description: 'Create Support Ticket',
+                        onTap: () {
+                          if (context
+                              .read<AppFeaturesProvider>()
+                              .isSupportTicketsEnabled) {
+                            context.push(ContactSupportRoute.path);
+                          } else {
+                            FeatureFlagUtils.showFeatureDisabledBottomSheet(
+                              context,
+                              title: 'Coming Soon',
+                              message:
+                                  'Support tickets are currently under maintenance. Please check back later.',
+                            );
+                          }
+                        },
+                      ),
+                      Divider(
+                        color: AppColors.grey200,
+                        thickness: 1,
+                        height: 0,
+                      ),
+                      SupportOptionItem(
+                        icon: Icons.check_circle_outline,
+                        title: 'Track Ticket Status',
+                        description: 'Track your ticket status here.',
+                        onTap: () {
+                          if (context
+                              .read<AppFeaturesProvider>()
+                              .isSupportTicketsEnabled) {
+                            ContactSupportBottomSheet.show(
+                              context: context,
+                              onCreateTicketTap: () {
+                                context.push(ContactSupportRoute.path);
+                              },
+                              onTrackTicketStatusTap: () {
+                                context.push(TrackTicketRoute.path);
+                              },
+                            );
+                          } else {
+                            FeatureFlagUtils.showFeatureDisabledBottomSheet(
+                              context,
+                              title: 'Coming Soon',
+                              message:
+                                  'Support tickets are currently under maintenance. Please check back later.',
+                            );
+                          }
+                        },
+                      ),
+                      Divider(
+                        color: AppColors.grey200,
+                        thickness: 1,
+                        height: 0,
+                      ),
+                    ],
                     SupportOptionItem(
                       icon: Icons.description_outlined,
                       title: 'Terms of Use',

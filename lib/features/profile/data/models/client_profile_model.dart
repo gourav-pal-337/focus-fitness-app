@@ -61,13 +61,29 @@ class ClientProfileModel {
   final String? timezone;
 
   factory ClientProfileModel.fromJson(Map<String, dynamic> json) {
+    final fullName = json['fullName'] as String? ?? '';
+    String? forename = json['forename'] as String?;
+    String? surname = json['surname'] as String?;
+
+    if ((forename == null || forename.trim().isEmpty) &&
+        (surname == null || surname.trim().isEmpty) &&
+        fullName.trim().isNotEmpty) {
+      final parts = fullName.trim().split(RegExp(r'\s+'));
+      if (parts.isNotEmpty) {
+        forename = parts[0];
+        if (parts.length > 1) {
+          surname = parts.sublist(1).join(' ');
+        }
+      }
+    }
+
     return ClientProfileModel(
       id: json['_id'] as String? ?? json['id'] as String? ?? '',
       trainerId: json['trainerId'] as String?,
       clientUserId: json['clientUserId'] as String? ?? '',
-      fullName: json['fullName'] as String? ?? '',
-      forename: json['forename'] as String?,
-      surname: json['surname'] as String?,
+      fullName: fullName,
+      forename: forename,
+      surname: surname,
       preferredName: json['preferredName'] as String?,
       dateOfBirth: json['dob'] as String? ?? json['dateOfBirth'] as String?,
       age: int.parse(json['age'] as String? ?? '0'),
@@ -99,7 +115,8 @@ class ClientProfileModel {
           : null,
       createdAt: json['createdAt'] as String? ?? '',
       updatedAt: json['updatedAt'] as String? ?? '',
-      profilePicture: json['profilePicture'] as String? ?? json['profilePhoto'] as String?,
+      profilePicture:
+          json['profilePicture'] as String? ?? json['profilePhoto'] as String?,
       timezone: json['timezone'] as String?,
     );
   }

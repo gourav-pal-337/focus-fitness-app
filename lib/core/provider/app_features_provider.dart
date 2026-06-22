@@ -1,47 +1,36 @@
 import 'package:flutter/foundation.dart';
-import '../../features/authentication/data/repository/auth_repository.dart';
+import '../config/app_features_config.dart';
 import '../../features/trainer/data/models/app_features_model.dart';
-import '../../features/trainer/data/repository/system_settings_repository.dart';
 
+/// Provides app feature flags from the build-time [kAppFeaturesConfig].
+///
+/// Flags are shipped inside the binary (no backend fetch), so what App Review
+/// sees is exactly what ships. To enable/disable a module, edit
+/// `lib/core/config/app_features_config.dart` and release a new build.
 class AppFeaturesProvider extends ChangeNotifier {
-  final SystemSettingsRepository _repository = SystemSettingsRepository();
-
-  AppFeatures? _features;
-  bool _isLoading = false;
-  String? _error;
+  // Initialized synchronously from the local config so flags are available
+  // immediately on first frame — no loading state, no network round-trip.
+  AppFeatures? _features = AppFeatures.fromJson(kAppFeaturesConfig);
 
   AppFeatures? get features => _features;
-  bool get isLoading => _isLoading;
-  String? get error => _error;
 
-  /// Fetch all app features from backend
+  // No async loading or backend errors with a local config; kept for
+  // call-site compatibility.
+  bool get isLoading => false;
+  String? get error => null;
+
+  /// Loads feature flags from the local build-time config.
+  ///
+  /// Kept as a `Future` so existing call sites (e.g. `..fetchFeatures()`)
+  /// continue to work unchanged. Performs no network I/O.
   Future<void> fetchFeatures() async {
-    print("Fetching app features...");
-    _isLoading = true;
-    _error = null;
+    _features = AppFeatures.fromJson(kAppFeaturesConfig);
     notifyListeners();
-
-    final result = await _repository.getAppFeatures();
-
-    result.when(
-      success: (response) async {
-        _features = response.features;
-        _isLoading = false;
-        notifyListeners();
-      },
-      failure: (message, code) {
-        print("Error fetching app features: $message (code: $code)");
-        _error = message;
-        _isLoading = false;
-        notifyListeners();
-      },
-    );
   }
 
   /// Check if a specific feature is enabled
   bool isEnabled(bool Function(AppFeatures) selector) {
-    if (_features == null)
-      return true; // Default to true if not loaded yet or fail-safe
+    if (_features == null) return true;
     return selector(_features!);
   }
 
@@ -56,6 +45,7 @@ class AppFeaturesProvider extends ChangeNotifier {
       _features?.finance.subscriptionOffers ?? true;
   bool get isSupportTicketsEnabled => _features?.support.supportTickets ?? true;
   bool get isFaqSystemEnabled => _features?.support.faqSystem ?? true;
+  bool get isNotificationsEnabled => _features?.support.notifications ?? true;
 
   // Workout features
   bool get isWorkoutManualsEnabled => _features?.workouts.workoutManuals ?? true;

@@ -4,8 +4,9 @@ class Endpoints {
   static const String stageUrl =
       "https://api-stage.focusfusion.co.uk/api/mobile";
   static const String devUrl = "https://focus-fusion-api.applore.in/api/mobile";
-  static const String localUrl = "http://localhost:4000/api/mobile";
-  // 'https://martha-insightful-genevie.ngrok-free.dev/api/mobile'; //gourav dev
+  static const String localUrl =
+      //    "http://localhost:4000/api/mobile";
+      'https://martha-insightful-genevie.ngrok-free.dev/api/mobile'; //gourav dev
 
   // TODO IMPORTANT!!!: always check baseUrl before deployment
   static const String baseUrl = prodUrl;

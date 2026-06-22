@@ -86,7 +86,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Consumer2<ClientProfileProvider, LinkedTrainerProvider>(
               builder: (context, profileProvider, trainerProvider, _) {
-                final isRefreshing = profileProvider.isLoading || trainerProvider.isLoading;
+                final isRefreshing =
+                    profileProvider.isLoading || trainerProvider.isLoading;
                 return CustomAppBar(
                   title: 'Profile',
                   actions: [
@@ -123,14 +124,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 context.push(DelinkTrainerRoute.path);
                               },
                             ),
-                            SizedBox(height: AppSpacing.lg),
-                            SubscriptionSection(
-                              plan: 'Premium Trainer Access',
-                              nextBilling: '22 December 2025',
-                              onManagePlans: () {
-                                // TODO: Navigate to manage plans screen
-                              },
-                            ),
+                            // SizedBox(height: AppSpacing.lg),
+                            // SubscriptionSection(
+                            //   plan: 'Premium Trainer Access',
+                            //   nextBilling: '22 December 2025',
+                            //   onManagePlans: () {
+                            //     // TODO: Navigate to manage plans screen
+                            //   },
+                            // ),
                             SizedBox(height: AppSpacing.lg),
                             SupportSettingsSection(
                               onLanguagePreferencesTap: () {

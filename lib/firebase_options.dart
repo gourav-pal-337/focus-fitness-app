@@ -57,21 +57,21 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAtoyAjO6Ym_EtjbKYZPrXFhvVnQFydYKA',
-    appId: '1:340118958004:android:ce17ac2b86e03ff2c68ce1',
-    messagingSenderId: '340118958004',
-    projectId: 'focus-fitness-90f35',
-    storageBucket: 'focus-fitness-90f35.firebasestorage.app',
+    apiKey: 'AIzaSyA2ZRNcgFWvLQRIg4iJICnlCsDlWBOy0Zs',
+    appId: '1:419558554401:android:9efc1a1b16b88ecb8fdc60',
+    messagingSenderId: '419558554401',
+    projectId: 'focus-fusion-notification',
+    storageBucket: 'focus-fusion-notification.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCWk9LC4zuUoK3qj3ZHhTe1D3MZXKuCmKw',
-    appId: '1:340118958004:ios:03dab9212fef1755c68ce1',
-    messagingSenderId: '340118958004',
-    projectId: 'focus-fitness-90f35',
-    storageBucket: 'focus-fitness-90f35.firebasestorage.app',
-    androidClientId: '340118958004-mqa1t48ohr4646jitfeo1vqcgv7b35fd.apps.googleusercontent.com',
-    iosClientId: '340118958004-d7m1hu31op68ejbhseo0d8gc6o0bruec.apps.googleusercontent.com',
+    apiKey: 'AIzaSyBnjlPWdDfLzwkJLU-er9hXE1ciys9Gtdk',
+    appId: '1:419558554401:ios:ee8653a6157b31358fdc60',
+    messagingSenderId: '419558554401',
+    projectId: 'focus-fusion-notification',
+    storageBucket: 'focus-fusion-notification.firebasestorage.app',
+    androidClientId: '419558554401-e4sstf9vtg8nd3mgjjks22kq0l1f4apo.apps.googleusercontent.com',
+    iosClientId: '419558554401-e708jbphftuhc28bltbgkf2lasr547t2.apps.googleusercontent.com',
     iosBundleId: 'com.focusfitness.fitt',
   );
 

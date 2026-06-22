@@ -5,6 +5,8 @@ class FirebaseLoginRequestModel {
     this.role = 'client',
     this.email,
     this.fullName,
+    this.forename,
+    this.surname,
     required this.provider,
   });
 
@@ -12,6 +14,8 @@ class FirebaseLoginRequestModel {
   final String role;
   final String? email;
   final String? fullName;
+  final String? forename;
+  final String? surname;
   final String provider; // 'google' or 'apple'
 
   Map<String, dynamic> toJson() {
@@ -20,6 +24,8 @@ class FirebaseLoginRequestModel {
       'role': role,
       'email': email,
       'fullName': fullName,
+      'forename': forename,
+      'surname': surname,
       'provider': provider,
     };
   }

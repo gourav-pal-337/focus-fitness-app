@@ -13,7 +13,14 @@
       "Bash(sed -E 's/\\(Password=\\).*/\\\\1***MASKED***/' key.properties)",
       "Bash(fvm flutter *)",
       "Bash(python3 -)",
-      "Bash(flutter analyze *)"
+      "Bash(flutter analyze *)",
+      "Bash(sed -n '45,75p' lib/features/session/ui/session_history_screen.dart)",
+      "Bash(sed -n '40,70p' lib/features/workouts/ui/workouts_screen.dart)",
+      "Bash(sed -n '270,305p' lib/features/home/ui/home_screen.dart)",
+      "Bash(sed -n '165,200p' lib/features/home/widgets/trainer_connection_card.dart)",
+      "Bash(sed -n '400,445p' lib/features/trainer/ui/trainer_profile_screen.dart)",
+      "Bash(sed -n '455,500p' lib/core/widgets/session_popup/session_popup_widget.dart)",
+      "Bash(sed -n '45,80p' lib/features/session/widgets/session_card.dart)"
     ]
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 /// Response model for email registration
 class RegisterResponseModel {
   RegisterResponseModel({
@@ -100,15 +102,34 @@ class UserModel {
   final bool? tfaVerified;
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    log('user model jsonn :: $json');
+    final fullName = json['fullName'] as String?;
+    String? forename = json['forename'] as String?;
+    String? surname = json['surname'] as String?;
+
+    if ((forename == null || forename.trim().isEmpty) &&
+        (surname == null || surname.trim().isEmpty) &&
+        fullName != null &&
+        fullName.trim().isNotEmpty) {
+      final parts = fullName.trim().split(RegExp(r'\s+'));
+      if (parts.isNotEmpty) {
+        forename = parts[0];
+        if (parts.length > 1) {
+          surname = parts.sublist(1).join(' ');
+        }
+      }
+    }
+
     return UserModel(
       id: json['id'] as String? ?? '',
       role: json['role'] as String? ?? '',
-      fullName: json['fullName'] as String?,
-      forename: json['forename'] as String?,
-      surname: json['surname'] as String?,
+      fullName: fullName,
+      forename: forename,
+      surname: surname,
       gender: json['gender'] as String?,
       // dob: json['dob'] as String?,
-      profilePicture: json['profilePicture'] as String? ?? json['profilePhoto'] as String?,
+      profilePicture:
+          json['profilePicture'] as String? ?? json['profilePhoto'] as String?,
       email: json['email'] as String?,
       phone: json['phone'] as String?,
       phoneCountry: json['phoneCountry'] as String?,
@@ -156,6 +177,7 @@ class UserModel {
       'tfaVerified': tfaVerified,
     };
   }
+
   UserModel copyWith({
     String? id,
     String? dob,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:focus_fitness/core/widgets/show_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:focus_fitness/core/provider/app_features_provider.dart';
 import 'package:focus_fitness/core/provider/user_provider.dart';
 
 import 'package:focus_fitness/features/profile/provider/client_profile_provider.dart';
@@ -20,11 +21,28 @@ class PinnedHomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<ClientProfileProvider, UserProvider, LinkedTrainerProvider>(
+    return Consumer3<
+      ClientProfileProvider,
+      UserProvider,
+      LinkedTrainerProvider
+    >(
       builder: (context, authProv, userProvider, trainerProvider, _) {
         final user = userProvider.user;
-        final isRefreshing = (userProvider.isLoading && user != null) ||
+        final isRefreshing =
+            (userProvider.isLoading && user != null) ||
             (trainerProvider.isLoading && trainerProvider.trainer != null);
+
+        final displayName =
+            [
+              user?.forename,
+              authProv.profile?.forename,
+              user?.fullName,
+              authProv.profile?.fullName,
+            ].firstWhere(
+              (name) => name != null && name.trim().isNotEmpty,
+              orElse: () => '',
+            ) ??
+            '';
 
         return Container(
           color: AppColors.background,
@@ -48,11 +66,7 @@ class PinnedHomeHeader extends StatelessWidget {
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      user?.forename ??
-                          authProv.profile?.forename ??
-                          user?.fullName ??
-                          authProv.profile?.fullName ??
-                          '',
+                      displayName,
                       style: AppTextStyle.text24SemiBold.copyWith(
                         color: AppColors.textPrimary,
                       ),
@@ -65,22 +79,26 @@ class PinnedHomeHeader extends StatelessWidget {
               Row(
                 children: [
                   BackgroundRefreshIndicator(isRefreshing: isRefreshing),
-                  GestureDetector(
-                    onTap: () {
-                      context.push(NotificationsRoute.path);
-                    },
-                    child: Badge(
-                      isLabelVisible: false,
-                      backgroundColor: AppColors.primary,
-                      child: Icon(
-                        Icons.notifications_outlined,
-                        size: 24.sp,
-                        color: AppColors.textPrimary,
+                  // Notification bell — hidden when notifications are disabled.
+                  if (context
+                      .watch<AppFeaturesProvider>()
+                      .isNotificationsEnabled) ...[
+                    GestureDetector(
+                      onTap: () {
+                        context.push(NotificationsRoute.path);
+                      },
+                      child: Badge(
+                        isLabelVisible: false,
+                        backgroundColor: AppColors.primary,
+                        child: Icon(
+                          Icons.notifications_outlined,
+                          size: 24.sp,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
-                  ),
-
-                  SizedBox(width: 16.w),
+                    SizedBox(width: 16.w),
+                  ],
                   // CircleAvatar(
                   //   radius: 20.r,
                   //   backgroundColor: AppColors.grey200,

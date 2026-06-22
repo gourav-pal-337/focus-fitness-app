@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:focus_fitness/core/widgets/show_image.dart';
-import 'package:focus_fitness/features/trainer/data/models/trainer_referral_response_model.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -91,6 +89,9 @@ class TrainerConnectionCard extends StatelessWidget {
         final relationshipStatus =
             provider.profile?.relationshipStatus ?? 'pending';
         final isLive = relationshipStatus == 'live';
+        final isBookingEnabled = context
+            .watch<AppFeaturesProvider>()
+            .isSessionSchedulingEnabled;
 
         return Container(
           padding: EdgeInsets.all(AppSpacing.md),
@@ -101,6 +102,7 @@ class TrainerConnectionCard extends StatelessWidget {
           child: Column(
             children: [
               GestureDetector(
+                behavior: HitTestBehavior.opaque,
                 onTap: () {
                   final trainerId = trainer.id;
                   if (trainerId.isNotEmpty) {
@@ -170,12 +172,15 @@ class TrainerConnectionCard extends StatelessWidget {
                 ),
               ),
               if (isLive) ...[
-                SizedBox(height: AppSpacing.md),
+                if (isBookingEnabled) SizedBox(height: AppSpacing.md),
                 Builder(
                   builder: (context) {
-                    final isBookingEnabled = context.watch<AppFeaturesProvider>().isSessionSchedulingEnabled;
+                    // Booking disabled — hide the button entirely.
+                    if (!isBookingEnabled) return const SizedBox.shrink();
                     return CustomButton(
-                      text: isBookingEnabled ? 'Book Your Session' : 'Coming Soon',
+                      text: isBookingEnabled
+                          ? 'Book Your Session'
+                          : 'Coming Soon',
                       onPressed: () {
                         if (!isBookingEnabled) {
                           FeatureFlagUtils.showFeatureDisabledBottomSheet(
