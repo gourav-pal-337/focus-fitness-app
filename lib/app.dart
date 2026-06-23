@@ -48,12 +48,25 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       scaffoldMessengerKey: rootScaffoldMessengerKey,
       routerConfig: AppRouter.router,
       builder: (context, child) {
-        return Stack(
-          children: [
-            if (child != null) child,
-            // Global session popup overlay
-            const SessionPopupWidget(),
-          ],
+        final mediaQuery = MediaQuery.of(context);
+        // Honor the user's OS font-size preference, but clamp it so the
+        // device/accessibility text scaling can't grow past what our
+        // fixed-size (screenutil .w/.h) containers can hold. Without this,
+        // larger system fonts overflow layouts across the whole app.
+        return MediaQuery(
+          data: mediaQuery.copyWith(
+            textScaler: mediaQuery.textScaler.clamp(
+              minScaleFactor: 1.0,
+              maxScaleFactor: 1.15,
+            ),
+          ),
+          child: Stack(
+            children: [
+              if (child != null) child,
+              // Global session popup overlay
+              const SessionPopupWidget(),
+            ],
+          ),
         );
       },
     );
