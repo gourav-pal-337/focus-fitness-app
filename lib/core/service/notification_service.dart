@@ -21,7 +21,7 @@ class NotificationService {
 
     // Android initialization settings
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings('@mipmap/launcher_icon');
+        AndroidInitializationSettings('@drawable/ic_notification');
 
     // iOS initialization settings
     const DarwinInitializationSettings initializationSettingsDarwin =
@@ -80,7 +80,7 @@ class NotificationService {
             'High Importance Notifications',
             channelDescription:
                 'This channel is used for important notifications.',
-            icon: '@mipmap/ic_launcher',
+            icon: '@drawable/ic_notification',
             importance: Importance.max,
             priority: Priority.high,
           ),

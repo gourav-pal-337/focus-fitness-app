@@ -28,6 +28,7 @@ class TransactionSuccessfulScreen extends StatefulWidget {
     this.sessionTime,
     this.sessionStartTime,
     this.currency,
+    this.durationMinutes = 60,
   });
 
   final double amount;
@@ -39,6 +40,7 @@ class TransactionSuccessfulScreen extends StatefulWidget {
   final String? sessionDate;
   final String? sessionTime;
   final DateTime? sessionStartTime;
+  final int durationMinutes;
 
   @override
   State<TransactionSuccessfulScreen> createState() =>
@@ -74,7 +76,9 @@ class _TransactionSuccessfulScreenState
       final isAlreadyAdded = await calendarService.isEventAlreadyAdded(
         title: 'Workout Session with ${widget.trainerName ?? 'Trainer'}',
         start: widget.sessionStartTime!,
-        end: widget.sessionStartTime!.add(const Duration(minutes: 60)),
+        end: widget.sessionStartTime!.add(
+          Duration(minutes: widget.durationMinutes),
+        ),
       );
 
       if (isAlreadyAdded) return;
@@ -202,7 +206,9 @@ class _TransactionSuccessfulScreenState
       description:
           'Booking ID: ${widget.bookingId ?? 'N/A'}\nSession with Focus Fitness.',
       start: widget.sessionStartTime!,
-      end: widget.sessionStartTime!.add(const Duration(minutes: 60)),
+      end: widget.sessionStartTime!.add(
+        Duration(minutes: widget.durationMinutes),
+      ),
       reminderMinutes: [10, 30],
     );
 

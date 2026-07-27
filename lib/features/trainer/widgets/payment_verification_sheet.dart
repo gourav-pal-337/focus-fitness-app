@@ -77,6 +77,7 @@ class _PaymentVerificationSheetState extends State<PaymentVerificationSheet> {
       }
 
       // If this was the last attempt and we still aren't "paid"
+      
       if (attempts >= maxRetries) {
         if (result != null && result['success'] == true) {
           final bookingData = result['booking'] as Map<String, dynamic>?;

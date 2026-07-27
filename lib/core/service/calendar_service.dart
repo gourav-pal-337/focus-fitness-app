@@ -22,31 +22,50 @@ class CalendarService {
   /// Prefers primary/default calendars, then writable ones.
   Future<String?> getDefaultCalendarId() async {
     try {
-      final permissionsGranted = await _deviceCalendarPlugin.hasPermissions();
-      if (permissionsGranted.isSuccess && !permissionsGranted.data!) {
-        final requestPermissionsResult = await _deviceCalendarPlugin.requestPermissions();
-        if (requestPermissionsResult.isSuccess && !requestPermissionsResult.data!) {
-          return null;
-        }
+      // Make sure we actually have (full) calendar access before enumerating.
+      final granted = await requestPermissions();
+      if (!granted) {
+        debugPrint('CalendarService: permission not granted.');
+        return null;
       }
 
       final calendarsResult = await _deviceCalendarPlugin.retrieveCalendars();
-      if (calendarsResult.isSuccess && calendarsResult.data != null) {
-        final calendars = calendarsResult.data!;
-        if (calendars.isNotEmpty) {
-          // Find the default calendar or the first writable one
-          final defaultCalendar = calendars.firstWhere(
-            (calendar) => calendar.isDefault ?? false,
-            orElse: () => calendars.firstWhere(
-              (calendar) => !(calendar.isReadOnly ?? true),
-              orElse: () => calendars.first,
-            ),
-          );
-          return defaultCalendar.id;
-        }
+      if (!calendarsResult.isSuccess || calendarsResult.data == null) {
+        debugPrint(
+          'CalendarService: retrieveCalendars failed: '
+          '${calendarsResult.errors.map((e) => e.errorMessage).join(", ")}',
+        );
+        return null;
       }
+
+      final calendars = calendarsResult.data!;
+      if (calendars.isEmpty) {
+        // No calendar account configured on the device (e.g. no Google account
+        // synced on Android, or no iCloud/local calendar on iOS).
+        debugPrint(
+          'CalendarService: no calendars exist on this device. '
+          'Add a calendar account (e.g. Google) in device settings.',
+        );
+        return null;
+      }
+
+      // Prefer the default calendar, then the first writable one.
+      // Note: treat null isReadOnly as WRITABLE — some Android calendars report
+      // null even though they accept event inserts.
+      final writableCalendars =
+          calendars.where((c) => c.isReadOnly != true).toList();
+      if (writableCalendars.isEmpty) {
+        debugPrint('CalendarService: no WRITABLE calendar found.');
+        return null;
+      }
+
+      final defaultCalendar = writableCalendars.firstWhere(
+        (calendar) => calendar.isDefault ?? false,
+        orElse: () => writableCalendars.first,
+      );
+      return defaultCalendar.id;
     } catch (e) {
-      debugPrint('Error getting default calendar ID: $e');
+      debugPrint('CalendarService: error getting default calendar ID: $e');
     }
     return null;
   }

@@ -7,6 +7,44 @@
 ///
 /// To enable or disable a module: flip the `true`/`false` value below and ship
 /// a new build. Keys must match the [AppFeatures] model.
+///
+// const Map<String, dynamic> kAppFeaturesConfig = { // production features
+//   "auth": {
+//     "emailAuth": true,
+//     "socialAuth": true,
+//     "multiChannelOtp": true,
+//     "tfa": true,
+//     "passwordManagement": true,
+//   },
+//   "trainer": {
+//     "trainerLinking": true,
+//     "trainerDiscovery": true,
+//     "trainerProfiles": true,
+//     "trainerUnlinking": true,
+//   },
+//   "workouts": {
+//     "workoutProgress": false,
+//     "exerciseLibrary": false,
+//     "activeWorkoutLogging": false,
+//     "workoutManuals": false,
+//     "sessionLogs": false,
+//   },
+//   "bookings": {
+//     "sessionScheduling": false,
+//     "sessionManagement": false,
+//     "sessionSummaries": false,
+//     "ratingFeedback": false,
+//   },
+//   "finance": {
+//     "subscriptionOffers": false,
+//     "payments": false,
+//     "paymentHistory": false,
+//   },
+//   "support": {"supportTickets": true, "faqSystem": true, "notifications": true},
+//   "profile": {"profileCustomization": true, "accountPrivacy": true},
+//   "home": {"whatsapp": true},
+// };
+
 const Map<String, dynamic> kAppFeaturesConfig = {
   "auth": {
     "emailAuth": true,
@@ -22,22 +60,22 @@ const Map<String, dynamic> kAppFeaturesConfig = {
     "trainerUnlinking": true,
   },
   "workouts": {
-    "workoutProgress": false,
-    "exerciseLibrary": false,
-    "activeWorkoutLogging": false,
-    "workoutManuals": false,
-    "sessionLogs": false,
+    "workoutProgress": true,
+    "exerciseLibrary": true,
+    "activeWorkoutLogging": true,
+    "workoutManuals": true,
+    "sessionLogs": true,
   },
   "bookings": {
-    "sessionScheduling": false,
-    "sessionManagement": false,
-    "sessionSummaries": false,
-    "ratingFeedback": false,
+    "sessionScheduling": true,
+    "sessionManagement": true,
+    "sessionSummaries": true,
+    "ratingFeedback": true,
   },
   "finance": {
-    "subscriptionOffers": false,
-    "payments": false,
-    "paymentHistory": false,
+    "subscriptionOffers": true,
+    "payments": true,
+    "paymentHistory": true,
   },
   "support": {"supportTickets": true, "faqSystem": true, "notifications": true},
   "profile": {"profileCustomization": true, "accountPrivacy": true},

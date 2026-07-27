@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Protects resources that are only referenced by name at runtime (from Dart via
+  flutter_local_notifications) and would otherwise be removed by the release
+  resource shrinker (shrinkResources = true). Without this, release builds crash
+  with "resource @drawable/ic_notification / @mipmap/... could not be found".
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/ic_notification,@mipmap/launcher_icon,@mipmap/ic_launcher" />

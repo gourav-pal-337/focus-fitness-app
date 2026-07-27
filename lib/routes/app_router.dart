@@ -772,6 +772,10 @@ abstract class TransactionSuccessfulRoute {
           ? DateTime.tryParse(startTimeIso)
           : null;
       final currency = state.uri.queryParameters['currency'];
+      final durationParam = state.uri.queryParameters['durationMinutes'];
+      final durationMinutes = durationParam != null
+          ? int.tryParse(durationParam) ?? 60
+          : 60;
 
       return TransactionSuccessfulScreen(
         amount: amount,
@@ -783,6 +787,7 @@ abstract class TransactionSuccessfulRoute {
         sessionDate: sessionDate,
         sessionTime: sessionTime,
         sessionStartTime: sessionStartTime,
+        durationMinutes: durationMinutes,
       );
     },
   );

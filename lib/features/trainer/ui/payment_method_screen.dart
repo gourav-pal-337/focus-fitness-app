@@ -712,7 +712,7 @@ class _PayButton extends StatelessWidget {
                         onSuccess: (bookingData) {
                           if (!context.mounted) return;
                           context.push(
-                            '/transaction-successful?amount=${totalChargedAmount.toStringAsFixed(2)}&currency=${settings?.platformFeeCurrency ?? currency}&paymentMethod=${Uri.encodeComponent(paymentMethod)}&cardNumber=${Uri.encodeComponent(cardNumber)}&trainerName=${Uri.encodeComponent(trainerName)}&sessionDate=${Uri.encodeComponent(sessionDate)}&sessionTime=${Uri.encodeComponent(sessionTime)}&sessionStartTime=${Uri.encodeComponent(sessionStartTime)}&bookingId=${bookingData['_id'] ?? trainerId}',
+                            '/transaction-successful?amount=${totalChargedAmount.toStringAsFixed(2)}&currency=${settings?.platformFeeCurrency ?? currency}&paymentMethod=${Uri.encodeComponent(paymentMethod)}&cardNumber=${Uri.encodeComponent(cardNumber)}&trainerName=${Uri.encodeComponent(trainerName)}&sessionDate=${Uri.encodeComponent(sessionDate)}&sessionTime=${Uri.encodeComponent(sessionTime)}&sessionStartTime=${Uri.encodeComponent(sessionStartTime)}&durationMinutes=$durationMinutes&bookingId=${bookingData['_id'] ?? trainerId}',
                           );
                         },
                         onError: (error) {

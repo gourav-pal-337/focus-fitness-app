@@ -1,18 +1,15 @@
 class Endpoints {
-  // TODO: Update baseUrl with actual API base URL
   static const String prodUrl = "https://api.focusfusion.co.uk/api/mobile";
   static const String stageUrl =
       "https://api-stage.focusfusion.co.uk/api/mobile";
   static const String devUrl = "https://focus-fusion-api.applore.in/api/mobile";
   static const String localUrl =
-      //    "http://localhost:4000/api/mobile";
-      'https://martha-insightful-genevie.ngrok-free.dev/api/mobile'; //gourav dev
+      //  "http://localhost:4000/api/mobile";
+      'https://ln90vztc-4000.inc1.devtunnels.ms/api/mobile'; //gourav dev
 
   // TODO IMPORTANT!!!: always check baseUrl before deployment
-  static const String baseUrl = prodUrl;
-
+  static const String baseUrl = devUrl;
   static const String uploadFile = '/uploads';
-
   // Auth endpoints
   static const String registerEmail = '/auth/register-email';
   static const String loginEmail = '/auth/login-email';
@@ -21,7 +18,7 @@ class Endpoints {
   static const String sendOtp = '/auth/send-otp';
   static const String verifyOtp = '/auth/verify-otp';
   static const String forgotPassword = '/auth/password/forgot';
-  static const String resetPassword = '/auth/password/reset';
+  static const String resetPassword = '/auth/passwRord/reset';
   static const String sendTfaOtp = '/auth/tfa/send-otp';
   static const String verifyTfa = '/auth/tfa/verify';
   static const String disableTfa = '/auth/tfa';

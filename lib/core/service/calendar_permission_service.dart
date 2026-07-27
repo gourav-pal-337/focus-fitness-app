@@ -4,33 +4,33 @@ class CalendarPermissionService {
   /// Requests calendar permission and returns true if granted.
   /// Handles denied and permanently denied states.
   static Future<bool> requestCalendarPermission() async {
-    // Check current status for basic calendar permission
-    PermissionStatus status = await Permission.calendar.status;
-    
-    if (status.isGranted) {
-      return true;
-    }
-    
-    // Request permission if not granted
-    if (status.isDenied || status.isLimited) {
-      status = await Permission.calendar.request();
-      if (status.isGranted) return true;
-    }
-    
-    // Fallback for iOS 17+ specific full access permission
-    // In many cases, Permission.calendar is mapped to full access, 
-    // but some versions of permission_handler differentiate them.
-    PermissionStatus fullAccessStatus = await Permission.calendarFullAccess.status;
+    // IMPORTANT: request FULL access first.
+    // On iOS 17+, Permission.calendar can resolve to write-only ("Add Events
+    // Only") access. With write-only access device_calendar cannot ENUMERATE
+    // calendars, so no writable calendar id is ever found and event creation
+    // fails. Full access is required to look up the default calendar.
+    PermissionStatus fullAccessStatus =
+        await Permission.calendarFullAccess.status;
+    if (fullAccessStatus.isGranted) return true;
     if (fullAccessStatus.isDenied || fullAccessStatus.isLimited) {
       fullAccessStatus = await Permission.calendarFullAccess.request();
       if (fullAccessStatus.isGranted) return true;
     }
 
-    // If still not granted and permanently denied, guide user to settings
+    // Fallback to the generic calendar permission (older iOS / Android, where
+    // this maps to read+write calendar access).
+    PermissionStatus status = await Permission.calendar.status;
+    if (status.isGranted) return true;
+    if (status.isDenied || status.isLimited) {
+      status = await Permission.calendar.request();
+      if (status.isGranted) return true;
+    }
+
+    // If permanently denied, guide the user to app settings.
     if (status.isPermanentlyDenied || fullAccessStatus.isPermanentlyDenied) {
       await openAppSettings();
     }
-    
+
     return false;
   }
 
