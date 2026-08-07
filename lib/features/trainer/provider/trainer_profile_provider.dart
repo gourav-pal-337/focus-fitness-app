@@ -198,6 +198,7 @@ class TrainerProfileProvider extends ChangeNotifier {
         trainerId: _trainer!.id,
         startTime: startTimeStr,
         endTime: endTimeStr,
+        timezone: timezone,
       );
 
       return await result.when(

@@ -24,6 +24,7 @@ class _PaypalWebViewScreenState extends State<PaypalWebViewScreen> {
   late final WebViewController _controller;
   double progress = 0;
   bool isLoading = true;
+  bool _isPopped = false;
 
   @override
   void initState() {
@@ -79,7 +80,12 @@ class _PaypalWebViewScreenState extends State<PaypalWebViewScreen> {
           children: [
             CustomAppBar(
               title: 'Paypal Payment',
-              onBack: () => Navigator.pop(context, false),
+              onBack: () {
+                if (!_isPopped) {
+                  _isPopped = true;
+                  Navigator.pop(context, false);
+                }
+              },
             ),
             if (isLoading)
               LinearProgressIndicator(
@@ -95,12 +101,15 @@ class _PaypalWebViewScreenState extends State<PaypalWebViewScreen> {
   }
 
   void _checkUrl(String url) {
+    if (_isPopped || !mounted) return;
     log('PaypalWebView: Checking URL: $url');
     if (url.contains(widget.successUrlPattern)) {
       log('PaypalWebView: Success pattern detected!');
+      _isPopped = true;
       Navigator.pop(context, true);
     } else if (url.contains(widget.cancelUrlPattern)) {
       log('PaypalWebView: Cancel pattern detected!');
+      _isPopped = true;
       Navigator.pop(context, false);
     }
   }

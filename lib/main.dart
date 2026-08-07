@@ -63,7 +63,7 @@ void main() async {
   }
 
   // TODO: Add your actual Stripe publishable key here
-  Stripe.publishableKey = 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY';
+  // Stripe.publishableKey = 'pk_test_YOUR_STRIPE_PUBLISHABLE_KEY';
 
   await LocalStorageService.init();
   InternetConnectivityService.init();
@@ -126,50 +126,54 @@ class AppBootstrap extends StatelessWidget {
             minTextAdapt: true,
             builder: (context, child) {
               return MultiProvider(
-          providers: [
-            ChangeNotifierProvider<UserProvider>(create: (_) => UserProvider()),
-            ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
-            ChangeNotifierProvider<ForgotPasswordProvider>(
-              create: (_) => ForgotPasswordProvider(),
-            ),
-            ChangeNotifierProvider<SampleProvider>(
-              create: (_) => SampleProvider(),
-            ),
-            ChangeNotifierProvider<SessionPopupProvider>(
-              create: (_) => SessionPopupProvider(),
-            ),
-            ChangeNotifierProvider<LinkedTrainerProvider>(
-              create: (_) => LinkedTrainerProvider(),
-            ),
-            ChangeNotifierProvider<ClientProfileProvider>(
-              create: (_) => ClientProfileProvider(),
-            ),
-            ChangeNotifierProvider<TrainerProfileProvider>(
-              create: (_) => TrainerProfileProvider(),
-            ),
-            ChangeNotifierProvider<AccountDetailsProvider>(
-              create: (_) => AccountDetailsProvider(),
-            ),
-            ChangeNotifierProvider<SessionHistoryProvider>(
-              create: (_) => SessionHistoryProvider(),
-            ),
-            ChangeNotifierProvider<SystemSettingsProvider>(
-              create: (_) => SystemSettingsProvider(),
-            ),
-            ChangeNotifierProvider<PaymentMethodProvider>(
-              create: (_) => PaymentMethodProvider(),
-            ),
-            ChangeNotifierProvider<SessionDetailsProvider>(
-              create: (_) => SessionDetailsProvider(),
-            ),
-            ChangeNotifierProvider<AppFeaturesProvider>(
-              create: (_) => AppFeaturesProvider()..fetchFeatures(),
-              lazy: false,
-            ),
-            ChangeNotifierProvider<WorkoutProvider>(
-              create: (_) => WorkoutProvider(),
-            ),
-          ],
+                providers: [
+                  ChangeNotifierProvider<UserProvider>(
+                    create: (_) => UserProvider(),
+                  ),
+                  ChangeNotifierProvider<AuthProvider>(
+                    create: (_) => AuthProvider(),
+                  ),
+                  ChangeNotifierProvider<ForgotPasswordProvider>(
+                    create: (_) => ForgotPasswordProvider(),
+                  ),
+                  ChangeNotifierProvider<SampleProvider>(
+                    create: (_) => SampleProvider(),
+                  ),
+                  ChangeNotifierProvider<SessionPopupProvider>(
+                    create: (_) => SessionPopupProvider(),
+                  ),
+                  ChangeNotifierProvider<LinkedTrainerProvider>(
+                    create: (_) => LinkedTrainerProvider(),
+                  ),
+                  ChangeNotifierProvider<ClientProfileProvider>(
+                    create: (_) => ClientProfileProvider(),
+                  ),
+                  ChangeNotifierProvider<TrainerProfileProvider>(
+                    create: (_) => TrainerProfileProvider(),
+                  ),
+                  ChangeNotifierProvider<AccountDetailsProvider>(
+                    create: (_) => AccountDetailsProvider(),
+                  ),
+                  ChangeNotifierProvider<SessionHistoryProvider>(
+                    create: (_) => SessionHistoryProvider(),
+                  ),
+                  ChangeNotifierProvider<SystemSettingsProvider>(
+                    create: (_) => SystemSettingsProvider(),
+                  ),
+                  ChangeNotifierProvider<PaymentMethodProvider>(
+                    create: (_) => PaymentMethodProvider(),
+                  ),
+                  ChangeNotifierProvider<SessionDetailsProvider>(
+                    create: (_) => SessionDetailsProvider(),
+                  ),
+                  ChangeNotifierProvider<AppFeaturesProvider>(
+                    create: (_) => AppFeaturesProvider()..fetchFeatures(),
+                    lazy: false,
+                  ),
+                  ChangeNotifierProvider<WorkoutProvider>(
+                    create: (_) => WorkoutProvider(),
+                  ),
+                ],
                 child: const App(),
               );
             },

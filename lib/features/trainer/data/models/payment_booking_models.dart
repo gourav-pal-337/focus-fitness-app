@@ -67,6 +67,7 @@ class InitiatePaymentResponseModel {
   final String? paymentIntentId;
   final String? orderId;
   final String? checkoutUrl;
+  final String? publishableKey;
 
   InitiatePaymentResponseModel({
     required this.success,
@@ -80,6 +81,7 @@ class InitiatePaymentResponseModel {
     this.paymentIntentId,
     this.orderId,
     this.checkoutUrl,
+    this.publishableKey,
   });
 
   factory InitiatePaymentResponseModel.fromJson(Map<String, dynamic> json) {
@@ -95,6 +97,7 @@ class InitiatePaymentResponseModel {
       paymentIntentId: json['paymentIntentId'] as String?,
       orderId: json['orderId'] as String?,
       checkoutUrl: json['checkoutUrl'] as String?,
+      publishableKey: json['publishableKey'] as String?,
     );
   }
 }

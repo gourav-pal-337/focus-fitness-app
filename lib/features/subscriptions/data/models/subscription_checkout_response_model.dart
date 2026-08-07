@@ -8,6 +8,7 @@ class SubscriptionCheckoutResponseModel {
   final String? clientSecret;
   final String? customerId;
   final String? ephemeralKey;
+  final String? publishableKey;
 
   SubscriptionCheckoutResponseModel({
     required this.success,
@@ -18,6 +19,7 @@ class SubscriptionCheckoutResponseModel {
     this.clientSecret,
     this.customerId,
     this.ephemeralKey,
+    this.publishableKey,
   });
 
   factory SubscriptionCheckoutResponseModel.fromJson(
@@ -32,6 +34,7 @@ class SubscriptionCheckoutResponseModel {
       clientSecret: json['clientSecret'],
       customerId: json['customerId'],
       ephemeralKey: json['ephemeralKey'],
+      publishableKey: json['publishableKey'],
     );
   }
 }

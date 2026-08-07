@@ -515,6 +515,7 @@ class TrainerApiService {
     required String trainerId,
     required String startTime,
     required String endTime,
+    String? timezone,
   }) async {
     try {
       final response = await _apiHitter.getApiResponse(
@@ -522,6 +523,7 @@ class TrainerApiService {
         queryParameters: {
           'startTime': startTime,
           'endTime': endTime,
+          if (timezone != null && timezone.isNotEmpty) 'timezone': timezone,
         },
       );
 

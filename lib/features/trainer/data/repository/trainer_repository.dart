@@ -246,6 +246,7 @@ class TrainerRepository {
     required String trainerId,
     required String startTime,
     required String endTime,
+    String? timezone,
   }) async {
     try {
       if (trainerId.trim().isEmpty) {
@@ -262,6 +263,7 @@ class TrainerRepository {
         trainerId: trainerId,
         startTime: startTime,
         endTime: endTime,
+        timezone: timezone,
       );
       return Success(response);
     } on ApiException catch (e) {

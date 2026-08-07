@@ -8,9 +8,10 @@ class Endpoints {
       'https://ln90vztc-4000.inc1.devtunnels.ms/api/mobile'; //gourav dev
 
   // TODO IMPORTANT!!!: always check baseUrl before deployment
-  static const String baseUrl = devUrl;
+  static const String baseUrl = stageUrl;
   static const String uploadFile = '/uploads';
-  // Auth endpoints
+
+  // Auth endpointssahil
   static const String registerEmail = '/auth/register-email';
   static const String loginEmail = '/auth/login-email';
   static const String firebaseLogin = '/auth/firebase-login';
@@ -28,6 +29,7 @@ class Endpoints {
 
   // Client profile endpoints
   static const String getClientProfile = '/client/profile';
+
   static const String updateClientProfile = '/client/profile';
   static const String deleteAccount = '/client/profile';
 

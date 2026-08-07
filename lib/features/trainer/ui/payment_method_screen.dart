@@ -463,8 +463,7 @@ class _PayButton extends StatelessWidget {
                   result.when(
                     success: (response) async {
                       if (selectedPaymentType == PaymentType.creditCard) {
-                        Stripe.publishableKey =
-                            "pk_test_51T5N9X38afHUCI9lYRWGMYeJU4z9Y31rfNJJuoFB8N59qYZ72O9OZagxLJTQtgTXCiDmbkxgXB334LH7vcjZqyKP00fGNUhH0v";
+                        Stripe.publishableKey = response.publishableKey ?? "";
                         await Stripe.instance.applySettings();
                         // This means Stripe
                         if (response.clientSecret != null &&
@@ -606,10 +605,11 @@ class _PayButton extends StatelessWidget {
                     bool paymentCompleted = false;
                     final bookingId =
                         initiateResponse.payment?['bookingId'] as String?;
+
                     print('bookingId :::: ${initiateResponse.payment}');
                     if (selectedPaymentType == PaymentType.creditCard) {
                       Stripe.publishableKey =
-                          "pk_test_51T5N9X38afHUCI9lYRWGMYeJU4z9Y31rfNJJuoFB8N59qYZ72O9OZagxLJTQtgTXCiDmbkxgXB334LH7vcjZqyKP00fGNUhH0v";
+                          initiateResponse.publishableKey ?? "";
                       await Stripe.instance.applySettings();
                       if (initiateResponse.clientSecret != null &&
                           initiateResponse.clientSecret!.isNotEmpty) {
