@@ -23,6 +23,7 @@ class TransactionSuccessfulScreen extends StatefulWidget {
     this.paymentMethod = 'Standard Charted Card',
     this.cardNumber = '1234 5678 2345',
     this.trainerName,
+    this.sessionName,
     this.bookingId,
     this.sessionDate,
     this.sessionTime,
@@ -36,6 +37,7 @@ class TransactionSuccessfulScreen extends StatefulWidget {
   final String paymentMethod;
   final String cardNumber;
   final String? trainerName;
+  final String? sessionName;
   final String? bookingId;
   final String? sessionDate;
   final String? sessionTime;
@@ -68,13 +70,25 @@ class _TransactionSuccessfulScreenState
     // Show calendar prompt after a short delay
   }
 
+  /// Calendar event title: "${sessionName} with ${trainerName}".
+  String get _calendarEventTitle {
+    print("Session Name ::: ${widget.sessionName?.trim() ?? "NUll"}");
+    final name = (widget.sessionName?.trim().isNotEmpty ?? false)
+        ? widget.sessionName!.trim()
+        : 'Workout Session';
+    final trainer = (widget.trainerName?.trim().isNotEmpty ?? false)
+        ? widget.trainerName!.trim()
+        : 'Trainer';
+    return '$name with $trainer';
+  }
+
   Future<void> _showCalendarPrompt() async {
     final calendarService = CalendarService();
 
     // Check if already added
     if (widget.sessionStartTime != null) {
       final isAlreadyAdded = await calendarService.isEventAlreadyAdded(
-        title: 'Workout Session with ${widget.trainerName ?? 'Trainer'}',
+        title: _calendarEventTitle,
         start: widget.sessionStartTime!,
         end: widget.sessionStartTime!.add(
           Duration(minutes: widget.durationMinutes),
@@ -202,7 +216,8 @@ class _TransactionSuccessfulScreenState
     );
 
     final success = await calendarService.createEvent(
-      title: 'Workout Session with ${widget.trainerName ?? 'Trainer'}',
+      title:
+          '${widget.sessionName?.trim() ?? "Workout Session"} with ${widget.trainerName?.trim() ?? 'Trainer'}',
       description:
           'Booking ID: ${widget.bookingId ?? 'N/A'}\nSession with Focus Fitness.',
       start: widget.sessionStartTime!,

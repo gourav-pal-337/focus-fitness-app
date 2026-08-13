@@ -10,18 +10,24 @@ class NotificationItem extends StatelessWidget {
     super.key,
     required this.message,
     required this.timestamp,
+    this.isRead = true,
+    this.onTap,
   });
 
   final String message;
   final String timestamp;
+  final bool isRead;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        // TODO: Handle notification tap
-      },
-      child: Padding(
+      onTap: onTap,
+      child: Container(
+        // Unread rows get a subtle tinted background.
+        color: isRead
+            ? Colors.transparent
+            : AppColors.primary.withValues(alpha: 0.06),
         padding: EdgeInsets.symmetric(
           horizontal: AppSpacing.screenPadding.left,
           vertical: AppSpacing.md,
@@ -49,9 +55,11 @@ class NotificationItem extends StatelessWidget {
                 children: [
                   Text(
                     message,
-                    style: AppTextStyle.text16Regular.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
+                    style:
+                        (isRead
+                                ? AppTextStyle.text16Regular
+                                : AppTextStyle.text16SemiBold)
+                            .copyWith(color: AppColors.textPrimary),
                   ),
                   SizedBox(height: 4.h),
                   Text(
@@ -64,11 +72,18 @@ class NotificationItem extends StatelessWidget {
               ),
             ),
             SizedBox(width: AppSpacing.sm),
-            Icon(
-              Icons.more_vert,
-              size: 20.sp,
-              color: AppColors.textPrimary,
-            ),
+            // Unread dot indicator.
+            if (!isRead)
+              Container(
+                width: 10.w,
+                height: 10.w,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+              )
+            else
+              SizedBox(width: 10.w),
           ],
         ),
       ),

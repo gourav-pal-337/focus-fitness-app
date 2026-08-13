@@ -209,7 +209,9 @@ class _ProfileContent extends StatelessWidget {
         ],
         // Booking (date/time selection) is hidden when session scheduling
         // is disabled.
-        if (context.watch<AppFeaturesProvider>().isSessionSchedulingEnabled) ...[
+        if (context
+            .watch<AppFeaturesProvider>()
+            .isSessionSchedulingEnabled) ...[
           SizedBox(height: AppSpacing.xl),
           const DateSelector(),
           SizedBox(height: AppSpacing.xl),
@@ -441,6 +443,7 @@ class _BookSessionButton extends StatelessWidget {
                   }
                 : showBookingConfirmation
                 ? () async {
+                    print("17291");
                     final sessionPlan = provider.selectedSessionPlan;
                     final baseAmount = sessionPlan?.feeAmount ?? 100.00;
 
@@ -461,9 +464,12 @@ class _BookSessionButton extends StatelessWidget {
                     final dateId = provider.selectedDate ?? '';
                     final timeSlot = provider.selectedTimeSlot ?? '';
                     final durationMinutes = sessionPlan?.durationMinutes ?? 60;
-
+                    print(
+                      "Session Name ::::::: ${sessionPlan?.title ?? "NULLL"}",
+                    );
                     final uri = Uri(
                       path: PaymentMethodRoute.path,
+
                       queryParameters: {
                         if (trainerId.isNotEmpty) 'trainerId': trainerId,
                         if (sessionPlanId.isNotEmpty)
@@ -473,6 +479,7 @@ class _BookSessionButton extends StatelessWidget {
                         'amount': totalAmount.toStringAsFixed(2),
                         'baseAmount': baseAmount.toStringAsFixed(2),
                         'durationMinutes': durationMinutes.toString(),
+                        'sessionName': sessionPlan?.title ?? 'Workout Session',
                         'trainerName': provider.trainer?.fullName ?? 'Trainer',
                         'sessionDate': DateTimeUtils.formatDateId(
                           dateId,

@@ -19,6 +19,7 @@ import 'package:focus_fitness/features/trainer/provider/payment_method_provider.
 import 'package:focus_fitness/features/trainer/provider/trainer_profile_provider.dart';
 import 'package:focus_fitness/features/trainer/provider/system_settings_provider.dart';
 import 'package:focus_fitness/features/workouts/providers/workout_provider.dart';
+import 'package:focus_fitness/features/home/provider/notification_provider.dart';
 import 'package:focus_fitness/firebase_options.dart';
 import 'package:focus_fitness/core/responsive/responsive_config.dart';
 import 'package:provider/provider.dart';
@@ -172,6 +173,9 @@ class AppBootstrap extends StatelessWidget {
                   ),
                   ChangeNotifierProvider<WorkoutProvider>(
                     create: (_) => WorkoutProvider(),
+                  ),
+                  ChangeNotifierProvider<NotificationProvider>(
+                    create: (_) => NotificationProvider(),
                   ),
                 ],
                 child: const App(),

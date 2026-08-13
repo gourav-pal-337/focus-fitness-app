@@ -18,6 +18,7 @@ import 'package:focus_fitness/features/profile/provider/edit_profile_details_pro
 import 'package:focus_fitness/features/profile/ui/edit_profile_details_screen.dart';
 import '../../session/provider/session_history_provider.dart';
 import '../../workouts/providers/workout_provider.dart';
+import '../provider/notification_provider.dart';
 import '../../../core/provider/app_features_provider.dart';
 import '../../../core/utils/feature_flag_utils.dart';
 
@@ -135,6 +136,10 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       listen: false,
     );
+    final notificationProvider = Provider.of<NotificationProvider>(
+      context,
+      listen: false,
+    );
 
     // Fetch linked trainer when screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -147,6 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // workoutProvider.fetchWeeklyProgress(),
         sessionHistory.fetchBookings(),
         sessionHistory.fetchPendingCompletionBookings(),
+        notificationProvider.fetchNotifications(),
         checkuserDetails(),
       ]);
 

@@ -21,8 +21,6 @@ import '../provider/session_details_provider.dart';
 import '../widgets/session_card.dart' show SessionData, SessionStatus;
 import '../widgets/session_status_badge.dart';
 import '../widgets/reschedule_bottom_sheet.dart';
-import '../widgets/cancel_session_dialog.dart';
-import '../widgets/session_cancelled_dialog.dart';
 
 class SessionDetailsScreen extends StatefulWidget {
   const SessionDetailsScreen({super.key, required this.session});
@@ -629,73 +627,19 @@ class _ActionButton extends StatelessWidget {
       case SessionStatus.upcoming:
         return Consumer<SessionDetailsProvider>(
           builder: (context, provider, _) {
-            final isCancelling = provider.isCancelling;
-            final historyProvider = context.read<SessionHistoryProvider>();
-
-            return Row(
-              children: [
-                Expanded(
-                  child: CustomButton(
-                    text: isCancelling ? 'Canceling...' : 'Cancel',
-                    type: ButtonType.filled,
-                    isLoading: isCancelling || historyProvider.isLoading,
-                    onPressed: () {
-                      CancelSessionDialog.show(
-                        context: context,
-                        trainerName: session.trainerName,
-                        onConfirm: () async {
-                          if (session.bookingId != null) {
-                            if (context.mounted) {
-                              SessionCancelledDialog.show(
-                                context: context,
-                                onOk: () async {
-                                  final success = await provider.cancelSession(
-                                    session.bookingId!,
-                                  );
-                                  if (success && context.mounted) {
-                                    await historyProvider.fetchBookings();
-                                    context.go(HomeRoute.path);
-                                  }
-                                },
-                              );
-                            }
-                          } else {
-                            context.pop();
-                          }
-                        },
-                      );
-                    },
-                    height: 48.h,
-                    backgroundColor: AppColors.primary,
-                    textColor: AppColors.background,
-                    borderRadius: 12.r,
-                  ),
-                ),
-                SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Container(
-                    height: 48.h,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                        width: 1.5,
-                      ),
-                      color: AppColors.primary.withValues(alpha: 0.05),
-                    ),
-                    child: CustomButton(
-                      text: 'Reschedule',
-                      type: ButtonType.text,
-                      onPressed: () {
-                        if (session.bookingId != null) {
-                          _showRescheduleBottomSheet(context, session);
-                        }
-                      },
-                      textColor: AppColors.primary,
-                    ),
-                  ),
-                ),
-              ],
+            return CustomButton(
+              text: 'Reschedule',
+              type: ButtonType.filled,
+              onPressed: () {
+                if (session.bookingId != null) {
+                  _showRescheduleBottomSheet(context, session);
+                }
+              },
+              width: double.infinity,
+              height: 48.h,
+              backgroundColor: AppColors.primary,
+              textColor: AppColors.background,
+              borderRadius: 12.r,
             );
           },
         );

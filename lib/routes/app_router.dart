@@ -694,6 +694,7 @@ abstract class PaymentMethodRoute {
       final planType = state.uri.queryParameters['planType'] ?? '';
 
       final trainerName = state.uri.queryParameters['trainerName'] ?? '';
+      final sessionName = state.uri.queryParameters['sessionName'] ?? '';
       final sessionDate = state.uri.queryParameters['sessionDate'] ?? '';
       final sessionTime = state.uri.queryParameters['sessionTime'] ?? '';
       final sessionStartTime =
@@ -714,6 +715,7 @@ abstract class PaymentMethodRoute {
         isSubscription: isSubscription,
         planType: planType,
         trainerName: trainerName,
+        sessionName: sessionName,
         sessionDate: sessionDate,
         sessionTime: sessionTime,
         sessionStartTime: sessionStartTime,
@@ -765,6 +767,7 @@ abstract class TransactionSuccessfulRoute {
           state.uri.queryParameters['cardNumber'] ?? '1234 5678 2345';
       final bookingId = state.uri.queryParameters['bookingId'];
       final trainerName = state.uri.queryParameters['trainerName'];
+      final sessionName = state.uri.queryParameters['sessionName'];
       final sessionDate = state.uri.queryParameters['sessionDate'];
       final sessionTime = state.uri.queryParameters['sessionTime'];
       final startTimeIso = state.uri.queryParameters['sessionStartTime'];
@@ -783,6 +786,7 @@ abstract class TransactionSuccessfulRoute {
         paymentMethod: paymentMethod,
         cardNumber: cardNumber,
         trainerName: trainerName,
+        sessionName: sessionName,
         bookingId: bookingId,
         sessionDate: sessionDate,
         sessionTime: sessionTime,

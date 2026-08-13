@@ -25,6 +25,7 @@ class LocalStorageService {
   static const String _twoFactorAuthEnabled = 'twoFactorAuthEnabled';
   static const String _userKey = 'user_data';
   static const String _timezoneKey = 'timezone';
+  static const String _readNotificationIdsKey = 'readNotificationIds';
 
   final EncryptedSharedPreferences _prefs;
 
@@ -166,6 +167,33 @@ class LocalStorageService {
 
   static Future<String?> getAppleEmail(String appleId) async {
     return await _prefsInstance.getString('apple_email_$appleId');
+  }
+
+  /// Get the set of notification IDs the user has read (persisted locally).
+  static Future<Set<String>> getReadNotificationIds() async {
+    try {
+      final idsStr = await _prefsInstance.getString(_readNotificationIdsKey);
+      if (idsStr == null || idsStr.isEmpty) return <String>{};
+      // Stored as a comma-separated string (no getStringList on encrypted prefs).
+      return idsStr.split(',').where((e) => e.isNotEmpty).toSet();
+    } catch (e) {
+      log(e.toString());
+      return <String>{};
+    }
+  }
+
+  /// Persist the set of read notification IDs (capped to the most recent 500).
+  static Future<void> setReadNotificationIds(Set<String> ids) async {
+    try {
+      var list = ids.where((e) => e.isNotEmpty).toList();
+      // Cap to avoid unbounded growth of the stored string.
+      if (list.length > 500) {
+        list = list.sublist(list.length - 500);
+      }
+      await _prefsInstance.setString(_readNotificationIdsKey, list.join(','));
+    } catch (e) {
+      log(e.toString());
+    }
   }
 
   /// Get recent locations (max 6)

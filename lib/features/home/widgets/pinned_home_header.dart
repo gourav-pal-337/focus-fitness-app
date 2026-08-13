@@ -15,6 +15,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/loading/background_refresh_indicator.dart';
 import '../../trainer/provider/linked_trainer_provider.dart';
 import '../../../routes/app_router.dart';
+import '../provider/notification_provider.dart';
 
 class PinnedHomeHeader extends StatelessWidget {
   const PinnedHomeHeader({super.key});
@@ -87,14 +88,20 @@ class PinnedHomeHeader extends StatelessWidget {
                       onTap: () {
                         context.push(NotificationsRoute.path);
                       },
-                      child: Badge(
-                        isLabelVisible: false,
-                        backgroundColor: AppColors.primary,
-                        child: Icon(
-                          Icons.notifications_outlined,
-                          size: 24.sp,
-                          color: AppColors.textPrimary,
-                        ),
+                      child: Consumer<NotificationProvider>(
+                        builder: (context, notificationProvider, _) {
+                          final count = notificationProvider.unreadCount;
+                          return Badge(
+                            isLabelVisible: count > 0,
+                            label: Text(count > 99 ? '99+' : '$count'),
+                            backgroundColor: AppColors.primary,
+                            child: Icon(
+                              Icons.notifications_outlined,
+                              size: 24.sp,
+                              color: AppColors.textPrimary,
+                            ),
+                          );
+                        },
                       ),
                     ),
                     SizedBox(width: 16.w),

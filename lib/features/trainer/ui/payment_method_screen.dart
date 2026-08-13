@@ -36,6 +36,7 @@ class PaymentMethodScreen extends StatefulWidget {
     this.isSubscription = false,
     this.planType = '',
     this.trainerName = '',
+    this.sessionName = '',
     this.sessionDate = '',
     this.sessionTime = '',
     this.sessionStartTime = '',
@@ -57,6 +58,7 @@ class PaymentMethodScreen extends StatefulWidget {
 
   // Additional booking details
   final String trainerName;
+  final String sessionName;
   final String sessionDate;
   final String sessionTime;
   final String sessionStartTime;
@@ -97,6 +99,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
     final trainer = trainerProvider.trainer;
     final isStripeConnected = trainer?.isStripeConnected ?? false;
     final isPayPalConnected = trainer?.isPayPalConnected ?? false;
+    print("Session Name 2::::::: ${widget.sessionName}");
     log("isStripeConnected: $isStripeConnected");
     log("isPayPalConnected: $isPayPalConnected");
     return Scaffold(
@@ -185,6 +188,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                 isSubscription: widget.isSubscription,
                 planType: widget.planType,
                 trainerName: widget.trainerName,
+                sessionName: widget.sessionName,
                 sessionDate: widget.sessionDate,
                 sessionTime: widget.sessionTime,
                 sessionStartTime: widget.sessionStartTime,
@@ -325,6 +329,7 @@ class _PayButton extends StatelessWidget {
     required this.isSubscription,
     required this.planType,
     required this.trainerName,
+    required this.sessionName,
     required this.sessionDate,
     required this.sessionTime,
     required this.sessionStartTime,
@@ -344,6 +349,7 @@ class _PayButton extends StatelessWidget {
   final bool isSubscription;
   final String planType;
   final String trainerName;
+  final String sessionName;
   final String sessionDate;
   final String sessionTime;
   final String sessionStartTime;
@@ -712,7 +718,7 @@ class _PayButton extends StatelessWidget {
                         onSuccess: (bookingData) {
                           if (!context.mounted) return;
                           context.push(
-                            '/transaction-successful?amount=${totalChargedAmount.toStringAsFixed(2)}&currency=${settings?.platformFeeCurrency ?? currency}&paymentMethod=${Uri.encodeComponent(paymentMethod)}&cardNumber=${Uri.encodeComponent(cardNumber)}&trainerName=${Uri.encodeComponent(trainerName)}&sessionDate=${Uri.encodeComponent(sessionDate)}&sessionTime=${Uri.encodeComponent(sessionTime)}&sessionStartTime=${Uri.encodeComponent(sessionStartTime)}&durationMinutes=$durationMinutes&bookingId=${bookingData['_id'] ?? trainerId}',
+                            '/transaction-successful?amount=${totalChargedAmount.toStringAsFixed(2)}&currency=${settings?.platformFeeCurrency ?? currency}&paymentMethod=${Uri.encodeComponent(paymentMethod)}&cardNumber=${Uri.encodeComponent(cardNumber)}&trainerName=${Uri.encodeComponent(trainerName)}&sessionName=${Uri.encodeComponent(sessionName)}&sessionDate=${Uri.encodeComponent(sessionDate)}&sessionTime=${Uri.encodeComponent(sessionTime)}&sessionStartTime=${Uri.encodeComponent(sessionStartTime)}&durationMinutes=$durationMinutes&bookingId=${bookingData['_id'] ?? trainerId}',
                           );
                         },
                         onError: (error) {
